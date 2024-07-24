@@ -1,0 +1,13 @@
+# .gitignore no frontend
+
+# Dependências do Node.js
+node_modules/
+npm-debug.log
+
+# Build outputs
+dist/
+build/
+
+# Logs
+logs/
+*.log

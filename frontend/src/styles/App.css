@@ -1,0 +1,88 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: rgb(71, 56, 158);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: rgb(255, 255, 255);
+}
+
+.Titulo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+form {
+  margin-top: 20px;
+}
+
+.select-div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+input {
+  padding: 10px;
+  font-size: 16px;
+  text-align: center;
+  width: 15%;
+}
+
+label {
+  color: black;
+  font-style: oblique;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+button {
+  background-color: rgb(71, 56, 158);
+  color: white;
+  border-radius: 10px;
+  padding: 15px 12px;
+  margin-top: 40px;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .etiqueta, .etiqueta * {
+    visibility: visible;
+  }
+  .etiqueta {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+.etiqueta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.etiqueta div {
+  margin-right: 20px;
+  text-align: left;
+}
+
+.etiqueta p {
+  margin: 0;
+  font-size: 18px;
+}
