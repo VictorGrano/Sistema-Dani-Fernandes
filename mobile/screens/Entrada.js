@@ -401,6 +401,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     color: "#222222",
+    backgroundColor: '#FFFFFF',
     fontSize: 17,
     textAlign: "center",
   },

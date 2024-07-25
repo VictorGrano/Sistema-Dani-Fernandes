@@ -4,13 +4,13 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { PieChart } from "react-native-gifted-charts";
 import axios from "axios";
 
-const MenuScreen = () => {
+const RelatorioScreen = () => {
   const navigation = useNavigation();
   const [dados, setDados] = useState([]);
 
   const fetchDados = useCallback(() => {
     axios
-      .get("http://192.168.1.102:3000/estoque/QuantidadeEstoque")
+      .get("http://192.168.1.102:3000/QuantidadeEstoque")
       .then((response) => {
         const dadosr = response.data.map((estoque) => ({
           text: estoque.estoque_local,
@@ -156,4 +156,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MenuScreen;
+export default RelatorioScreen;

@@ -32,12 +32,13 @@ const LotesScreen = ({ route }) => {
     <ScrollView contentContainerStyle={styles.container}>
       {lotes.map((lote, index) => (
         <View
-          key={lote.id}
-          style={[styles.detailsContainer, index === 0 && styles.firstLote]}
+        key={lote.id}
+        style={[styles.detailsContainer, index === 0 && styles.firstLote]}
         >
-          <Text style={styles.detailsText}>Lote: {lote.nome_lote}</Text>
+          {index == 0 && (<Text style={styles.detailsTextHeader}>Prioridade de saída</Text>)}
+          <Text style={styles.detailsTextHeader}>Lote: {lote.nome_lote}</Text>
           <Text style={styles.detailsText}>
-            Quantidade de produtos no lote: {lote.quantidade}
+            Estoque: {lote.quantidade}
           </Text>
           <Text style={styles.detailsText}>
             Local Armazenado: {lote.nome_local || "Não registrado"}
@@ -83,9 +84,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     color: "#333",
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  detailsTextHeader: {
+    fontSize: 25,
+    marginBottom: 10,
+    color: "#333",
+    fontWeight: 'bold',
+    textAlign: 'center',
+
   },
   button: {
-    backgroundColor: "#F7C8D0",
+    backgroundColor: "#D8B4E2",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,

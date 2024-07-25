@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -126,7 +127,8 @@ const SaidaScreen = ({ route }) => {
           }
         })
         .catch((error) => {
-          console.error("Error fetching lots:", error);
+          Alert.alert('Aviso!', 'Não há mais produtos neste lote?');
+          
         });
     }
   }, [route.params]);
@@ -250,6 +252,7 @@ const styles = StyleSheet.create({
     color: "#222222",
     fontSize: 17,
     textAlign: "center",
+    backgroundColor: '#FFFFFF',
   },
   header: {
     fontSize: 24,

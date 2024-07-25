@@ -7,17 +7,23 @@ import SaidaScreen from './screens/Saida';
 import EscanearScreen from './screens/Escanear';
 import BuscaScreen from './screens/Busca';
 import LotesScreen from './screens/Lotes';
+import LoginScreen from './screens/Login';
 
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Menu">
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen 
+          name="Login" 
+          component={LoginScreen} 
+          options={{ title: 'Login', headerShown: false }} 
+        />
         <Stack.Screen 
           name="Menu" 
           component={MenuScreen} 
-          options={{ title: 'Menu Principal' }} 
+          options={{ title: 'Menu Principal'}} 
         />
         <Stack.Screen 
           name="Buscar" 

@@ -18,7 +18,7 @@ const BuscaScreen = () => {
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.102:3000/produtos")
+      .get("http://192.168.1.102:3000/produtos/")
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -34,9 +34,10 @@ const BuscaScreen = () => {
   const handleProductSelect = (item) => {
     setSelectedProduct(item.value);
     axios
-      .get(`http://192.168.1.102:3000/buscaProduto?id=${item.value}`)
+      .get(`http://192.168.1.102:3000/produtos/InfoProduto?id=${item.value}`)
       .then((response) => {
         setProductDetails(response.data);
+        console.log(response.data);
       })
       .catch((error) => {
         console.error("Error fetching product details:", error);
@@ -65,6 +66,10 @@ const BuscaScreen = () => {
           <Text style={styles.detailsText}>
             Estoque:{" "}
             {productDetails.estoque_total || "Não há esse produto no estoque"}
+          </Text>
+          <Text style={styles.detailsText}>
+            Unidade de Medida:{" "}
+            {productDetails.unidade || "Não há uma unidade de medida definida"}
           </Text>
           <Text style={styles.detailsText}>
             Descrição: {productDetails.descricao || "Não há descrição"}
@@ -118,12 +123,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#F7C8D0",
+    backgroundColor: "#D8B4E2",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
     alignItems: "center",
-    width: "80%",
   },
   buttonText: {
     color: "white",
