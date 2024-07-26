@@ -8,6 +8,10 @@ import EscanearScreen from './screens/Escanear';
 import BuscaScreen from './screens/Busca';
 import LotesScreen from './screens/Lotes';
 import LoginScreen from './screens/Login';
+import RelatorioMenuScreen from './screens/RelatorioMenu';
+import RelatorioProdutos from './screens/reports/RelatorioProdutos';
+import RelatorioProdutosScreen from './screens/reports/RelatorioProdutos';
+import RelatorioLotesScreen from './screens/reports/RelatorioLotes';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +28,21 @@ const App = () => {
           name="Menu" 
           component={MenuScreen} 
           options={{ title: 'Menu Principal'}} 
+        />
+        <Stack.Screen 
+          name="Menu Relatorio" 
+          component={RelatorioMenuScreen} 
+          options={{ title: 'Menu de Relatório'}} 
+        />
+        <Stack.Screen 
+          name="Relatorio Produtos" 
+          component={RelatorioProdutosScreen} 
+          options={{ title: 'Relatório Produtos'}} 
+        />
+        <Stack.Screen 
+          name="Relatorio Lotes" 
+          component={RelatorioLotesScreen} 
+          options={{ title: 'Relatório Lotes'}} 
         />
         <Stack.Screen 
           name="Buscar" 

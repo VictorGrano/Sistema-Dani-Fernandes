@@ -61,18 +61,21 @@ const BuscaScreen = () => {
         <View style={styles.detailsContainer}>
           <Text style={styles.detailsText}>Nome: {productDetails.nome}</Text>
           <Text style={styles.detailsText}>
-            Aroma: {productDetails.nome_aroma || "Não registrado"}
+            Aroma: {productDetails.nome_aroma || "Não registrado."}
           </Text>
           <Text style={styles.detailsText}>
             Estoque:{" "}
-            {productDetails.estoque_total || "Não há esse produto no estoque"}
+            {productDetails.estoque_total || "Não há esse produto no estoque."}
           </Text>
           <Text style={styles.detailsText}>
             Unidade de Medida:{" "}
-            {productDetails.unidade || "Não há uma unidade de medida definida"}
+            {productDetails.unidade || "Não há uma unidade de medida definida."}
           </Text>
           <Text style={styles.detailsText}>
-            Descrição: {productDetails.descricao || "Não há descrição"}
+            Preço Unitário: {productDetails.preco || "Preço não registrado."}
+          </Text>
+          <Text style={styles.detailsText}>
+            Descrição: {productDetails.descricao || "Não há descrição."}
           </Text>
           <TouchableOpacity
             style={styles.button}

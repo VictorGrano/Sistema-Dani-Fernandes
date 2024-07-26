@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { PieChart } from "react-native-gifted-charts";
+import { BarChart } from "react-native-gifted-charts";
 import axios from "axios";
 
 const MenuScreen = () => {
@@ -13,15 +13,14 @@ const MenuScreen = () => {
       .get("http://192.168.1.102:3000/estoque/QuantidadeEstoque")
       .then((response) => {
         const dadosr = response.data.map((estoque) => ({
-          text: estoque.estoque_local,
           value: estoque.estoque_local,
           nome: estoque.nome_local,
-          color: getRandomColor(), // Função para gerar cores aleatórias
+          frontColor: getRandomColor(), // Função para gerar cores aleatórias
         }));
         setDados(dadosr);
       })
       .catch((error) => {
-        console.log(error.data);
+        console.log(error);
       });
   }, []);
 
@@ -35,26 +34,24 @@ const MenuScreen = () => {
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.header}>Visão Geral do Estoque:</Text>
-        <PieChart
-          showText
-          donut
+        <BarChart
           textBackgroundColor="white"
           textColor="black"
           textAlign="center"
-          showTextBackground
-          textBackgroundRadius={20}
           alignItems="center"
           barBorderRadius={4}
-          frontColor="lightgray"
           data={dados}
+          showValuesAsTopLabel
+          rotateLabel
+          maxValue = {10000}
         />
         <Legend data={dados} />
       </View>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("Cadastro")}
+        onPress={() => navigation.navigate("Menu Relatorio")}
       >
-        <Text style={styles.buttonText}>Cadastro de Produtos / Insumos</Text>
+        <Text style={styles.buttonText}>Relatório</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
@@ -83,7 +80,7 @@ const Legend = ({ data }) => {
     <View style={styles.legendContainer}>
       {data.map((item, index) => (
         <View key={index} style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: item.color }]} />
+          <View style={[styles.legendColor, { backgroundColor: item.frontColor }]} />
           <Text style={styles.legendText}>{item.nome}</Text>
         </View>
       ))}

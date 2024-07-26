@@ -21,9 +21,10 @@ function App() {
   const [newLoteName, setNewLoteName] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:3000/produtos')
+    axios.get('http://localhost:3000/produtos/')
       .then(response => {
         setProducts(response.data);
+        console.log(response.data)
       })
       .catch(error => {
         console.error('Error fetching products:', error);
@@ -45,7 +46,7 @@ function App() {
   };
 
   const fetchLotes = (productId) => {
-    axios.get(`http://localhost:3000/buscarlotes?produto_id=${productId}`)
+    axios.get(`http://localhost:3000/produtos/Lotes?produto_id=${productId}`)
       .then(response => {
         setLotes(response.data);
       })
@@ -102,7 +103,7 @@ function App() {
 
   const handleCreateLote = () => {
     if (productId && dataFabricacao) {
-      axios.get(`http://localhost:3000/produtoDetalhes?produto_id=${productId}`)
+      axios.get(`http://localhost:3000/produtos/InfoProduto?id=${productId}`)
         .then(response => {
           const { sigla, cod_aroma } = response.data;
           const date = new Date(dataFabricacao);
