@@ -18,7 +18,7 @@ const BuscaScreen = () => {
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.102:3000/produtos/")
+      .get("http://192.168.1.177:3000/produtos/")
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -34,7 +34,7 @@ const BuscaScreen = () => {
   const handleProductSelect = (item) => {
     setSelectedProduct(item.value);
     axios
-      .get(`http://192.168.1.102:3000/produtos/InfoProduto?id=${item.value}`)
+      .get(`http://192.168.1.177:3000/produtos/InfoProduto?id=${item.value}`)
       .then((response) => {
         setProductDetails(response.data);
         console.log(response.data);
@@ -72,7 +72,7 @@ const BuscaScreen = () => {
             {productDetails.unidade || "Não há uma unidade de medida definida."}
           </Text>
           <Text style={styles.detailsText}>
-            Preço Unitário: {productDetails.preco || "Preço não registrado."}
+            Preço Unitário: R${productDetails.preco || "Preço não registrado."}
           </Text>
           <Text style={styles.detailsText}>
             Descrição: {productDetails.descricao || "Não há descrição."}

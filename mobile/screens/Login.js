@@ -7,32 +7,45 @@ import {
   TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState("");
   const [senha, setSenha] = useState("");
+  const [visualizarSenha, setVisualizarSenha] = useState(true);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const loginData = {
       user: user,
       senha: senha,
     };
     console.log(loginData);
-    axios
-      .post("http://192.168.1.102:3000/usuarios/Login", loginData)
-      .then((response) => {
-        if (response.data.message == 'Logado') {
-          navigation.replace("Menu");
-        }
-      })
-      .catch((error) => {
-        if (error.response.status == "404") {
-          alert("Usuário ou senha inválidos!");
-        }
-      });
+
+    try {
+      const response = await axios.post(
+        "http://192.168.1.177:3000/usuarios/Login",
+        loginData
+      );
+      const data = response.data;
+        AsyncStorage.setItem("nome", data[0].nome),
+        AsyncStorage.setItem("id", String(data[0].id)),
+        navigation.replace("Menu");
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        alert("Usuário ou senha inválidos!");
+      } else {
+        console.error(error);
+        alert("Ocorreu um erro ao fazer login. Por favor, tente novamente.");
+      }
+    }
   };
+
+  const handlePassword = () => {
+    setVisualizarSenha(!visualizarSenha);
+  }
 
   return (
     <View style={styles.container}>
@@ -47,11 +60,18 @@ const LoginScreen = () => {
       <TextInput
         style={styles.input}
         placeholder="Digite a senha aqui"
+        secureTextEntry={visualizarSenha}
         keyboardType="password"
         onChangeText={setSenha}
       />
+      {visualizarSenha ? (
+        <FontAwesome5 name="eye" size={25} color="black" onPress={handlePassword}/>
+      ) : (
+        <FontAwesome5 name="eye-slash" size={25} color="black" onPress={handlePassword}/>
+      )}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
+        <FontAwesome5 name="sign-in-alt" size={25} color="white"/>
       </TouchableOpacity>
     </View>
   );
@@ -86,21 +106,22 @@ const styles = StyleSheet.create({
   },
   label: {
     marginLeft: -250,
-    color: '#222222',
-    fontWeight: 'bold',
+    color: "#222222",
+    fontWeight: "bold",
     fontSize: 17,
   },
   input: {
     height: 40,
-    width: '80%',
+    width: "80%",
     margin: 12,
-    borderWidth: 1,
+    borderWidth: 0,
     padding: 10,
     color: "#222222",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "transparent",
     fontSize: 17,
-    textAlign: "center",
+    textAlign: "left",
     borderRadius: 8,
+    borderBottomWidth: 1, 
   },
 });
 

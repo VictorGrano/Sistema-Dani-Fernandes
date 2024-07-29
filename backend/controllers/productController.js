@@ -94,3 +94,41 @@ exports.getLotes = (req, res) => {
     }
   });
 };
+
+exports.getAromas = (req, res) => {
+  connection.query("SELECT * FROM aromas", (error, results) => {
+    if (error) throw error;
+    res.json(results);
+  });
+};
+
+exports.getInfoAromas = (req, res) => {
+  const { cod_aroma } = req.query;
+  const q1 = "SELECT * FROM produtos WHERE cod_aroma = ?";
+  const q2 = "SELECT nome_aroma FROM aromas WHERE cod_aroma = ?";
+  
+  connection.query(q1, [cod_aroma], (error, productResults) => {
+    if (error) {
+      console.error('Erro ao buscar produtos:', error);
+      res.status(500).send('Erro ao buscar produtos');
+      return;
+    }
+
+    connection.query(q2, [cod_aroma], (error, aromaResults) => {
+      if (error) {
+        console.error('Erro ao buscar aromas:', error);
+        res.status(500).send('Erro ao buscar aromas');
+        return;
+      }
+
+      if (aromaResults.length > 0) {
+        productResults.forEach(product => {
+          product.nome_aroma = aromaResults[0].nome_aroma;
+        });
+      }
+
+      res.json(productResults);
+    });
+  });
+};
+

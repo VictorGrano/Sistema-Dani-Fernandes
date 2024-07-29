@@ -1,28 +1,63 @@
-import React, { useState, useCallback } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { BarChart } from "react-native-gifted-charts";
+import { PieChart } from "react-native-gifted-charts";
 import axios from "axios";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MenuScreen = () => {
   const navigation = useNavigation();
   const [dados, setDados] = useState([]);
-
+  const [id, setId] = useState(1);
+  const [quantidadeL, setQuantidadeL] = useState();
+  const [nome, setNome] = useState("");
+  const [local, setLocal] = useState("");
+  const [total, setTotal] = useState();
   const fetchDados = useCallback(() => {
     axios
-      .get("http://192.168.1.102:3000/estoque/QuantidadeEstoque")
+      .get("http://192.168.1.177:3000/estoque/Locais")
       .then((response) => {
-        const dadosr = response.data.map((estoque) => ({
-          value: estoque.estoque_local,
-          nome: estoque.nome_local,
-          frontColor: getRandomColor(), // Função para gerar cores aleatórias
-        }));
+        const dataL = response.data;
+        setQuantidadeL(dataL.length);
+        console.log(dataL.length);
+      })
+      .catch((error) => {
+        console.error("Error fetching locations:", error);
+      });
+    axios
+      .get(`http://192.168.1.177:3000/estoque/QuantidadeEstoque?id=${id}`)
+      .then((response) => {
+        const data = response.data[0];
+        setTotal(data.estoque_total);
+        const dadosr = [
+          {
+            value: data.estoque_utilizado,
+            color: "blue",
+            text: calculaPorcentagem(data.estoque_utilizado, data.estoque_total),
+            nome: `Espaço Utilizado: ${data.estoque_utilizado} caixas`,
+          },
+          {
+            value: data.estoque_livre,
+            color: "green",
+            text: calculaPorcentagem(data.estoque_livre, data.estoque_total),
+            nome: `Espaço livre para uso: ${data.estoque_livre} caixas`,
+          },
+        ];
+        setLocal(data.nome_local);
         setDados(dadosr);
+        console.log(data);
       })
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -30,71 +65,124 @@ const MenuScreen = () => {
     }, [fetchDados])
   );
 
+  useEffect(() => {
+    const fetchNome = async () => {
+      const storedNome = await AsyncStorage.getItem("nome");
+      setNome(storedNome || "Usuário");
+    };
+    fetchNome();
+  }, []);
+
+  const calculaPorcentagem = (num, total) => {
+    if (total === 0) return "0%";
+    const conta = (num / total) * 100;
+    const porcentagem = String(Math.round(conta)).concat("%");
+    return porcentagem;
+  };
+
+  const handleAvancar = () => {
+    if (id < quantidadeL) {
+      setId(id + 1);
+    } else {
+      setId(1);
+    }
+  };
+
+  const handleRegredir = () => {
+    if (id > 1) {
+      setId(id - 1);
+    } else {
+      setId(quantidadeL);
+    }
+  };
+
+  const Legend = ({ data }) => {
+    return (
+      <View style={styles.legendContainer}>
+        {data.map((item, index) => (
+          <View key={index} style={styles.legendItem}>
+            <View
+              style={[styles.legendColor, { backgroundColor: item.color }]}
+            />
+            <Text style={styles.legendText}>{item.nome}</Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.header}>Visão Geral do Estoque:</Text>
-        <BarChart
-          textBackgroundColor="white"
-          textColor="black"
-          textAlign="center"
-          alignItems="center"
-          barBorderRadius={4}
-          data={dados}
-          showValuesAsTopLabel
-          rotateLabel
-          maxValue = {10000}
-        />
-        <Legend data={dados} />
-      </View>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Menu Relatorio")}
-      >
-        <Text style={styles.buttonText}>Relatório</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Buscar")}
-      >
-        <Text style={styles.buttonText}>Buscar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Escanear", { tipo: "entrada" })}
-      >
-        <Text style={styles.buttonText}>Registrar Entrada</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Escanear", { tipo: "saida" })}
-      >
-        <Text style={styles.buttonText}>Registrar Saída</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-const Legend = ({ data }) => {
-  return (
-    <View style={styles.legendContainer}>
-      {data.map((item, index) => (
-        <View key={index} style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: item.frontColor }]} />
-          <Text style={styles.legendText}>{item.nome}</Text>
+      <ScrollView>
+        <Text style={styles.headerNome}>Olá, {nome}!</Text>
+        <View style={styles.card}>
+          <Text style={styles.header}>{local}</Text>
+          <PieChart
+            donut
+            showText
+            textBackgroundColor="white"
+            textColor="white"
+            radius={130}
+            textSize={20}
+            textBackgroundRadius={30}
+            centerLabelComponent={() => {
+              return (
+                <Text style={{ fontSize: 15, textAlign: "center" }}>
+                  TOTAL: {total} caixas
+                </Text>
+              );
+            }}
+            data={dados}
+          />
+          <Legend data={dados} />
+          <View style={styles.change}>
+            <TouchableOpacity
+              onPress={handleRegredir}
+              style={styles.changeButton}
+            >
+              <FontAwesome5 name="chevron-left" style={styles.changeItem} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleAvancar}
+              style={styles.changeButton}
+            >
+              <FontAwesome5 name="chevron-right" style={styles.changeItem} />
+            </TouchableOpacity>
+          </View>
         </View>
-      ))}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Menu Relatorio")}
+          >
+            <FontAwesome5 name="chart-bar" size={24} color="white" />
+            <Text style={styles.buttonText}>Relatório</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Buscar")}
+          >
+            <FontAwesome5 name="search" size={24} color="white" />
+            <Text style={styles.buttonText}>Buscar Produtos</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Escanear", { tipo: "entrada" })}
+          >
+            <FontAwesome5 name="upload" size={24} color="white" />
+            <Text style={styles.buttonText}>Registrar Entrada</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Escanear", { tipo: "saida" })}
+          >
+            <FontAwesome5 name="download" size={24} color="white" />
+            <Text style={styles.buttonText}>Registrar Saída</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
-};
-
-const getRandomColor = () => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
 };
 
 const styles = StyleSheet.create({
@@ -102,34 +190,58 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  buttonContainer: {
+    flex: 1,
     padding: 20,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
   },
   button: {
     backgroundColor: "#D8B4E2",
-    padding: 15,
-    marginVertical: 10,
-    borderRadius: 8,
-    alignItems: "center",
-    width: "80%",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    padding: 50,
+    padding: 40,
     elevation: 10,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 15,
-    marginTop: -50,
+    width: 150,
+    height: 150,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 40,
+    elevation: 10,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 15,
+    margin: 20,
+    flex: 1,
+  },
+  headerNome: {
+    fontSize: 25,
+    marginTop: 20,
+    color: "#333",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   header: {
     fontSize: 25,
     marginBottom: 10,
+    color: "#333",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  changeItem: {
+    fontSize: 25,
     color: "#333",
     fontWeight: "bold",
     textAlign: "center",
@@ -150,6 +262,15 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 16,
+  },
+  change: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 5,
+    marginHorizontal: 20,
+  },
+  changeButton: {
+    paddingHorizontal: 50,
   },
 });
 

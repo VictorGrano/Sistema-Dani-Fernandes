@@ -12,6 +12,7 @@ import RelatorioMenuScreen from './screens/RelatorioMenu';
 import RelatorioProdutos from './screens/reports/RelatorioProdutos';
 import RelatorioProdutosScreen from './screens/reports/RelatorioProdutos';
 import RelatorioLotesScreen from './screens/reports/RelatorioLotes';
+import RelatorioAromaScreen from './screens/reports/RelatorioAroma';
 
 const Stack = createStackNavigator();
 
@@ -35,14 +36,14 @@ const App = () => {
           options={{ title: 'Menu de Relatório'}} 
         />
         <Stack.Screen 
-          name="Relatorio Produtos" 
-          component={RelatorioProdutosScreen} 
-          options={{ title: 'Relatório Produtos'}} 
-        />
-        <Stack.Screen 
           name="Relatorio Lotes" 
           component={RelatorioLotesScreen} 
           options={{ title: 'Relatório Lotes'}} 
+        />
+        <Stack.Screen 
+          name="Relatorio Aromas" 
+          component={RelatorioAromaScreen} 
+          options={{ title: 'Relatório Aromas'}} 
         />
         <Stack.Screen 
           name="Buscar" 

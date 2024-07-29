@@ -1,25 +1,33 @@
 import React, { useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import axios from "axios";
-
+import RelatorioGeral from "./reports/RelatorioProdutos";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 const RelatorioMenuScreen = () => {
   const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Relatorio Produtos")}
-      >
-        <Text style={styles.buttonText}>Relatório Geral</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Relatorio Lotes")}
-      >
-        <Text style={styles.buttonText}>Relatório de Estoque</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={RelatorioGeral}>
+          <FontAwesome5 name="file-alt" size={24} color="white" />
+          <Text style={styles.buttonText}>Relatório Geral</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("Relatorio Aromas")}
+        >
+          <FontAwesome5 name="leaf" size={24} color="white" />
+          <Text style={styles.buttonText}>Relatório por Aroma</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("Relatorio Lotes")}
+        >
+          <FontAwesome5 name="box-open" size={24} color="white" />
+          <Text style={styles.buttonText}>Relatório de Lotes</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -27,22 +35,31 @@ const RelatorioMenuScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     padding: 20,
+  },
+  buttonContainer: {
+    flex: 1,
+    padding: 30,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
   },
   button: {
     backgroundColor: "#D8B4E2",
-    padding: 15,
-    marginVertical: 10,
-    borderRadius: 8,
+    padding: 40,
+    elevation: 10,
+    borderRadius: 20,
     alignItems: "center",
-    width: "80%",
+    justifyContent: "center",
+    marginBottom: 15,
+    width: 150,
+    height: 150,
   },
   buttonText: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+    textAlign: "center",
   },
   card: {
     backgroundColor: "#FFFFFF",
@@ -60,7 +77,7 @@ const styles = StyleSheet.create({
     color: "#333",
     fontWeight: "bold",
     textAlign: "center",
-  }
+  },
 });
 
 export default RelatorioMenuScreen;

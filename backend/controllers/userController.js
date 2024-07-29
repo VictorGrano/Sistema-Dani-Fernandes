@@ -10,7 +10,7 @@ exports.login = (req, res) => {
       throw error;
     }
     if (results.length > 0) {
-      res.json({ message: "Logado" });
+      res.json(results);
     } else {
       res.status(404).json({ message: "Erro no login" });
     }

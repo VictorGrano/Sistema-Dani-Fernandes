@@ -9,7 +9,7 @@ const LotesScreen = ({ route }) => {
 
   useEffect(() => {
     axios
-      .get(`http://192.168.1.102:3000/produtos/Lotes?produto_id=${id}`)
+      .get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${id}`)
       .then((response) => {
         const lotes = response.data;
         console.log(lotes);

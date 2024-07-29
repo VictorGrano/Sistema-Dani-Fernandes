@@ -33,7 +33,7 @@ const EntradaScreen = ({ route }) => {
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.102:3000/produtos/")
+      .get("http://192.168.1.177:3000/produtos/")
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -45,7 +45,7 @@ const EntradaScreen = ({ route }) => {
         console.error("Error fetching products:", error);
       });
     axios
-      .get("http://192.168.1.102:3000/estoque/Locais")
+      .get("http://192.168.1.177:3000/estoque/Locais")
       .then((response) => {
         const locaisData = response.data.map((local) => ({
           label: local.nome_local,
@@ -61,7 +61,7 @@ const EntradaScreen = ({ route }) => {
   useEffect(() => {
     if (selectedProduct) {
       axios
-        .get(`http://192.168.1.102:3000/produtos/Lotes?produto_id=${id}`)
+        .get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage(
@@ -141,10 +141,10 @@ const EntradaScreen = ({ route }) => {
     };
 
     console.log(entradaData);
-    axios.post('http://192.168.1.102:3000/estoque/Entrada', entradaData)
+    axios.post('http://192.168.1.177:3000/estoque/Entrada', entradaData)
       .then(response => {
         console.log("Entrada criada com sucesso:", response.data);
-        navigation.replace('Menu');
+        navigation.replace("Menu");
       })
       .catch(error => {
         console.error("Erro ao criar entrada:", error);
@@ -160,7 +160,7 @@ const EntradaScreen = ({ route }) => {
       setValidade(validade);
       setFabricacao(fabricacao);
       axios
-        .get(`http://192.168.1.102:3000/produtos/InfoProduto?id=${id}`)
+        .get(`http://192.168.1.177:3000/produtos/InfoProduto?id=${id}`)
         .then((response) => {
           setNome(response.data.nome);
         })
@@ -168,7 +168,7 @@ const EntradaScreen = ({ route }) => {
           console.error("Error fetching product data:", error);
         });
       axios
-        .get(`http://192.168.1.102:3000/produtos/Lotes?produto_id=${id}`)
+        .get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage(

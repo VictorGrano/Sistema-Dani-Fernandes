@@ -26,7 +26,7 @@ const SaidaScreen = ({ route }) => {
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.102:3000/produtos")
+      .get("http://192.168.1.177:3000/produtos")
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -42,7 +42,7 @@ const SaidaScreen = ({ route }) => {
   useEffect(() => {
     if (selectedProduct) {
       axios
-        .get(`http://192.168.1.102:3000/buscarlotes?produto_id=${selectedProduct}`)
+        .get(`http://192.168.1.177:3000/buscarlotes?produto_id=${selectedProduct}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage("Não existem lotes para este produto.");
@@ -81,18 +81,18 @@ const SaidaScreen = ({ route }) => {
     const saidaData = {
       id,
       quantidade: quantidadeTotal,
+      quantidade_caixas: quantidadeCaixas,
       lote: selectedLote,
     };
-
     console.log(saidaData);
     axios
-      .post("http://192.168.1.102:3000/saidas", saidaData)
+      .post("http://192.168.1.177:3000/estoque/Saida", saidaData)
       .then((response) => {
         console.log("Saída registrada com sucesso:", response.data);
         navigation.goBack();
       })
       .catch((error) => {
-        console.error("Erro ao registrar saída:", error);
+        console.error("Erro ao registrar saída:", error.response.data);
       });
   };
 
@@ -103,7 +103,7 @@ const SaidaScreen = ({ route }) => {
       setQuantidade(quantidade);
       setSelectedLote(lote);
       axios
-        .get(`http://192.168.1.102:3000/buscaProduto?id=${id}`)
+        .get(`http://192.168.1.177:3000/produtos/InfoProduto?id=${id}`)
         .then((response) => {
           setNome(response.data.nome);
         })
@@ -111,7 +111,7 @@ const SaidaScreen = ({ route }) => {
           console.error("Error fetching product data:", error);
         });
       axios
-        .get(`http://192.168.1.102:3000/buscarlotes?produto_id=${id}`)
+        .get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage("Não existem lotes para este produto.");
@@ -127,8 +127,7 @@ const SaidaScreen = ({ route }) => {
           }
         })
         .catch((error) => {
-          Alert.alert('Aviso!', 'Não há mais produtos neste lote?');
-          
+          console.log(error);          
         });
     }
   }, [route.params]);

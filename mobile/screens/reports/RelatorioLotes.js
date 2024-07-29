@@ -20,7 +20,7 @@ const RelatorioLotesScreen = () => {
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.102:3000/produtos/")
+      .get("http://192.168.1.177:3000/produtos/")
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -36,7 +36,7 @@ const RelatorioLotesScreen = () => {
   const handleProductSelect = (item) => {
     setSelectedProduct(item.value);
     axios
-      .get(`http://192.168.1.102:3000/produtos/InfoProduto?id=${item.value}`)
+      .get(`http://192.168.1.177:3000/produtos/InfoProduto?id=${item.value}`)
       .then((response) => {
         setProductDetails(response.data);
         console.log(response.data);
@@ -45,7 +45,7 @@ const RelatorioLotesScreen = () => {
         console.error("Error fetching product details:", error);
       });
         axios
-          .get(`http://192.168.1.102:3000/produtos/Lotes?produto_id=${item.value}`)
+          .get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${item.value}`)
           .then((response) => {
             const lotes = response.data;
             console.log(lotes);
@@ -83,9 +83,9 @@ const RelatorioLotesScreen = () => {
           </head>
           <body>
             <h1>Relatório de Lotes - ${productDetails.nome}</h1>
+            <h3>Tipo de Produto: ${productDetails.categoria}</h3>
             <h3>Total de Produtos: ${productDetails.estoque_total}</h3>
             <h3>Total de Caixas: ${productDetails.total_caixas}</h3>
-            <h3>Tipo de Produto: ${productDetails.estoque_total}</h3>
             <table>
               <tr>
                 <th>Lote do Produto</th>
