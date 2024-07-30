@@ -35,24 +35,25 @@ const RelatorioAromaScreen = () => {
 
   const handleAromaSelect = (item) => {
     setSelectedAroma(item.value);
+    console.log(aromas[0].categoria)
     axios
       .get(`http://192.168.1.177:3000/produtos/InfoAromas?cod_aroma=${item.value}`)
       .then((response) => {
         const infoAromas = response.data.map((aroma) => ({
           nome_produto: aroma.nome,
-          estoque_produto: aroma.estoque_total,
-          preco: aroma.preco,
+          estoque_produto: parseFloat(aroma.estoque_total) || 0,
+          preco: parseFloat(aroma.preco) || 0,
+          categoria: aroma.categoria,
           unidade: aroma.unidade,
           descricao: aroma.descricao,
           nome_aroma: aroma.nome_aroma,
-          valor_total: aroma.preco * aroma.estoque_total
+          valor_total: (parseFloat(aroma.preco) || 0) * (parseFloat(aroma.estoque_total) || 0)
         }));
-        
+
         const totalEstoque = infoAromas.reduce((acc, curr) => acc + curr.estoque_produto, 0);
-        const precoEstoque = infoAromas.reduce((acc, curr) => acc + curr.preco, 0);
-        console.log(infoAromas);
+        const valorTotalEstoque = infoAromas.reduce((acc, curr) => acc + curr.valor_total, 0);
         setTotal(totalEstoque);
-        setValorEstoque(precoEstoque * totalEstoque);
+        setValorEstoque(valorTotalEstoque);
         setAromaDetails(infoAromas);
       })
       .catch((error) => {
@@ -75,23 +76,25 @@ const RelatorioAromaScreen = () => {
           </head>
           <body>
             <h1>Relatório de Aromas - ${aromaDetails[0].nome_aroma}</h1>
-            <h3>Total de Produtos: ${total || 0}</h3>
-            <h3>Preço total do estoque: R$${valorEstoque || 0}</h3>
+            <h3>Total de Produtos: ${total.toLocaleString('pt-br')}</h3>
+            <h3>Valor total no estoque: R$${valorEstoque.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
             <table>
               <tr>
                 <th>Nome do Produto</th>
+                <th>Tipo do Produto</th>
                 <th>Estoque do Produto</th>
                 <th>Preço Unitário</th>
-                <th>Preço Total </th>
+                <th>Valor Total</th>
               </tr>`;
 
       aromaDetails.forEach((item) => {
         htmlContent += `
               <tr>
                 <td>${item.nome_produto}</td>
-                <td>${item.estoque_produto}</td>
-                <td>R$${item.preco || 0}</td>
-                <td>R$${item.valor_total || 0}</td>
+                <td>${item.categoria}</td>
+                <td>${item.estoque_produto.toLocaleString('pt-br')}</td>
+                <td>R$${item.preco.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td>R$${item.valor_total.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               </tr>`;
       });
 
@@ -102,10 +105,9 @@ const RelatorioAromaScreen = () => {
 
       const { uri } = await Print.printToFileAsync({
         html: htmlContent,
-        fileName: `Relatorio_Estoque_${
+        fileName: `Relatorio_Aromas_${
           new Date().toISOString().split("T")[0]
         }.pdf`,
-        OrientationType: 'landscape'
       });
       console.log("File has been saved to:", uri);
 
@@ -124,7 +126,7 @@ const RelatorioAromaScreen = () => {
 
   return (
     <View style={styles.container}>
-        <Text style={styles.header}>Escolha o Aroma: </Text>
+      <Text style={styles.header}>Escolha o Aroma: </Text>
       <Dropdown
         style={styles.dropdown}
         data={aromas}
@@ -138,21 +140,21 @@ const RelatorioAromaScreen = () => {
       {aromaDetails.length > 0 && (
         <View style={styles.detailsContainer}>
           <Text style={styles.detailsText}>
-            Estoque: {total || "Não há esse produto no estoque."}
+            Estoque: {total.toLocaleString('pt-br')}
           </Text>
           <Text style={styles.detailsText}>
             Unidade de Medida: {aromaDetails[0].unidade || "Não há uma unidade de medida definida."}
           </Text>
           <Text style={styles.detailsText}>
-            Valor Total no Estoque: R${valorEstoque.toLocaleString('pt-BR') || "Valor não registrado."}
+            Valor Total no Estoque: R${valorEstoque.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </Text>
           <Text style={styles.detailsText}>
             Descrição: {aromaDetails[0].descricao || "Não há descrição."}
           </Text>
-      </View>
+        </View>
       )}
       <TouchableOpacity style={styles.button} onPress={generatePDF}>
-        <Text style={styles.buttonText} >Gerar PDF</Text>
+        <Text style={styles.buttonText}>Gerar PDF</Text>
       </TouchableOpacity>
     </View>
   );
@@ -163,14 +165,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     backgroundColor: "#ecf0f1",
-    alignItems: 'center',
+    alignItems: "center",
     padding: 8,
-  },
-  spacer: {
-    height: 8,
-  },
-  printer: {
-    textAlign: "center",
   },
   button: {
     backgroundColor: "#D8B4E2",
@@ -212,7 +208,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
-  }
+  },
 });
 
 export default RelatorioAromaScreen;

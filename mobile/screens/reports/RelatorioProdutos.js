@@ -1,4 +1,3 @@
-// generatePDF.js
 import axios from "axios";
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
@@ -10,10 +9,10 @@ const fetchProdutos = async () => {
     const produtosData = response.data.map((produto) => ({
       nome: produto.nome,
       descricao: produto.descricao,
-      estoque: produto.estoque_total,
+      estoque: parseFloat(produto.estoque_total) || 0,
       unidade: produto.unidade,
-      valor_unitario: produto.preco,
-      valor_total: produto.estoque * produto.preco
+      valor_unitario: parseFloat(produto.preco) || 0,
+      valor_total: (parseFloat(produto.preco) || 0) * (parseFloat(produto.estoque_total) || 0),
     }));
     return produtosData;
   } catch (error) {
@@ -25,14 +24,16 @@ const fetchProdutos = async () => {
 const RelatorioGeral = async () => {
   try {
     const produtos = await fetchProdutos();
-
     let totalEstoque = 0;
     let valorTotalEstoque = 0;
 
     produtos.forEach((item) => {
-      totalEstoque += parseInt(item.estoque);
-      valorTotalEstoque += parseFloat(item.valor_unitario) * parseInt(item.estoque);
+      totalEstoque += item.estoque;
+      valorTotalEstoque += item.valor_total;
     });
+
+    totalEstoque = isNaN(totalEstoque) ? 0 : totalEstoque;
+    valorTotalEstoque = isNaN(valorTotalEstoque) ? 0 : valorTotalEstoque;
 
     let htmlContent = `
       <html>
@@ -47,6 +48,8 @@ const RelatorioGeral = async () => {
         </head>
         <body>
           <h1>Relatório de Estoque</h1>
+          <h2>Total de Produtos: ${totalEstoque.toLocaleString('pt-br')}</h2>
+          <h2>Valor total no estoque: R$${valorTotalEstoque.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
           <table>
             <tr>
               <th>Produto</th>
@@ -61,18 +64,15 @@ const RelatorioGeral = async () => {
       htmlContent += `
             <tr>
               <td>${item.nome}</td>
-              <td>${item.estoque}</td>
-              <td>${item.descricao || 'Não Possui'}</td>
+              <td>${item.estoque.toLocaleString('pt-br')}</td>
+              <td>${item.descricao || "Não Possui"}</td>
               <td>${item.unidade}</td>
-              <td>R$${parseFloat(item.valor_unitario || 0)}</td>
-              <td>R$${parseFloat(item.valor_total || 0)}</td>
+              <td>R$${item.valor_unitario.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              <td>R$${item.valor_total.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             </tr>`;
     });
-
     htmlContent += `
           </table>
-          <h1>Total de Produtos: ${totalEstoque}</h1>
-          <h1>Valor total no estoque: R$${valorTotalEstoque || 0}</h1>
         </body>
       </html>`;
 

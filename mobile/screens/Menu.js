@@ -20,6 +20,7 @@ const MenuScreen = () => {
   const [nome, setNome] = useState("");
   const [local, setLocal] = useState("");
   const [total, setTotal] = useState();
+
   const fetchDados = useCallback(() => {
     axios
       .get("http://192.168.1.177:3000/estoque/Locais")
@@ -178,6 +179,20 @@ const MenuScreen = () => {
           >
             <FontAwesome5 name="download" size={24} color="white" />
             <Text style={styles.buttonText}>Registrar Saída</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Historico")}
+          >
+            <FontAwesome5 name="clock" size={24} color="white" />
+            <Text style={styles.buttonText}>Histórico</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.replace("Login")}
+          >
+            <FontAwesome5 name="sign-out-alt" size={24} color="white" />
+            <Text style={styles.buttonText}>Logout</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

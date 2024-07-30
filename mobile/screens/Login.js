@@ -71,7 +71,6 @@ const LoginScreen = () => {
       )}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
-        <FontAwesome5 name="sign-in-alt" size={25} color="white"/>
       </TouchableOpacity>
     </View>
   );

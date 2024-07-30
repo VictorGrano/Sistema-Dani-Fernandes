@@ -11,6 +11,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SaidaScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -23,6 +24,18 @@ const SaidaScreen = ({ route }) => {
   const [lotes, setLotes] = useState([]);
   const [selectedLote, setSelectedLote] = useState(null);
   const [noLotesMessage, setNoLotesMessage] = useState("");
+  const [nomeUser, setNomeUser] = useState("");
+  const [idUser, setIdUser] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const storedNome = await AsyncStorage.getItem("nome");
+      const storedID = await AsyncStorage.getItem("id");
+      setNomeUser(storedNome || "Usuário");
+      setIdUser(storedID || null);
+    };
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     axios
@@ -83,6 +96,8 @@ const SaidaScreen = ({ route }) => {
       quantidade: quantidadeTotal,
       quantidade_caixas: quantidadeCaixas,
       lote: selectedLote,
+      user: nomeUser,
+      iduser: idUser,
     };
     console.log(saidaData);
     axios
@@ -127,7 +142,7 @@ const SaidaScreen = ({ route }) => {
           }
         })
         .catch((error) => {
-          console.log(error);          
+          console.log(error);
         });
     }
   }, [route.params]);
@@ -228,6 +243,7 @@ const SaidaScreen = ({ route }) => {
             keyboardType="numeric"
             editable={true}
             value={quantidade}
+            onChangeText={handleQuantidadeChange}
           />
           <TouchableOpacity style={styles.button} onPress={handleSaida}>
             <Text style={styles.buttonText}>Registrar Saída</Text>

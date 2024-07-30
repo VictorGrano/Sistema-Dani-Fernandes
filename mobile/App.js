@@ -13,6 +13,7 @@ import RelatorioProdutos from './screens/reports/RelatorioProdutos';
 import RelatorioProdutosScreen from './screens/reports/RelatorioProdutos';
 import RelatorioLotesScreen from './screens/reports/RelatorioLotes';
 import RelatorioAromaScreen from './screens/reports/RelatorioAroma';
+import HistoricoScreen from './screens/Historico';
 
 const Stack = createStackNavigator();
 
@@ -69,6 +70,11 @@ const App = () => {
           name="Escanear" 
           component={EscanearScreen} 
           options={{ title: 'Escanear QR Code' }} 
+        />
+        <Stack.Screen 
+          name="Historico" 
+          component={HistoricoScreen} 
+          options={{ title: 'Histórico de Movimentação' }} 
         />
       </Stack.Navigator>
     </NavigationContainer>

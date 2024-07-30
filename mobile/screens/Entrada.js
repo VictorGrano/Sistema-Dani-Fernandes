@@ -10,6 +10,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const EntradaScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -30,8 +31,12 @@ const EntradaScreen = ({ route }) => {
   const [validade, setValidade] = useState("");
   const [fabricacao, setFabricacao] = useState("");
   const [isNewLote, setIsNewLote] = useState(false);
+  const [nomeUser, setNomeUser] = useState("");
+  const [idUser, setIdUser] = useState("");
 
   useEffect(() => {
+    setNomeUser(AsyncStorage.getItem("nome"));
+    setIdUser(AsyncStorage.getItem("id"));
     axios
       .get("http://192.168.1.177:3000/produtos/")
       .then((response) => {
@@ -79,7 +84,7 @@ const EntradaScreen = ({ route }) => {
           }
         })
         .catch((error) => {
-          if (error.response.status === '404') {
+          if (error.response.status === "404") {
             setNoLotesMessage(
               "Não existem lotes para este produto. Adicione um com o campo abaixo."
             );
@@ -127,6 +132,19 @@ const EntradaScreen = ({ route }) => {
     setNewLote(text);
   };
 
+  useEffect(() => {
+    const fetchNome = async () => {
+      const storedNome = await AsyncStorage.getItem("nome");
+      setNomeUser(storedNome || "Usuário");
+    };
+    const fetchID = async () => {
+      const storedID = await AsyncStorage.getItem("id");
+      setIdUser(storedID || null);
+    };
+    fetchNome();
+    fetchID();
+  }, []);
+
   const handleEntrar = () => {
     const quantidadeTotal = quantidade * (quantidadeCaixas || 1);
     const entradaData = {
@@ -138,15 +156,17 @@ const EntradaScreen = ({ route }) => {
       localArmazenado: selectedLocal,
       quantidade_caixas: quantidadeCaixas || 1,
       coluna,
+      user: nomeUser,
+      iduser: idUser,
     };
-
     console.log(entradaData);
-    axios.post('http://192.168.1.177:3000/estoque/Entrada', entradaData)
-      .then(response => {
+    axios
+      .post("http://192.168.1.177:3000/estoque/Entrada", entradaData)
+      .then((response) => {
         console.log("Entrada criada com sucesso:", response.data);
         navigation.replace("Menu");
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Erro ao criar entrada:", error);
       });
   };
@@ -197,7 +217,11 @@ const EntradaScreen = ({ route }) => {
         <>
           <Text style={styles.header}>Dados do Produto:</Text>
           <Text style={styles.subheader}>Nome do Produto:</Text>
-          <TextInput style={styles.input} value={String(nome)} editable={false} />
+          <TextInput
+            style={styles.input}
+            value={String(nome)}
+            editable={false}
+          />
           <Text style={styles.subheader}>Quantidade de caixas:</Text>
           <TextInput
             style={styles.input}
@@ -224,7 +248,9 @@ const EntradaScreen = ({ route }) => {
           <Text style={styles.subheader}>Quantidade no Lote:</Text>
           <TextInput
             style={styles.input}
-            value={String(lotes.find(l => l.label === selectedLote)?.quantidade || '0')}
+            value={String(
+              lotes.find((l) => l.label === selectedLote)?.quantidade || "0"
+            )}
             editable={false}
           />
           <Text style={styles.subheader}>Data de Fabricação:</Text>
@@ -321,7 +347,9 @@ const EntradaScreen = ({ route }) => {
                   style={styles.button}
                   onPress={() => setIsNewLote(false)}
                 >
-                  <Text style={styles.buttonText}>Selecionar Lote Existente</Text>
+                  <Text style={styles.buttonText}>
+                    Selecionar Lote Existente
+                  </Text>
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -345,10 +373,14 @@ const EntradaScreen = ({ route }) => {
               >
                 <Text style={styles.buttonText}>Adicionar Novo Lote</Text>
               </TouchableOpacity>
-              <Text style={styles.subheader}>Quantidade Disponível no Lote:</Text>
+              <Text style={styles.subheader}>
+                Quantidade Disponível no Lote:
+              </Text>
               <TextInput
                 style={styles.input}
-                value={String(lotes.find(l => l.label === selectedLote)?.quantidade || '')}
+                value={String(
+                  lotes.find((l) => l.label === selectedLote)?.quantidade || ""
+                )}
                 editable={false}
               />
             </View>
@@ -411,7 +443,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     color: "#222222",
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     fontSize: 17,
     textAlign: "center",
   },
