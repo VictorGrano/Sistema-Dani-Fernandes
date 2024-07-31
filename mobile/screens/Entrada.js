@@ -164,7 +164,7 @@ const EntradaScreen = ({ route }) => {
       .post("http://192.168.1.177:3000/estoque/Entrada", entradaData)
       .then((response) => {
         console.log("Entrada criada com sucesso:", response.data);
-        navigation.replace("Menu");
+        navigation.goBack();
       })
       .catch((error) => {
         console.error("Erro ao criar entrada:", error);

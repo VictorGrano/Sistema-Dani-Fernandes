@@ -32,6 +32,7 @@ const LoginScreen = () => {
       const data = response.data;
         AsyncStorage.setItem("nome", data[0].nome),
         AsyncStorage.setItem("id", String(data[0].id)),
+        AsyncStorage.setItem("tipo", data[0].tipo),
         navigation.replace("Menu");
     } catch (error) {
       if (error.response && error.response.status === 404) {

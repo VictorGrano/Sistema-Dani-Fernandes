@@ -1,11 +1,16 @@
 const connection = require("../database");
 
 // Função para formatar a data de dd/mm/aaaa para aaaa-mm-dd HH:MM:SS
-const formatData = (data, isEnd = false) => {
-  const [dia, mes, ano] = data.split("/");
-  const time = isEnd ? "23:59:59" : "00:00:00";
-  return `${ano}-${mes}-${dia} ${time}`;
-};
+function formatDateToBeginingOfDay(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString().slice(0, 19).replace('T', ' ');
+}
+function formatDateToEndOfDay(date) {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d.toISOString().slice(0, 19).replace('T', ' ');
+}
 
 exports.login = (req, res) => {
   const { user, senha } = req.body;
@@ -32,7 +37,7 @@ exports.historico = (req, res) => {
     produtoid,
     lote,
     local_armazenado,
-    tipo_mudança, 
+    tipo_mudanca, 
     ordenar,
   } = req.body;
 
@@ -45,13 +50,13 @@ exports.historico = (req, res) => {
   }
   if (dataInicio && dataFim) {
     q += " AND data_mudanca BETWEEN ? AND ?";
-    params.push(formatData(dataInicio), formatData(dataFim, true));
+    params.push(formatDateToBeginingOfDay(dataInicio), formatDateToEndOfDay(dataFim));
   } else if (dataInicio) {
     q += " AND data_mudanca > ?";
-    params.push(formatData(dataInicio));
+    params.push(formatDateToBeginingOfDay(dataInicio));
   } else if (dataFim) {
     q += " AND data_mudanca < ?";
-    params.push(formatData(dataFim, true));
+    params.push(formatDateToEndOfDay(dataFim));
   }
   if (produtoid) {
     q += " AND produto_id = ?";
@@ -65,9 +70,9 @@ exports.historico = (req, res) => {
     q += " AND local_armazenado = ?";
     params.push(local_armazenado);
   }
-  if (tipo_mudança) {
-    q += " AND tipo_mudança = ?";
-    params.push(tipo_mudança);
+  if (tipo_mudanca) {
+    q += " AND tipo_mudanca = ?";
+    params.push(tipo_mudanca);
   }
   q += ` ORDER BY ${ordenar || "data_mudanca"} DESC`;
 
@@ -87,6 +92,16 @@ exports.historico = (req, res) => {
               reject(error);
             } else {
               results[index].nome_produto = nomeResults[0].nome;
+              resolve();
+            }
+          });
+          const q3 = `SELECT nome_local FROM locais_armazenamento WHERE id = ?`;
+          connection.query(q3, [result.local_armazenado], (error, localResults) => {
+            if (error) {
+              console.error("Erro no servidor:", error);
+              reject(error);
+            } else {
+              results[index].nome_local = localResults[0].nome_local;
               resolve();
             }
           });

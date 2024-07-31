@@ -27,6 +27,13 @@ const RelatorioMenuScreen = () => {
           <FontAwesome5 name="box-open" size={24} color="white" />
           <Text style={styles.buttonText}>Relatório de Lotes</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("Relatorio Movimentacao")}
+        >
+          <FontAwesome5 name="sync" size={24} color="white" />
+          <Text style={styles.buttonText}>Relatório de Movimentação</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -46,7 +53,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#D8B4E2",
-    padding: 40,
+    padding: 20,
     elevation: 10,
     borderRadius: 20,
     alignItems: "center",

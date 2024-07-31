@@ -14,6 +14,7 @@ import RelatorioProdutosScreen from './screens/reports/RelatorioProdutos';
 import RelatorioLotesScreen from './screens/reports/RelatorioLotes';
 import RelatorioAromaScreen from './screens/reports/RelatorioAroma';
 import HistoricoScreen from './screens/Historico';
+import RelatorioMovimentacaoScreen from './screens/reports/RelatorioMovimentacao';
 
 const Stack = createStackNavigator();
 
@@ -75,6 +76,11 @@ const App = () => {
           name="Historico" 
           component={HistoricoScreen} 
           options={{ title: 'Histórico de Movimentação' }} 
+        />
+        <Stack.Screen 
+          name="Relatorio Movimentacao" 
+          component={RelatorioMovimentacaoScreen} 
+          options={{ title: 'Relatório de Movimentação' }} 
         />
       </Stack.Navigator>
     </NavigationContainer>

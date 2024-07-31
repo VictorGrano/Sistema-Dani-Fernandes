@@ -11,6 +11,7 @@ import { PieChart } from "react-native-gifted-charts";
 import axios from "axios";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loading from "../components/Loading";
 
 const MenuScreen = () => {
   const navigation = useNavigation();
@@ -18,21 +19,23 @@ const MenuScreen = () => {
   const [id, setId] = useState(1);
   const [quantidadeL, setQuantidadeL] = useState();
   const [nome, setNome] = useState("");
+  const [tipo, setTipo] = useState("");
   const [local, setLocal] = useState("");
   const [total, setTotal] = useState();
+  const [loading, setLoading] = useState(false);
 
-  const fetchDados = useCallback(() => {
-    axios
+  const fetchDados = useCallback(async () => {
+    setLoading(true);
+    await axios
       .get("http://192.168.1.177:3000/estoque/Locais")
       .then((response) => {
         const dataL = response.data;
         setQuantidadeL(dataL.length);
-        console.log(dataL.length);
       })
       .catch((error) => {
         console.error("Error fetching locations:", error);
       });
-    axios
+    await axios
       .get(`http://192.168.1.177:3000/estoque/QuantidadeEstoque?id=${id}`)
       .then((response) => {
         const data = response.data[0];
@@ -41,7 +44,10 @@ const MenuScreen = () => {
           {
             value: data.estoque_utilizado,
             color: "blue",
-            text: calculaPorcentagem(data.estoque_utilizado, data.estoque_total),
+            text: calculaPorcentagem(
+              data.estoque_utilizado,
+              data.estoque_total
+            ),
             nome: `Espaço Utilizado: ${data.estoque_utilizado} caixas`,
           },
           {
@@ -53,11 +59,11 @@ const MenuScreen = () => {
         ];
         setLocal(data.nome_local);
         setDados(dadosr);
-        console.log(data);
       })
       .catch((error) => {
         console.log(error);
       });
+    setLoading(false);
   }, [id]);
 
   useFocusEffect(
@@ -69,7 +75,9 @@ const MenuScreen = () => {
   useEffect(() => {
     const fetchNome = async () => {
       const storedNome = await AsyncStorage.getItem("nome");
+      const storedTipo = await AsyncStorage.getItem("tipo");
       setNome(storedNome || "Usuário");
+      setTipo(storedTipo || "usuario");
     };
     fetchNome();
   }, []);
@@ -97,6 +105,9 @@ const MenuScreen = () => {
     }
   };
 
+  if (loading) {
+    return <Loading />;
+  }
   const Legend = ({ data }) => {
     return (
       <View style={styles.legendContainer}>
@@ -152,13 +163,24 @@ const MenuScreen = () => {
           </View>
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate("Menu Relatorio")}
-          >
-            <FontAwesome5 name="chart-bar" size={24} color="white" />
-            <Text style={styles.buttonText}>Relatório</Text>
-          </TouchableOpacity>
+          {tipo == "admin" && (
+            <>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate("Menu Relatorio")}
+              >
+                <FontAwesome5 name="chart-bar" size={24} color="white" />
+                <Text style={styles.buttonText}>Relatório</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate("Historico")}
+              >
+                <FontAwesome5 name="clock" size={24} color="white" />
+                <Text style={styles.buttonText}>Histórico</Text>
+              </TouchableOpacity>
+            </>
+          )}
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate("Buscar")}
@@ -179,13 +201,6 @@ const MenuScreen = () => {
           >
             <FontAwesome5 name="download" size={24} color="white" />
             <Text style={styles.buttonText}>Registrar Saída</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate("Historico")}
-          >
-            <FontAwesome5 name="clock" size={24} color="white" />
-            <Text style={styles.buttonText}>Histórico</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
@@ -215,7 +230,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#D8B4E2",
-    padding: 40,
+    padding: 20,
     elevation: 10,
     borderRadius: 20,
     alignItems: "center",

@@ -6,15 +6,18 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Alert
 } from "react-native";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
 import { Dropdown } from "react-native-element-dropdown";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Loading from "../components/Loading";
+import Loading from "../../components/Loading";
+import * as Print from "expo-print";
+import { shareAsync } from "expo-sharing";
 
-const HistoricoScreen = () => {
+const RelatorioMovimentacaoScreen = () => {
   const [historicoData, setHistoricoData] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [selectedUsuario, setSelectedUsuario] = useState(null);
@@ -178,29 +181,80 @@ const HistoricoScreen = () => {
     return <Loading />;
   }
 
-  const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.text}>Usuário: {item.usuario}</Text>
-      <Text style={styles.text}>Tabela Alterada: {item.tabela}</Text>
-      <Text style={styles.text}>Tipo de Mudança: {item.tipo_mudanca}</Text>
-      <Text style={styles.text}>Produto: {item.produto}</Text>
-      <Text style={styles.text}>Lote: {item.lote}</Text>
-      <Text style={styles.text}>
-        Quantidade Movimentação: {item.quantidade}
-      </Text>
-      <Text style={styles.text}>Quantidade de Caixas: {item.caixas}</Text>
-      <Text style={styles.text}>
-        Valor Antes da Movimentação: {item.quantidadeAntiga}
-      </Text>
-      <Text style={styles.text}>
-        Quantidade de Caixas antes da Movimentação: {item.caixasAntiga}
-      </Text>
-      <Text style={styles.text}>Local Armazenado: {item.local_armazenado}</Text>
-      <Text style={styles.text}>Coluna: {item.coluna}</Text>
-      <Text style={styles.text}>Data da Mudança: {item.data_mudanca}</Text>
-      <Text style={styles.text}>Hora da Mudança: {item.hora_mudanca}</Text>
-    </View>
-  );
+  const criaPDF = async () => {
+    try {
+        let htmlContent = `
+          <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { text-align: center; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }
+                th { background-color: #f2f2f2; }
+              </style>
+            </head>
+            <body>
+              <h1>Relatório de Movimentação</h1>
+              <table>
+                <tr>
+                  <th>Usuário</th>
+                  <th>Tipo de Mudança</th>
+                  <th>Produto</th>
+                  <th>Lote</th>
+                  <th>Quantidade Movimentada</th>
+                  <th>Quantidade de Caixas movimentadas</th>
+                  <th>Quantidade antes da movimentação</th>
+                  <th>Quantiade de caixas antes da movimentação</th>
+                  <th>Local armazenado:</th>
+                  <th>Coluna:</th>
+                  <th>Data da mudança:</th>
+                  <th>Hora da mudança:</th>
+                </tr>`;
+    
+        historicoData.forEach((item) => {
+          htmlContent += `
+                <tr>
+                  <td>${item.usuario}</td>
+                  <td>${item.tipo_mudanca}</td>
+                  <td>${item.produto}</td>
+                  <td>${item.lote}</td>
+                  <td>${item.quantidade}</td>
+                  <td>${item.caixas}</td>
+                  <td>${item.quantidadeAntiga || 0}</td>
+                  <td>${item.caixasAntiga || 0}</td>
+                  <td>${item.local_armazenado}</td>
+                  <td>${item.coluna}</td>
+                  <td>${item.data_mudanca}</td>
+                  <td>${item.hora_mudanca}</td>
+                </tr>`;
+        });
+        htmlContent += `
+              </table>
+            </body>
+          </html>`;
+    
+        const { uri } = await Print.printToFileAsync({
+          html: htmlContent,
+          base64: false,
+          fileName: `Relatorio_movimentacao${
+            new Date().toISOString().split("T")[0]
+          }.pdf`,
+        });
+        console.log("File has been saved to:", uri);
+    
+        Alert.alert(
+          "PDF Gerado",
+          "O relatório de movimentação foi gerado com sucesso!",
+          [{ text: "OK" }]
+        );
+    
+        await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+        Alert.alert("Erro", "Ocorreu um erro ao gerar o PDF.");
+      }
+    };
 
   return (
     <View style={styles.container}>
@@ -330,11 +384,10 @@ const HistoricoScreen = () => {
           Nenhum histórico encontrado. Limpe os filtros e tente novamente
         </Text>
       ) : (
-        <FlatList
-          data={historicoData}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
-        />
+        <TouchableOpacity style={styles.button} onPress={criaPDF}>
+            <FontAwesome5 name="check" size={24} color="white" />
+            <Text style={styles.buttonText}>Gerar PDF</Text>
+          </TouchableOpacity>
       )}
     </View>
   );
@@ -406,4 +459,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HistoricoScreen;
+export default RelatorioMovimentacaoScreen;
