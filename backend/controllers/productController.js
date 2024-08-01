@@ -107,6 +107,13 @@ exports.getAromas = (req, res) => {
   });
 };
 
+exports.getTipo = (req, res) => {
+  connection.query("SELECT * FROM tipo_produto", (error, results) => {
+    if (error) throw error;
+    res.json(results);
+  });
+};
+
 exports.getInfoAromas = (req, res) => {
   const { cod_aroma } = req.query;
   const q1 = "SELECT * FROM produtos WHERE cod_aroma = ?";
@@ -148,4 +155,45 @@ exports.getInfoAromas = (req, res) => {
       res.status(500).send("Erro ao buscar informações");
     }
   })();
+};
+
+exports.postRelatorioProdutos = (req, res) => {
+  const { id, categoria_id, cod_aroma, preco } = req.body;
+  let params = [];
+
+  let q = `
+    SELECT p.*, a.nome_aroma 
+    FROM produtos p
+    LEFT JOIN aromas a ON p.cod_aroma = a.cod_aroma
+    WHERE 1=1
+  `;
+
+  if (id) {
+    q += " AND p.id = ?";
+    params.push(id);
+  }
+  if (categoria_id) {
+    q += " AND p.categoria_id = ?";
+    params.push(categoria_id);
+  }
+
+  if (cod_aroma) {
+    q += " AND p.cod_aroma = ?";
+    params.push(cod_aroma);
+  }
+
+  if (preco) {
+    q += " AND p.preco = ?";
+    params.push(preco);
+  }
+
+  connection.query(q, params, (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+
+    res.json(results);
+  });
 };

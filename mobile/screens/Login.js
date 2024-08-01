@@ -5,17 +5,22 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  Modal,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState("");
   const [senha, setSenha] = useState("");
   const [visualizarSenha, setVisualizarSenha] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleLogin = async () => {
     const loginData = {
@@ -30,10 +35,14 @@ const LoginScreen = () => {
         loginData
       );
       const data = response.data;
-        AsyncStorage.setItem("nome", data[0].nome),
-        AsyncStorage.setItem("id", String(data[0].id)),
-        AsyncStorage.setItem("tipo", data[0].tipo),
+      await AsyncStorage.setItem("nome", data[0].nome);
+      await AsyncStorage.setItem("id", String(data[0].id));
+      await AsyncStorage.setItem("tipo", data[0].tipo);
+      if (data[0].primeiro_login === "sim") {
+        setIsModalVisible(true);
+      } else {
         navigation.replace("Menu");
+      }
     } catch (error) {
       if (error.response && error.response.status === 404) {
         alert("Usuário ou senha inválidos!");
@@ -46,7 +55,36 @@ const LoginScreen = () => {
 
   const handlePassword = () => {
     setVisualizarSenha(!visualizarSenha);
-  }
+  };
+
+  const handleSetNewPassword = async () => {
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Erro", "As senhas não coincidem.");
+      return;
+    }
+
+    try {
+      const id = await AsyncStorage.getItem("id");
+      if (!id) {
+        throw new Error("ID do usuário não encontrado.");
+      }
+      const response = await axios.post("http://192.168.1.177:3000/usuarios/NovaSenha", {
+        id: id,
+        senha: newPassword,
+      });
+      console.log(response)
+      if (response.data.success) {
+        Alert.alert("Sucesso", "Senha alterada com sucesso!");
+        setIsModalVisible(false);
+        navigation.replace("Menu");
+      } else {
+        Alert.alert("Erro", "Ocorreu um erro ao alterar a senha. Tente novamente.");
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Erro", "Ocorreu um erro.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -62,17 +100,44 @@ const LoginScreen = () => {
         style={styles.input}
         placeholder="Digite a senha aqui"
         secureTextEntry={visualizarSenha}
-        keyboardType="password"
         onChangeText={setSenha}
       />
-      {visualizarSenha ? (
-        <FontAwesome5 name="eye" size={25} color="black" onPress={handlePassword}/>
-      ) : (
-        <FontAwesome5 name="eye-slash" size={25} color="black" onPress={handlePassword}/>
-      )}
+      <FontAwesome5
+        name={visualizarSenha ? "eye" : "eye-slash"}
+        size={25}
+        color="black"
+        onPress={handlePassword}
+      />
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
+
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalHeader}>Definir Nova Senha</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Digite a nova senha"
+              secureTextEntry={true}
+              onChangeText={setNewPassword}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Confirme a nova senha"
+              secureTextEntry={true}
+              onChangeText={setConfirmPassword}
+            />
+            <TouchableOpacity style={styles.button} onPress={handleSetNewPassword}>
+              <Text style={styles.buttonText}>Salvar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -122,6 +187,24 @@ const styles = StyleSheet.create({
     textAlign: "left",
     borderRadius: 8,
     borderBottomWidth: 1, 
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalView: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalHeader: {
+    fontSize: 20,
+    marginBottom: 20,
+    fontWeight: "bold",
   },
 });
 

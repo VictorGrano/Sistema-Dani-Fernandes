@@ -1,28 +1,51 @@
 const connection = require("../database");
+const bcrypt = require("bcrypt");
 
 // Função para formatar a data de dd/mm/aaaa para aaaa-mm-dd HH:MM:SS
 function formatDateToBeginingOfDay(date) {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 19).replace('T', ' ');
+  return d.toISOString().slice(0, 19).replace("T", " ");
 }
+
 function formatDateToEndOfDay(date) {
   const d = new Date(date);
   d.setHours(23, 59, 59, 999);
-  return d.toISOString().slice(0, 19).replace('T', ' ');
+  return d.toISOString().slice(0, 19).replace("T", " ");
+}
+
+function Encriptar(senha) {
+  const saltRounds = 5;
+  return new Promise((resolve, reject) => {
+    bcrypt.hash(senha, saltRounds, function (err, hash) {
+      if (err) reject(err);
+      resolve(hash);
+    });
+  });
 }
 
 exports.login = (req, res) => {
   const { user, senha } = req.body;
-  const q = `SELECT * FROM usuarios WHERE login = ? AND senha = ?`;
-  connection.query(q, [user, senha], (error, results) => {
+  const q = `SELECT * FROM usuarios WHERE login = ?`;
+  connection.query(q, [user], (error, results) => {
     if (error) {
       console.error("Erro no servidor:", error);
       res.status(500).json({ error: "Erro no servidor" });
-      throw error;
+      return;
     }
     if (results.length > 0) {
-      res.json(results);
+      bcrypt.compare(senha, results[0].senha, function (err, result) {
+        if (err) {
+          console.error("Erro no servidor:", err);
+          res.status(500).json({ error: "Erro no servidor" });
+          return;
+        }
+        if (result) {
+          res.status(200).json(results);
+        } else {
+          res.status(404).json({ message: "Erro no login" });
+        }
+      });
     } else {
       res.status(404).json({ message: "Erro no login" });
     }
@@ -37,7 +60,7 @@ exports.historico = (req, res) => {
     produtoid,
     lote,
     local_armazenado,
-    tipo_mudanca, 
+    tipo_mudanca,
     ordenar,
   } = req.body;
 
@@ -50,7 +73,10 @@ exports.historico = (req, res) => {
   }
   if (dataInicio && dataFim) {
     q += " AND data_mudanca BETWEEN ? AND ?";
-    params.push(formatDateToBeginingOfDay(dataInicio), formatDateToEndOfDay(dataFim));
+    params.push(
+      formatDateToBeginingOfDay(dataInicio),
+      formatDateToEndOfDay(dataFim)
+    );
   } else if (dataInicio) {
     q += " AND data_mudanca > ?";
     params.push(formatDateToBeginingOfDay(dataInicio));
@@ -128,7 +154,7 @@ exports.usuarios = (req, res) => {
     if (error) {
       console.error("Erro no servidor:", error);
       res.status(500).json({ error: "Erro no servidor" });
-      throw error;
+      return;
     }
     if (results.length > 0) {
       res.json(results);
@@ -136,4 +162,72 @@ exports.usuarios = (req, res) => {
       res.status(404).json({ message: "Erro na pesquisa" });
     }
   });
+};
+
+exports.cadastraUsuario = async (req, res) => {
+  const { nome, login, tipo, senha } = req.body;
+  const q1 = "SELECT * FROM usuarios WHERE nome = ? OR login = ?";
+  connection.query(q1, [nome, login], async (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+    if (results.length > 0) {
+      res.status(409).json({
+        message: "Erro ao cadastrar! Já tem o nome ou o login no sistema!",
+      });
+    } else {
+      try {
+        const hashedSenha = await Encriptar(senha);
+        const q2 =
+          "INSERT INTO usuarios (nome, login, senha, tipo, primeiro_login) values (?, ?, ?, ?, ?)";
+        connection.query(
+          q2,
+          [nome, login, hashedSenha, tipo, "sim"],
+          (error, results) => {
+            if (error) {
+              console.error("Erro no servidor:", error);
+              res.status(500).json({ error: "Erro no servidor" });
+              return;
+            }
+            res
+              .status(201)
+              .json({ message: "Usuário cadastrado com sucesso!" });
+          }
+        );
+      } catch (error) {
+        console.error("Erro ao encriptar a senha:", error);
+        res.status(500).json({ error: "Erro ao encriptar a senha" });
+      }
+    }
+  });
+};
+
+exports.setNewPassword = async (req, res) => {
+  const { id, senha } = req.body;
+  try {
+    const hashedSenha = await Encriptar(senha);
+    const q =
+      "UPDATE usuarios SET senha = ?, primeiro_login = 'nao' WHERE id = ?";
+    connection.query(q, [hashedSenha, id], (error, results) => {
+      if (error) {
+        console.error("Erro no servidor:", error);
+        res.status(500).json({ error: "Erro no servidor" });
+        return;
+      }
+      if (results.affectedRows > 0) {
+        res
+          .status(200)
+          .json({ success: true, message: "Senha alterada com sucesso!" });
+      } else {
+        res
+          .status(404)
+          .json({ success: false, message: "Usuário não encontrado." });
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao encriptar a senha:", error);
+    res.status(500).json({ error: "Erro ao encriptar a senha" });
+  }
 };

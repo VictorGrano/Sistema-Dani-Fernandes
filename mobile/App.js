@@ -1,6 +1,7 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import MenuScreen from './screens/Menu';
 import EntradaScreen from './screens/Entrada';
 import SaidaScreen from './screens/Saida';
@@ -9,78 +10,146 @@ import BuscaScreen from './screens/Busca';
 import LotesScreen from './screens/Lotes';
 import LoginScreen from './screens/Login';
 import RelatorioMenuScreen from './screens/RelatorioMenu';
-import RelatorioProdutos from './screens/reports/RelatorioProdutos';
 import RelatorioProdutosScreen from './screens/reports/RelatorioProdutos';
 import RelatorioLotesScreen from './screens/reports/RelatorioLotes';
 import RelatorioAromaScreen from './screens/reports/RelatorioAroma';
 import HistoricoScreen from './screens/Historico';
 import RelatorioMovimentacaoScreen from './screens/reports/RelatorioMovimentacao';
+import MenuCadastroScreen from './screens/MenuCadastro';
+import CadastroUsuarioScreen from './screens/CadastroUsuario';
 
 const Stack = createStackNavigator();
 
 const App = () => {
+  const [id, setID] = useState(null);
+  const [nome, setNome] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const bootstrapAsync = async () => {
+      try {
+        const storedId = await AsyncStorage.getItem('id');
+        const storedNome = await AsyncStorage.getItem('nome');
+        if (storedId !== null && storedNome !== null) {
+          setID(storedId);
+          setNome(storedNome);
+        }
+      } catch (e) {
+        console.log('Erro ao recuperar dados do AsyncStorage!', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    bootstrapAsync();
+  }, []);
+
+  const handleLogin = async (userId, userName) => {
+    try {
+      await AsyncStorage.setItem('id', userId);
+      await AsyncStorage.setItem('nome', userName);
+      setID(userId);
+      setNome(userName);
+    } catch (e) {
+      console.log('Erro ao salvar dados no AsyncStorage!', e);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('id');
+      await AsyncStorage.removeItem('nome');
+      setID(null);
+      setNome(null);
+    } catch (e) {
+      console.log('Erro ao remover dados do AsyncStorage!', e);
+    }
+  };
+
+  if (isLoading) {
+    // Você pode adicionar um indicador de carregamento aqui se desejar
+    return null;
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen 
-          name="Login" 
-          component={LoginScreen} 
-          options={{ title: 'Login', headerShown: false }} 
+      <Stack.Navigator initialRouteName={id ? 'Menu' : 'Login'}>
+        <Stack.Screen
+          name="Login"
+          options={{ title: 'Login', headerShown: false }}
+        >
+          {props => <LoginScreen {...props} onLogin={handleLogin} />}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Menu"
+          options={{ title: 'Menu Principal' }}
+        >
+          {props => <MenuScreen {...props} onLogout={handleLogout} />}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Menu Relatorio"
+          component={RelatorioMenuScreen}
+          options={{ title: 'Menu de Relatório' }}
         />
-        <Stack.Screen 
-          name="Menu" 
-          component={MenuScreen} 
-          options={{ title: 'Menu Principal'}} 
+        <Stack.Screen
+          name="Relatorio Lotes"
+          component={RelatorioLotesScreen}
+          options={{ title: 'Relatório Lotes' }}
         />
-        <Stack.Screen 
-          name="Menu Relatorio" 
-          component={RelatorioMenuScreen} 
-          options={{ title: 'Menu de Relatório'}} 
+        <Stack.Screen
+          name="Relatorio Aromas"
+          component={RelatorioAromaScreen}
+          options={{ title: 'Relatório Aromas' }}
         />
-        <Stack.Screen 
-          name="Relatorio Lotes" 
-          component={RelatorioLotesScreen} 
-          options={{ title: 'Relatório Lotes'}} 
+        <Stack.Screen
+          name="Buscar"
+          component={BuscaScreen}
+          options={{ title: 'Buscar Produtos' }}
         />
-        <Stack.Screen 
-          name="Relatorio Aromas" 
-          component={RelatorioAromaScreen} 
-          options={{ title: 'Relatório Aromas'}} 
+        <Stack.Screen
+          name="Lotes"
+          component={LotesScreen}
+          options={{ title: 'Visualizar Lotes' }}
         />
-        <Stack.Screen 
-          name="Buscar" 
-          component={BuscaScreen} 
-          options={{ title: 'Buscar Produtos' }} 
+        <Stack.Screen
+          name="Entrada"
+          component={EntradaScreen}
+          options={{ title: 'Registrar Entrada' }}
         />
-        <Stack.Screen 
-          name="Lotes" 
-          component={LotesScreen} 
-          options={{ title: 'Visualizar Lotes' }} 
+        <Stack.Screen
+          name="Saida"
+          component={SaidaScreen}
+          options={{ title: 'Registrar Saída' }}
         />
-        <Stack.Screen 
-          name="Entrada" 
-          component={EntradaScreen} 
-          options={{ title: 'Registrar Entrada' }} 
+        <Stack.Screen
+          name="Escanear"
+          component={EscanearScreen}
+          options={{ title: 'Escanear QR Code' }}
         />
-        <Stack.Screen 
-          name="Saida" 
-          component={SaidaScreen} 
-          options={{ title: 'Registrar Saída' }} 
+        <Stack.Screen
+          name="Menu Cadastro"
+          component={MenuCadastroScreen}
+          options={{ title: 'Menu de Cadastro' }}
         />
-        <Stack.Screen 
-          name="Escanear" 
-          component={EscanearScreen} 
-          options={{ title: 'Escanear QR Code' }} 
+        <Stack.Screen
+          name="Cadastro Usuario"
+          component={CadastroUsuarioScreen}
+          options={{ title: 'Cadastro de Usuários' }}
         />
-        <Stack.Screen 
-          name="Historico" 
-          component={HistoricoScreen} 
-          options={{ title: 'Histórico de Movimentação' }} 
+        <Stack.Screen
+          name="Historico"
+          component={HistoricoScreen}
+          options={{ title: 'Histórico de Movimentação' }}
         />
-        <Stack.Screen 
-          name="Relatorio Movimentacao" 
-          component={RelatorioMovimentacaoScreen} 
-          options={{ title: 'Relatório de Movimentação' }} 
+        <Stack.Screen
+          name="Relatorio Produtos"
+          component={RelatorioProdutosScreen}
+          options={{ title: 'Relatório de produtos' }}
+        />
+        <Stack.Screen
+          name="Relatorio Movimentacao"
+          component={RelatorioMovimentacaoScreen}
+          options={{ title: 'Relatório de Movimentação' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

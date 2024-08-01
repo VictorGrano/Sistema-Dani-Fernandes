@@ -1,38 +1,31 @@
 import React, { useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import RelatorioGeral from "./reports/RelatorioProdutos";
+import { useNavigation } from "@react-navigation/native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-const RelatorioMenuScreen = () => {
+
+const MenuCadastroScreen = () => {
   const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Relatorio Produtos")}>
-          <FontAwesome5 name="file-alt" size={24} color="white" />
-          <Text style={styles.buttonText}>Relatório de Produtos</Text>
+        <TouchableOpacity style={styles.button}>
+          <FontAwesome5 name="cart-plus" size={24} color="white" />
+          <Text style={styles.buttonText}>Cadastro de Produtos</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("Relatorio Aromas")}
         >
-          <FontAwesome5 name="leaf" size={24} color="white" />
-          <Text style={styles.buttonText}>Relatório por Aroma</Text>
+          <FontAwesome5 name="pump-soap" size={24} color="white" />
+          <Text style={styles.buttonText}>Cadastro de Insumos</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("Relatorio Lotes")}
+          onPress={() => navigation.navigate("Cadastro Usuario")}
         >
-          <FontAwesome5 name="box-open" size={24} color="white" />
-          <Text style={styles.buttonText}>Relatório de Lotes</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Relatorio Movimentacao")}
-        >
-          <FontAwesome5 name="sync" size={24} color="white" />
-          <Text style={styles.buttonText}>Relatório de Movimentação</Text>
+          <FontAwesome5 name="user" size={24} color="white" />
+          <Text style={styles.buttonText}>Cadastro de Usuários</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -87,4 +80,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RelatorioMenuScreen;
+export default MenuCadastroScreen;

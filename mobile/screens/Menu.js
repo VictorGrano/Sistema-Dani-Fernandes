@@ -104,6 +104,11 @@ const MenuScreen = () => {
       setId(quantidadeL);
     }
   };
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('id');
+    await AsyncStorage.removeItem('nome');
+    navigation.replace("Login");
+  }
 
   if (loading) {
     return <Loading />;
@@ -177,8 +182,15 @@ const MenuScreen = () => {
                 onPress={() => navigation.navigate("Historico")}
               >
                 <FontAwesome5 name="clock" size={24} color="white" />
-                <Text style={styles.buttonText}>Histórico</Text>
+                <Text style={styles.buttonText}>Histórico de Movimentação</Text>
               </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Menu Cadastro")}
+          >
+            <FontAwesome5 name="plus" size={24} color="white" />
+            <Text style={styles.buttonText}>Cadastro</Text>
+          </TouchableOpacity>
             </>
           )}
           <TouchableOpacity
@@ -204,7 +216,7 @@ const MenuScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.replace("Login")}
+            onPress={handleLogout}
           >
             <FontAwesome5 name="sign-out-alt" size={24} color="white" />
             <Text style={styles.buttonText}>Logout</Text>

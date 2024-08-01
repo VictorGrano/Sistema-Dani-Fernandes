@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert
+  Alert,
 } from "react-native";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
@@ -177,13 +177,26 @@ const RelatorioMovimentacaoScreen = () => {
     handleFilterChange("dataFim", currentDate);
   };
 
+  const calculaTotal = (item) => {
+    if (item.tipo_mudanca == "entrada") {
+      if (isNaN(item.quantidadeAntiga)) {
+        item.quantidadeAntiga = 0;
+      }
+      return parseInt(item.quantidadeAntiga) + parseInt(item.quantidade);
+    } else if (item.tipo_mudanca == "saída") {
+      return parseInt(item.quantidadeAntiga) - parseInt(item.quantidade);
+    } else {
+      return 0;
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
 
   const criaPDF = async () => {
     try {
-        let htmlContent = `
+      let htmlContent = `
           <html>
             <head>
               <style>
@@ -198,73 +211,74 @@ const RelatorioMovimentacaoScreen = () => {
               <h1>Relatório de Movimentação</h1>
               <table>
                 <tr>
+                  <th>Data da movimentação:</th>
+                  <th>Hora da movimentação:</th>
                   <th>Usuário</th>
-                  <th>Tipo de Mudança</th>
+                  <th>Tipo de Movimentação</th>
                   <th>Produto</th>
                   <th>Lote</th>
-                  <th>Quantidade Movimentada</th>
-                  <th>Quantidade de Caixas movimentadas</th>
-                  <th>Quantidade antes da movimentação</th>
-                  <th>Quantiade de caixas antes da movimentação</th>
+                  <th>Quantiade anterior</th>
+                  <th>Quantidade Atual</th>
+                  <th>Quantia de produtos movimentada</th>
                   <th>Local armazenado:</th>
                   <th>Coluna:</th>
-                  <th>Data da mudança:</th>
-                  <th>Hora da mudança:</th>
                 </tr>`;
-    
-        historicoData.forEach((item) => {
-          htmlContent += `
+
+      historicoData.forEach((item) => {
+        htmlContent += `
                 <tr>
+                  <td>${item.data_mudanca}</td>
+                  <td>${item.hora_mudanca}</td>
                   <td>${item.usuario}</td>
                   <td>${item.tipo_mudanca}</td>
                   <td>${item.produto}</td>
                   <td>${item.lote}</td>
-                  <td>${item.quantidade}</td>
-                  <td>${item.caixas}</td>
                   <td>${item.quantidadeAntiga || 0}</td>
-                  <td>${item.caixasAntiga || 0}</td>
+                  <td>${calculaTotal(item)}</td>
+                  <td>${item.quantidade || 0}</td>
                   <td>${item.local_armazenado}</td>
                   <td>${item.coluna}</td>
-                  <td>${item.data_mudanca}</td>
-                  <td>${item.hora_mudanca}</td>
                 </tr>`;
-        });
-        htmlContent += `
+      });
+      htmlContent += `
               </table>
             </body>
           </html>`;
-    
-        const { uri } = await Print.printToFileAsync({
-          html: htmlContent,
-          base64: false,
-          fileName: `Relatorio_movimentacao${
-            new Date().toISOString().split("T")[0]
-          }.pdf`,
-        });
-        console.log("File has been saved to:", uri);
-    
-        Alert.alert(
-          "PDF Gerado",
-          "O relatório de movimentação foi gerado com sucesso!",
-          [{ text: "OK" }]
-        );
-    
-        await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
-      } catch (error) {
-        console.error("Error generating PDF:", error);
-        Alert.alert("Erro", "Ocorreu um erro ao gerar o PDF.");
-      }
-    };
+
+      const { uri } = await Print.printToFileAsync({
+        html: htmlContent,
+        base64: false,
+        fileName: `Relatorio_movimentacao${
+          new Date().toISOString().split("T")[0]
+        }.pdf`,
+      });
+      console.log("File has been saved to:", uri);
+
+      Alert.alert(
+        "PDF Gerado",
+        "O relatório de movimentação foi gerado com sucesso!",
+        [{ text: "OK" }]
+      );
+
+      await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      Alert.alert("Erro", "Ocorreu um erro ao gerar o PDF.");
+    }
+  };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.header}>
+        Filtre abaixo (Ou aperte em Gerar PDF para gerar um relatório geral).
+      </Text>
       <TouchableOpacity
         style={styles.button}
         onPress={() => setMostraFiltros(!mostraFiltros)}
       >
         <FontAwesome5 name="filter" size={24} color="white" />
         {mostraFiltros ? (
-        <Text style={styles.buttonText}>Ocultar filtros</Text>
+          <Text style={styles.buttonText}>Ocultar filtros</Text>
         ) : (
           <Text style={styles.buttonText}>Mostrar filtros</Text>
         )}
@@ -385,9 +399,9 @@ const RelatorioMovimentacaoScreen = () => {
         </Text>
       ) : (
         <TouchableOpacity style={styles.button} onPress={criaPDF}>
-            <FontAwesome5 name="check" size={24} color="white" />
-            <Text style={styles.buttonText}>Gerar PDF</Text>
-          </TouchableOpacity>
+          <FontAwesome5 name="check" size={24} color="white" />
+          <Text style={styles.buttonText}>Gerar PDF</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -446,6 +460,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginLeft: 10,
+  },
+  header: {
+    color: "black",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   text: {
     fontSize: 14,

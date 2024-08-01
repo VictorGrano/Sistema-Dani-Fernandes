@@ -65,14 +65,14 @@ const BuscaScreen = () => {
           </Text>
           <Text style={styles.detailsText}>
             Estoque:{" "}
-            {productDetails.estoque_total || "Não há esse produto no estoque."}
+            {productDetails.estoque_total.toLocaleString('pt-br') || "Não há esse produto no estoque."}
           </Text>
           <Text style={styles.detailsText}>
             Unidade de Medida:{" "}
             {productDetails.unidade || "Não há uma unidade de medida definida."}
           </Text>
           <Text style={styles.detailsText}>
-            Preço Unitário: R${productDetails.preco || "Preço não registrado."}
+            Preço Unitário: R${productDetails.preco.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0"}
           </Text>
           <Text style={styles.detailsText}>
             Descrição: {productDetails.descricao || "Não há descrição."}

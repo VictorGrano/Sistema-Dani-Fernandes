@@ -174,6 +174,19 @@ const HistoricoScreen = () => {
     handleFilterChange("dataFim", currentDate);
   };
 
+  const calculaTotal = (item) => {
+    if (item.tipo_mudanca == "entrada") {
+      if (isNaN(item.quantidadeAntiga)) {
+        item.quantidadeAntiga = 0;
+      }
+      return parseInt(item.quantidadeAntiga) + parseInt(item.quantidade);
+    } else if (item.tipo_mudanca == "saída") {
+      return parseInt(item.quantidadeAntiga) - parseInt(item.quantidade);
+    } else {
+      return 0;
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -181,19 +194,19 @@ const HistoricoScreen = () => {
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.text}>Usuário: {item.usuario}</Text>
-      <Text style={styles.text}>Tabela Alterada: {item.tabela}</Text>
-      <Text style={styles.text}>Tipo de Mudança: {item.tipo_mudanca}</Text>
+      <Text style={styles.text}>Alteração: {item.tabela}</Text>
+      <Text style={styles.text}>Tipo de movimentação: {item.tipo_mudanca}</Text>
       <Text style={styles.text}>Produto: {item.produto}</Text>
       <Text style={styles.text}>Lote: {item.lote}</Text>
       <Text style={styles.text}>
-        Quantidade Movimentação: {item.quantidade}
+        Quantidade movimentada: {item.quantidade}
       </Text>
-      <Text style={styles.text}>Quantidade de Caixas: {item.caixas}</Text>
+      <Text style={styles.text}>Caixas Movimentadas: {item.caixas}</Text>
       <Text style={styles.text}>
-        Valor Antes da Movimentação: {item.quantidadeAntiga}
+        Quantidade Antiga: {item.quantidadeAntiga || 0}
       </Text>
       <Text style={styles.text}>
-        Quantidade de Caixas antes da Movimentação: {item.caixasAntiga}
+        Quantidade Atual: {calculaTotal(item)}
       </Text>
       <Text style={styles.text}>Local Armazenado: {item.local_armazenado}</Text>
       <Text style={styles.text}>Coluna: {item.coluna}</Text>
@@ -397,6 +410,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     marginBottom: 5,
+    fontWeight: 'bold',
   },
   infoText: {
     fontSize: 16,
