@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
-const MenuCadastroScreen = () => {
+const GerenciarScreen = () => {
   const navigation = useNavigation();
 
   return (
@@ -11,21 +11,21 @@ const MenuCadastroScreen = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button}>
           <FontAwesome5 name="cart-plus" size={24} color="white" />
-          <Text style={styles.buttonText}>Cadastro de Produtos</Text>
+          <Text style={styles.buttonText}>Produtos</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Relatorio Aromas")}
+          style={styles.button} 
+          onPress={() => navigation.navigate("Insumos")}
         >
           <FontAwesome5 name="pump-soap" size={24} color="white" />
-          <Text style={styles.buttonText}>Cadastro de Insumos</Text>
+          <Text style={styles.buttonText}>Insumos</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("Cadastro Usuario")}
+          onPress={() => navigation.navigate("Usuarios")}
         >
           <FontAwesome5 name="user" size={24} color="white" />
-          <Text style={styles.buttonText}>Cadastro de Usuários</Text>
+          <Text style={styles.buttonText}>Usuários</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -80,4 +80,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MenuCadastroScreen;
+export default GerenciarScreen;

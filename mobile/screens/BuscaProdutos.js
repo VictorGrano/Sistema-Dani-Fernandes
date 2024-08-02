@@ -10,7 +10,7 @@ import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import { useNavigation } from "@react-navigation/native";
 
-const BuscaScreen = () => {
+const BuscaProdutosScreen = () => {
   const [produtos, setProdutos] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
@@ -139,4 +139,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BuscaScreen;
+export default BuscaProdutosScreen;

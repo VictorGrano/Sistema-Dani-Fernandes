@@ -8,7 +8,6 @@ exports.getAllProducts = (req, res) => {
   });
 };
 
-//Pega os detalhes do produto selecionado
 exports.getInfoProduto = (req, res) => {
   const { id } = req.query;
   const q = "SELECT * FROM produtos WHERE id = ?";

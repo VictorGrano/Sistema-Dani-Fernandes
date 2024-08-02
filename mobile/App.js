@@ -6,7 +6,6 @@ import MenuScreen from './screens/Menu';
 import EntradaScreen from './screens/Entrada';
 import SaidaScreen from './screens/Saida';
 import EscanearScreen from './screens/Escanear';
-import BuscaScreen from './screens/Busca';
 import LotesScreen from './screens/Lotes';
 import LoginScreen from './screens/Login';
 import RelatorioMenuScreen from './screens/RelatorioMenu';
@@ -15,8 +14,11 @@ import RelatorioLotesScreen from './screens/reports/RelatorioLotes';
 import RelatorioAromaScreen from './screens/reports/RelatorioAroma';
 import HistoricoScreen from './screens/Historico';
 import RelatorioMovimentacaoScreen from './screens/reports/RelatorioMovimentacao';
-import MenuCadastroScreen from './screens/MenuCadastro';
-import CadastroUsuarioScreen from './screens/CadastroUsuario';
+import BuscaProdutosScreen from './screens/BuscaProdutos';
+import BuscaInsumosScreen from './screens/BuscaInsumo';
+import GerenciarScreen from './screens/MenuCadastro';
+import UsuariosScreen from './screens/Usuarios';
+import InsumosScreen from './screens/Insumos';
 
 const Stack = createStackNavigator();
 
@@ -66,11 +68,6 @@ const App = () => {
     }
   };
 
-  if (isLoading) {
-    // Você pode adicionar um indicador de carregamento aqui se desejar
-    return null;
-  }
-
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName={id ? 'Menu' : 'Login'}>
@@ -102,9 +99,14 @@ const App = () => {
           options={{ title: 'Relatório Aromas' }}
         />
         <Stack.Screen
-          name="Buscar"
-          component={BuscaScreen}
+          name="Buscar Produtos"
+          component={BuscaProdutosScreen}
           options={{ title: 'Buscar Produtos' }}
+        />
+        <Stack.Screen
+          name="Buscar Insumos"
+          component={BuscaInsumosScreen}
+          options={{ title: 'Buscar Insumos' }}
         />
         <Stack.Screen
           name="Lotes"
@@ -127,14 +129,19 @@ const App = () => {
           options={{ title: 'Escanear QR Code' }}
         />
         <Stack.Screen
-          name="Menu Cadastro"
-          component={MenuCadastroScreen}
-          options={{ title: 'Menu de Cadastro' }}
+          name="Gerenciar"
+          component={GerenciarScreen}
+          options={{ title: 'Gerenciar' }}
         />
         <Stack.Screen
-          name="Cadastro Usuario"
-          component={CadastroUsuarioScreen}
-          options={{ title: 'Cadastro de Usuários' }}
+          name="Usuarios"
+          component={UsuariosScreen}
+          options={{ title: 'Usuários' }}
+        />
+        <Stack.Screen
+          name="Insumos"
+          component={InsumosScreen}
+          options={{ title: 'Insumos' }}
         />
         <Stack.Screen
           name="Historico"

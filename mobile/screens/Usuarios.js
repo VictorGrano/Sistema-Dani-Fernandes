@@ -11,7 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 
-const CadastroUsuarioScreen = () => {
+const UsuariosScreen = () => {
   const navigation = useNavigation();
   const [selectedTipoUsuario, setTipoUsuario] = useState(null);
   const [nome, setNome] = useState(null);
@@ -163,4 +163,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CadastroUsuarioScreen;
+export default UsuariosScreen;

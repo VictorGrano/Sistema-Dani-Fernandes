@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Modal,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { PieChart } from "react-native-gifted-charts";
@@ -22,6 +23,7 @@ const MenuScreen = () => {
   const [tipo, setTipo] = useState("");
   const [local, setLocal] = useState("");
   const [total, setTotal] = useState();
+  const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const fetchDados = useCallback(async () => {
@@ -104,15 +106,35 @@ const MenuScreen = () => {
       setId(quantidadeL);
     }
   };
+
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('id');
-    await AsyncStorage.removeItem('nome');
+    await AsyncStorage.removeItem("id");
+    await AsyncStorage.removeItem("nome");
     navigation.replace("Login");
-  }
+  };
+
+  const handleModalOpen = () => {
+    setModal(true);
+  };
+
+  const handleModalClose = () => {
+    setModal(false);
+  };
+
+  const handleBuscarProdutos = () => {
+    setModal(false);
+    navigation.navigate("Buscar Produtos");
+  };
+
+  const handleBuscarInsumos = () => {
+    setModal(false);
+    navigation.navigate("Buscar Insumos");
+  };
 
   if (loading) {
     return <Loading />;
   }
+
   const Legend = ({ data }) => {
     return (
       <View style={styles.legendContainer}>
@@ -184,21 +206,43 @@ const MenuScreen = () => {
                 <FontAwesome5 name="clock" size={24} color="white" />
                 <Text style={styles.buttonText}>Histórico de Movimentação</Text>
               </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate("Menu Cadastro")}
-          >
-            <FontAwesome5 name="plus" size={24} color="white" />
-            <Text style={styles.buttonText}>Cadastro</Text>
-          </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate("Gerenciar")}
+              >
+                <FontAwesome5 name="edit" size={24} color="white" />
+                <Text style={styles.buttonText}>Gerenciar</Text>
+              </TouchableOpacity>
             </>
           )}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate("Buscar")}
-          >
+          <Modal visible={modal} animationType="slide" transparent={true}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text style={styles.modalHeader}>Escolher Busca</Text>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={handleBuscarProdutos}
+                >
+                  <Text style={styles.modalButtonText}>Buscar Produtos</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={handleBuscarInsumos}
+                >
+                  <Text style={styles.modalButtonText}>Buscar Insumos</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={handleModalClose}
+                >
+                  <Text style={styles.modalCloseButtonText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+          <TouchableOpacity style={styles.button} onPress={handleModalOpen}>
             <FontAwesome5 name="search" size={24} color="white" />
-            <Text style={styles.buttonText}>Buscar Produtos</Text>
+            <Text style={styles.buttonText}>Buscar Produtos/Insumos</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
@@ -214,10 +258,7 @@ const MenuScreen = () => {
             <FontAwesome5 name="download" size={24} color="white" />
             <Text style={styles.buttonText}>Registrar Saída</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleLogout}
-          >
+          <TouchableOpacity style={styles.button} onPress={handleLogout}>
             <FontAwesome5 name="sign-out-alt" size={24} color="white" />
             <Text style={styles.buttonText}>Logout</Text>
           </TouchableOpacity>
@@ -313,6 +354,51 @@ const styles = StyleSheet.create({
   },
   changeButton: {
     paddingHorizontal: 50,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalView: {
+    width: 300,
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: "#D8B4E2",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+    width: "100%",
+  },
+  modalButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  modalCloseButton: {
+    backgroundColor: "#E57373",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
+  modalCloseButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
