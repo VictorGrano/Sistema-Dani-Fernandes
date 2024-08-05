@@ -4,6 +4,8 @@ const insumoController = require("../controllers/insumoController");
 
 router.get("/", insumoController.getInsumos);
 router.get("/TiposInsumos", insumoController.getTiposInsumos);
+router.put("/Atualizar", insumoController.updateInsumo);
+router.delete("/:id", insumoController.deleteInsumo);
 router.get("/InfoInsumo", insumoController.getInfoInsumo);
 router.post("/CadastroInsumo", insumoController.postCadastroInsumo);
 

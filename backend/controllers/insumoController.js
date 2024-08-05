@@ -25,18 +25,87 @@ exports.getTiposInsumos = (req, res) => {
   });
 };
 
-exports.getInsumos = (req, res) => {
-  const q = `SELECT * FROM insumos ORDER BY nome`;
-  connection.query(q, (error, results) => {
+exports.getInsumos = async (req, res) => {
+  const q = `
+    SELECT 
+      insumos.id,
+      insumos.nome,
+      insumos.descricao,
+      insumos.estoque,
+      insumos.preco,
+      insumos.coluna,
+      tipo_insumo.nome AS tipo,
+      locais_armazenamento.nome_local AS local
+    FROM insumos
+    LEFT JOIN tipo_insumo ON insumos.tipo_id = tipo_insumo.id
+    LEFT JOIN locais_armazenamento ON insumos.local_armazenado = locais_armazenamento.id
+    ORDER BY insumos.nome
+  `;
+
+  try {
+    const results = await queryAsync(q);
+
+    if (results.length > 0) {
+      res.json(results);
+    } else {
+      res.status(404).json({ message: "Erro na pesquisa" });
+    }
+  } catch (error) {
+    console.error("Erro no servidor:", error);
+    res.status(500).json({ error: "Erro no servidor" });
+  }
+};
+
+exports.updateInsumo = async (req, res) => {
+  const { id, nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna } = req.body;
+
+  // Verifica se o nome já existe, exceto para o insumo atual
+  const q1 = "SELECT * FROM insumos WHERE nome = ? AND id != ?";
+  connection.query(q1, [nome, id], async (error, results) => {
     if (error) {
       console.error("Erro no servidor:", error);
       res.status(500).json({ error: "Erro no servidor" });
       return;
     }
     if (results.length > 0) {
-      res.json(results);
+      res.status(409).json({
+        message: "Erro ao atualizar! Já existe um insumo com este nome no sistema!",
+      });
     } else {
-      res.status(404).json({ message: "Erro na pesquisa" });
+      try {
+        const q2 = "UPDATE insumos SET nome = ?, descricao = ?, estoque = ?, preco = ?, tipo_id = ?, local_armazenado = ?, coluna = ? WHERE id = ?";
+        const params = [nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna, id];
+
+        connection.query(q2, params, (error, results) => {
+          if (error) {
+            console.error("Erro no servidor:", error);
+            res.status(500).json({ error: "Erro no servidor" });
+            return;
+          }
+          res.status(200).json({ message: "Insumo atualizado com sucesso!" });
+        });
+      } catch (error) {
+        console.error("Erro ao atualizar o insumo:", error);
+        res.status(500).json({ error: "Erro ao atualizar o insumo" });
+      }
+    }
+  });
+};
+
+exports.deleteInsumo = (req, res) => {
+  const { id } = req.params;
+
+  const q = "DELETE FROM insumos WHERE id = ?";
+  connection.query(q, [id], (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+    if (results.affectedRows > 0) {
+      res.status(200).json({ message: "Insumo deletado com sucesso!" });
+    } else {
+      res.status(404).json({ error: "Insumo não encontrado" });
     }
   });
 };
@@ -62,6 +131,11 @@ exports.getInfoInsumo = async (req, res) => {
         insumo.local = null;
       }
 
+      if (localResults.length > 0) {
+        insumo.nome_local = localResults[0].nome_local; // Corrigi o nome do campo para `nome`
+      } else {
+        insumo.nome_local = null;
+      }
       if (tipoResults.length > 0) {
         insumo.tipo_insumo = tipoResults[0].nome; // Corrigi o nome do campo para `nome`
       } else {

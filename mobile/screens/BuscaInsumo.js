@@ -14,7 +14,6 @@ const BuscaInsumosScreen = () => {
   const [insumos, setInsumos] = useState([]);
   const [selectedInsumo, setSelectedInsumo] = useState(null);
   const [insumoDetails, setInsumoDetails] = useState(null);
-  const navigation = useNavigation();
 
   useEffect(() => {
     axios
@@ -26,9 +25,7 @@ const BuscaInsumosScreen = () => {
         }));
         setInsumos(insumosData);
       })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-      });
+      .catch()
   }, []);
 
   const handleInsumoSelect = (item) => {
@@ -66,17 +63,13 @@ const BuscaInsumosScreen = () => {
             {insumoDetails.estoque.toLocaleString('pt-br') || "Não há esse produto no estoque."}
           </Text>
           <Text style={styles.detailsText}>
-            Unidade de Medida:{" "}
-            {insumoDetails.unidade || "Não há uma unidade de medida definida."}
-          </Text>
-          <Text style={styles.detailsText}>
             Preço Unitário: R${insumoDetails.preco.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0"}
           </Text>
           <Text style={styles.detailsText}>
             Descrição: {insumoDetails.descricao || "Não há descrição."}
           </Text>
           <Text style={styles.detailsText}>
-            Local Armazenado: {insumoDetails.local || "Não há descrição."}
+            Local Armazenado: {insumoDetails.nome_local || "Não há descrição."}
           </Text>
           <Text style={styles.detailsText}>
             Coluna: {insumoDetails.coluna || "Não há descrição."}

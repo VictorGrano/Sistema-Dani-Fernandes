@@ -5,6 +5,8 @@ const productController = require("../controllers/productController");
 router.get("/", productController.getAllProducts);
 router.get("/InfoProduto", productController.getInfoProduto);
 router.post("/Cadastrar", productController.getInfoProduto);
+router.put("/Atualizar", productController.updateProduct);
+router.delete("/:id", productController.deleteProduct);
 router.get("/Tipo", productController.getTipo);
 router.get("/Lotes", productController.getLotes);
 router.get("/Aromas", productController.getAromas);

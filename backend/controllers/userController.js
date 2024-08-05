@@ -164,6 +164,71 @@ exports.usuarios = (req, res) => {
   });
 };
 
+exports.updateUsuario = async (req, res) => {
+  const { nome, login, tipo, id, senha } = req.body;
+
+  // Verifica se o nome ou login já existem, exceto para o usuário atual
+  const q1 = "SELECT * FROM usuarios WHERE (nome = ? OR login = ?) AND id != ?";
+  connection.query(q1, [nome, login, id], async (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+    if (results.length > 0) {
+      res.status(409).json({
+        message: "Erro ao atualizar! Já existe o nome ou o login no sistema!",
+      });
+    } else {
+      try {
+        let q2;
+        let params;
+
+        // Se a senha for fornecida, encripta a senha e atualiza todos os campos
+        if (senha) {
+          const hashedSenha = await Encriptar(senha);
+          q2 = "UPDATE usuarios SET nome = ?, login = ?, senha = ?, tipo = ? WHERE id = ?";
+          params = [nome, login, hashedSenha, tipo, id];
+        } else {
+          // Caso contrário, atualiza apenas nome, login e tipo
+          q2 = "UPDATE usuarios SET nome = ?, login = ?, tipo = ? WHERE id = ?";
+          params = [nome, login, tipo, id];
+        }
+
+        connection.query(q2, params, (error, results) => {
+          if (error) {
+            console.error("Erro no servidor:", error);
+            res.status(500).json({ error: "Erro no servidor" });
+            return;
+          }
+          res.status(200).json({ message: "Usuário atualizado com sucesso!" });
+        });
+      } catch (error) {
+        console.error("Erro ao encriptar a senha:", error);
+        res.status(500).json({ error: "Erro ao encriptar a senha" });
+      }
+    }
+  });
+};
+
+exports.deleteUser = (req, res) => {
+  const { id } = req.params;
+
+  const q = "DELETE FROM usuarios WHERE id = ?";
+  connection.query(q, [id], (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+    if (results.affectedRows > 0) {
+      res.status(200).json({ message: "Usuário deletado com sucesso!" });
+    } else {
+      res.status(404).json({ error: "Usuário não encontrado" });
+    }
+  });
+};
+
 exports.cadastraUsuario = async (req, res) => {
   const { nome, login, tipo, senha } = req.body;
   const q1 = "SELECT * FROM usuarios WHERE nome = ? OR login = ?";

@@ -2,7 +2,25 @@ const connection = require("../database");
 
 //Seleciona Todos os Produtos
 exports.getAllProducts = (req, res) => {
-  connection.query("SELECT * FROM produtos", (error, results) => {
+  const query = `
+    SELECT 
+      p.id, p.nome, p.descricao, p.estoque_total, p.preco, p.unidade, p.categoria_id, p.cod_aroma,
+      a.nome_aroma, 
+      t.nome_categoria, t.sigla, 
+      COALESCE(SUM(l.quantidade_caixas), 0) AS total_caixas
+    FROM 
+      produtos p
+    LEFT JOIN 
+      aromas a ON p.cod_aroma = a.cod_aroma
+    LEFT JOIN 
+      tipo_produto t ON p.categoria_id = t.id
+    LEFT JOIN 
+      lotes l ON p.id = l.produto_id
+    GROUP BY 
+      p.id, a.nome_aroma, t.nome_categoria, t.sigla
+  `;
+
+  connection.query(query, (error, results) => {
     if (error) throw error;
     res.json(results);
   });
@@ -48,6 +66,60 @@ exports.getInfoProduto = (req, res) => {
           });
         });
       });
+    } else {
+      res.status(404).json({ error: "Produto não encontrado" });
+    }
+  });
+};
+
+exports.updateProduct = async (req, res) => {
+  const { id, nome, descricao, estoque_total, preco, unidade, tipo, cod_aroma } = req.body;
+
+  // Verifica se o nome do produto já existe, exceto para o produto atual
+  const q1 = "SELECT * FROM produtos WHERE nome = ? AND id != ?";
+  connection.query(q1, [nome, id], async (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+    if (results.length > 0) {
+      res.status(409).json({
+        message: "Erro ao atualizar! Já existe um produto com este nome no sistema!",
+      });
+    } else {
+      try {
+        const q2 = "UPDATE produtos SET nome = ?, descricao = ?, categoria_id = ?,estoque_total = ?, preco = ?, unidade = ?, cod_aroma = ? WHERE id = ?";
+        const params = [nome, descricao, tipo, estoque_total, preco, unidade, cod_aroma, id];
+
+        connection.query(q2, params, (error, results) => {
+          if (error) {
+            console.error("Erro no servidor:", error);
+            res.status(500).json({ error: "Erro no servidor" });
+            return;
+          }
+          res.status(200).json({ message: "Produto atualizado com sucesso!" });
+        });
+      } catch (error) {
+        console.error("Erro ao atualizar o produto:", error);
+        res.status(500).json({ error: "Erro ao atualizar o produto" });
+      }
+    }
+  });
+};
+
+exports.deleteProduct = (req, res) => {
+  const { id } = req.params;
+
+  const query = "DELETE FROM produtos WHERE id = ?";
+  connection.query(query, [id], (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+    if (results.affectedRows > 0) {
+      res.status(200).json({ message: "Produto deletado com sucesso!" });
     } else {
       res.status(404).json({ error: "Produto não encontrado" });
     }

@@ -9,7 +9,7 @@ const GerenciarScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Produtos")}>
           <FontAwesome5 name="cart-plus" size={24} color="white" />
           <Text style={styles.buttonText}>Produtos</Text>
         </TouchableOpacity>

@@ -14,102 +14,102 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 
-const InsumosScreen = () => {
+const ProdutosScreen = () => {
   const navigation = useNavigation();
-  const [locais, setLocais] = useState([]);
+  const [aromas, setAromas] = useState([]);
   const [tipos, setTipos] = useState([]);
-  const [selectedLocal, setSelectedLocal] = useState(null);
+  const [selectedAroma, setSelectedAroma] = useState(null);
   const [selectedTipo, setSelectedTipo] = useState(null);
   const [nome, setNome] = useState(null);
   const [descricao, setDescricao] = useState(null);
   const [estoque, setEstoque] = useState(null);
   const [preco, setPreco] = useState(null);
-  const [coluna, setColuna] = useState(null);
-  const [insumos, setInsumos] = useState([]);
+  const [unidade, setUnidade] = useState(null);
+  const [produtos, setProdutos] = useState([]);
   const [search, setSearch] = useState("");
-  const [filteredInsumos, setFilteredInsumos] = useState([]);
+  const [filteredProdutos, setFilteredProdutos] = useState([]);
   const [cadastrar, setCadastrar] = useState(false);
   const [info, setInfo] = useState(true);
   const [modal, setModal] = useState(false);
-  const [insumoSelecionado, setInsumoSelecionado] = useState(null);
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.177:3000/estoque/Locais")
+      .get("http://192.168.1.177:3000/produtos/Aromas/")
       .then((response) => {
-        const locaisData = response.data.map((local) => ({
-          label: local.nome_local,
-          value: local.id,
+        const aromasData = response.data.map((aroma) => ({
+          label: aroma.nome_aroma,
+          value: aroma.cod_aroma,
         }));
-        setLocais(locaisData);
+        setAromas(aromasData);
       })
       .catch((error) => {
-        console.error("Error fetching locations:", error);
+        console.error("Error fetching aromas:", error);
+      });
+    axios
+      .get("http://192.168.1.177:3000/produtos/Tipo")
+      .then((response) => {
+        const tipoData = response.data.map((aroma) => ({
+          label: aroma.nome_categoria,
+          value: aroma.id,
+        }));
+        setTipos(tipoData);
+      })
+      .catch((error) => {
+        console.error("Error fetching aromas:", error);
       });
 
     axios
-      .get("http://192.168.1.177:3000/insumos/TiposInsumos")
+      .get("http://192.168.1.177:3000/produtos/")
       .then((response) => {
-        const tiposData = response.data.map((tipo) => ({
-          label: tipo.nome,
-          value: tipo.id,
+        const produtosData = response.data.map((produto) => ({
+          id: produto.id,
+          nome: produto.nome,
+          descricao: produto.descricao,
+          estoque_total: produto.estoque_total,
+          preco: produto.preco,
+          unidade: produto.unidade,
+          nome_aroma: produto.nome_aroma,
+          categoria: produto.nome_categoria,
+          categoria_id: produto.categoria_id,
+          cod_aroma: produto.cod_aroma,
         }));
-        setTipos(tiposData);
-      })
-      .catch((error) => {
-        console.error("Error fetching types:", error);
-      });
-
-    axios
-      .get("http://192.168.1.177:3000/insumos/")
-      .then((response) => {
-        const insumosData = response.data.map((insumo) => ({
-          id: insumo.id,
-          nome: insumo.nome,
-          descricao: insumo.descricao,
-          estoque: insumo.estoque,
-          preco: insumo.preco,
-          tipo: insumo.tipo,
-          nome_local: insumo.local,
-          local_armazenado: insumo.local_armazenado,
-          coluna: insumo.coluna,
-        }));
-        setInsumos(insumosData);
+        setProdutos(produtosData);
         setInfo(false);
-        setFilteredInsumos(insumosData);
+        setFilteredProdutos(produtosData);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("Error fetching produtos:", error);
         setInfo(true);
       });
   }, []);
 
   useEffect(() => {
-    setFilteredInsumos(
-      insumos.filter((insumo) =>
-        insumo.nome.toLowerCase().includes(search.toLowerCase())
+    setFilteredProdutos(
+      produtos.filter((produto) =>
+        produto.nome.toLowerCase().includes(search.toLowerCase())
       )
     );
-  }, [search, insumos]);
+  }, [search, produtos]);
 
   const handleRegistro = async () => {
     try {
       const dados = {
         nome: nome,
         descricao: descricao,
-        estoque: estoque,
+        estoque_total: estoque,
         preco: preco,
-        tipo_id: selectedTipo,
-        local_armazenado: selectedLocal,
-        coluna: coluna,
+        unidade: unidade,
+        tipo: selectedTipo,
+        aroma_id: selectedAroma,
       };
-      console.log(dados);
       const response = await axios.post(
-        "http://192.168.1.177:3000/insumos/CadastroInsumo",
+        "http://192.168.1.177:3000/produtos/CadastroProduto",
         dados
       );
 
       if (response.status == "201") {
-        Alert.alert("Sucesso", "Insumo cadastrado com sucesso!");
+        Alert.alert("Sucesso", "Produto cadastrado com sucesso!");
         navigation.goBack();
       } else {
         Alert.alert("Erro", response.data.message);
@@ -120,41 +120,43 @@ const InsumosScreen = () => {
       console.log(error);
       Alert.alert(
         "Erro",
-        "Ocorreu um erro ao registrar o insumo. Tente novamente mais tarde."
+        "Ocorreu um erro ao registrar o produto. Tente novamente mais tarde."
       );
     }
   };
 
+
   const handleEdicao = async () => {
     try {
       const dados = {
-        id: insumoSelecionado.id,
+        id: produtoSelecionado.id,
         nome: nome,
         descricao: descricao,
-        estoque: estoque,
+        estoque_total: estoque,
         preco: preco,
-        tipo_id: selectedTipo,
-        local_armazenado: selectedLocal,
-        coluna: coluna,
+        unidade: unidade,
+        tipo: selectedTipo,
+        cod_aroma: selectedAroma,
       };
       const response = await axios.put(
-        `http://192.168.1.177:3000/insumos/Atualizar`,
+        `http://192.168.1.177:3000/produtos/Atualizar`,
         dados
       );
 
-      if (response.data.message === "Insumo atualizado com sucesso!") {
+      if (response.data.message === "Produto atualizado com sucesso!") {
         Alert.alert("Sucesso", response.data.message);
         setModal(false);
         setNome(null);
         setDescricao(null);
         setEstoque(null);
         setPreco(null);
-        setColuna(null);
-        // Atualizar a lista de insumos
-        const updatedInsumos = insumos.map((insumo) =>
-          insumo.id === insumoSelecionado.id ? { ...insumo, ...dados } : insumo
+        setUnidade(null);
+        setSelectedAroma(null);
+        // Atualizar a lista de produtos
+        const updatedProdutos = produtos.map((produto) =>
+          produto.id === produtoSelecionado.id ? { ...produto, ...dados } : produto
         );
-        setInsumos(updatedInsumos);
+        setProdutos(updatedProdutos);
       } else {
         Alert.alert("Erro", response.data.message);
       }
@@ -162,32 +164,37 @@ const InsumosScreen = () => {
       console.log(error);
       Alert.alert(
         "Erro",
-        "Ocorreu um erro ao atualizar o insumo. Tente novamente mais tarde."
+        "Ocorreu um erro ao atualizar o produto. Tente novamente mais tarde."
       );
     }
   };
 
   const handleDelete = async (item) => {
-    console.log(item.id);
-    axios.delete(`http://192.168.1.177:3000/insumos/${item.id}:id`).then((response) => {
-      if (response.status == "200") {
-        Alert.alert("Sucesso!", "Insumo deletado com sucesso!")
-      }
-      else {
-        Alert.alert("Erro!", "Erro ao deletar!")
-      }
-    })
-  }
+    axios
+      .delete(`http://192.168.1.177:3000/produtos/${item.id}`)
+      .then((response) => {
+        if (response.status == "200") {
+          Alert.alert("Sucesso!", "Produto deletado com sucesso!");
+          setProdutos(produtos.filter((produto) => produto.id !== item.id));
+        } else {
+          Alert.alert("Erro!", "Erro ao deletar!");
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting produto:", error);
+        Alert.alert("Erro!", "Erro ao deletar!");
+      });
+  };
 
-  const abrirModalEdicao = (insumo) => {
-    setInsumoSelecionado(insumo);
-    setNome(insumo.nome);
-    setDescricao(insumo.descricao);
-    setEstoque(insumo.estoque);
-    setPreco(insumo.preco);
-    setSelectedTipo(insumo.tipo_id);
-    setSelectedLocal(insumo.local_armazenado);
-    setColuna(insumo.coluna);
+  const abrirModalEdicao = (produto) => {
+    setProdutoSelecionado(produto);
+    setNome(produto.nome);
+    setDescricao(produto.descricao);
+    setEstoque(produto.estoque_total);
+    setPreco(produto.preco);
+    setUnidade(produto.unidade);
+    setSelectedAroma(produto.cod_aroma);
+    setSelectedTipo(produto.categoria_id);
     setModal(true);
   };
 
@@ -196,30 +203,31 @@ const InsumosScreen = () => {
     setDescricao(null);
     setEstoque(null);
     setPreco(null);
-    setSelectedTipo(null);
-    setSelectedLocal(null);
-    setColuna(null);
+    setUnidade(null);
+    setSelectedAroma(null);
     setModal(false);
   };
 
   const renderItem = ({ item }) => {
     return (
       <View style={styles.itemContainer}>
-        <View>
+        <View style={styles.itemDetails}>
           <Text style={styles.text}>Nome: {item.nome}</Text>
-          <Text style={styles.text}>Descrição: {item.descricao}</Text>
-          <Text style={styles.text}>Tipo: {item.tipo}</Text>
-          <Text style={styles.text}>Estoque: {item.estoque}</Text>
+          <Text style={styles.text}>Descrição: {item.descricao || "Não possui"}</Text>
+          <Text style={styles.text}>Categoria: {item.categoria}</Text>
+          <Text style={styles.text}>Aroma: {item.nome_aroma}</Text>
+          <Text style={styles.text}>Estoque: {item.estoque_total}</Text>
           <Text style={styles.text}>Preço: R${item.preco}</Text>
-          <Text style={styles.text}>Local: {item.nome_local}</Text>
-          <Text style={styles.text}>Coluna: {item.coluna}</Text>
+          <Text style={styles.text}>Unidade: {item.unidade}</Text>
         </View>
-        <TouchableOpacity onPress={() => abrirModalEdicao(item)}>
-          <Text style={styles.editButton}>Editar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDelete(item)}>
-          <Text style={styles.deleteButton}>Excluir</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={() => abrirModalEdicao(item)}>
+            <Text style={styles.editButton}>Editar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleDelete(item)}>
+            <Text style={styles.deleteButton}>Excluir</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   };
@@ -233,27 +241,42 @@ const InsumosScreen = () => {
               style={styles.button}
               onPress={() => setCadastrar(false)}
             >
-              <Text style={styles.buttonText}>Ver lista de insumos</Text>
+              <Text style={styles.buttonText}>Ver lista de produtos</Text>
             </TouchableOpacity>
             <View style={styles.cardContainer}>
-              <Text style={styles.subheader}>Nome do insumo:</Text>
+              <Text style={styles.subheader}>Nome do produto:</Text>
               <TextInput
                 style={styles.input}
                 editable={true}
-                placeholder="Digite o nome do insumo aqui"
+                placeholder="Digite o nome do produto aqui"
                 onChangeText={setNome}
                 value={nome}
               />
             </View>
             <View style={styles.cardContainer}>
-              <Text style={styles.subheader}>Tipo do insumo:</Text>
+              <Text style={styles.subheader}>Aroma do produto:</Text>
+              <Dropdown
+                style={styles.dropdown}
+                data={aromas}
+                search={true}
+                labelField="label"
+                valueField="value"
+                placeholder="Selecione o aroma do produto"
+                value={selectedAroma}
+                onChange={(item) => {
+                  setSelectedAroma(item.value);
+                }}
+              />
+              </View>
+              <View style={styles.cardContainer}>
+              <Text style={styles.subheader}>Tipo do produto:</Text>
               <Dropdown
                 style={styles.dropdown}
                 data={tipos}
                 search={true}
                 labelField="label"
                 valueField="value"
-                placeholder="Selecione o tipo de insumo"
+                placeholder="Selecione o tipo do produto"
                 value={selectedTipo}
                 onChange={(item) => {
                   setSelectedTipo(item.value);
@@ -293,32 +316,17 @@ const InsumosScreen = () => {
               />
             </View>
             <View style={styles.cardContainer}>
-              <Text style={styles.subheader}>Local armazenado:</Text>
-              <Dropdown
-                style={styles.dropdown}
-                data={locais}
-                search={true}
-                labelField="label"
-                valueField="value"
-                placeholder="Selecione um local para armazenar"
-                value={selectedLocal}
-                onChange={(item) => {
-                  setSelectedLocal(item.value);
-                }}
-              />
-            </View>
-            <View style={styles.cardContainer}>
-              <Text style={styles.subheader}>Coluna:</Text>
+              <Text style={styles.subheader}>Unidade de medida:</Text>
               <TextInput
                 style={styles.input}
                 editable={true}
-                placeholder="Digite a coluna aqui"
-                onChangeText={setColuna}
-                value={coluna}
+                placeholder="Digite a unidade de medida aqui"
+                onChangeText={setUnidade}
+                value={unidade}
               />
             </View>
             <TouchableOpacity style={styles.button} onPress={handleRegistro}>
-              <Text style={styles.buttonText}>Cadastrar Insumo</Text>
+              <Text style={styles.buttonText}>Cadastrar Produto</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -326,13 +334,13 @@ const InsumosScreen = () => {
         <>
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar insumo"
+            placeholder="Buscar produto"
             value={search}
             onChangeText={setSearch}
           />
-          {info && <Text>Não há insumos para serem exibidos!</Text>}
+          {info && <Text>Não há produtos para serem exibidos!</Text>}
           <FlatList
-            data={filteredInsumos}
+            data={filteredProdutos}
             renderItem={renderItem}
             keyExtractor={(item, index) => index.toString()}
           />
@@ -340,7 +348,7 @@ const InsumosScreen = () => {
             style={styles.button}
             onPress={() => setCadastrar(true)}
           >
-            <Text style={styles.buttonText}>Cadastrar Insumo</Text>
+            <Text style={styles.buttonText}>Cadastrar Produto</Text>
           </TouchableOpacity>
         </>
       )}
@@ -348,24 +356,37 @@ const InsumosScreen = () => {
       <Modal visible={modal} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
-            <Text style={styles.modalHeader}>Editar Insumo</Text>
+            <Text style={styles.modalHeader}>Editar Produto</Text>
             <ScrollView>
-              <Text style={styles.subheader}>Nome do insumo:</Text>
+              <Text style={styles.subheader}>Nome do produto:</Text>
               <TextInput
                 style={styles.input}
                 editable={true}
-                placeholder="Digite o nome do insumo aqui"
+                placeholder="Digite o nome do produto aqui"
                 onChangeText={setNome}
                 value={nome}
               />
-              <Text style={styles.subheader}>Tipo do insumo:</Text>
+              <Text style={styles.subheader}>Aroma do produto:</Text>
+              <Dropdown
+                style={styles.dropdown}
+                data={aromas}
+                search={true}
+                labelField="label"
+                valueField="value"
+                placeholder="Selecione o aroma do produto"
+                value={selectedAroma}
+                onChange={(item) => {
+                  setSelectedAroma(item.value);
+                }}
+              />
+              <Text style={styles.subheader}>Tipo do produto:</Text>
               <Dropdown
                 style={styles.dropdown}
                 data={tipos}
                 search={true}
                 labelField="label"
                 valueField="value"
-                placeholder="Selecione o tipo de insumo"
+                placeholder="Selecione o tipo do produto"
                 value={selectedTipo}
                 onChange={(item) => {
                   setSelectedTipo(item.value);
@@ -397,26 +418,13 @@ const InsumosScreen = () => {
                 onChangeText={setPreco}
                 value={preco}
               />
-              <Text style={styles.subheader}>Local armazenado:</Text>
-              <Dropdown
-                style={styles.dropdown}
-                data={locais}
-                search={true}
-                labelField="label"
-                valueField="value"
-                placeholder="Selecione um local para armazenar"
-                value={selectedLocal}
-                onChange={(item) => {
-                  setSelectedLocal(item.value);
-                }}
-              />
-              <Text style={styles.subheader}>Coluna:</Text>
+              <Text style={styles.subheader}>Unidade de medida:</Text>
               <TextInput
                 style={styles.input}
                 editable={true}
-                placeholder="Digite a coluna aqui"
-                onChangeText={setColuna}
-                value={coluna}
+                placeholder="Digite a unidade de medida aqui"
+                onChangeText={setUnidade}
+                value={unidade}
               />
               <TouchableOpacity
                 style={styles.modalButton}
@@ -523,6 +531,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
+  itemDetails: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
   cardContainer: {
     backgroundColor: "#fff",
     padding: 15,
@@ -547,7 +562,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalView: {
-    width: "90%",
+    width: "80%",
     backgroundColor: "white",
     borderRadius: 10,
     alignItems: "center",
@@ -590,6 +605,7 @@ const styles = StyleSheet.create({
     color: "#007BFF",
     fontSize: 16,
     fontWeight: "bold",
+    marginRight: 10,
   },
   deleteButton: {
     color: "red",
@@ -598,4 +614,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InsumosScreen;
+export default ProdutosScreen;

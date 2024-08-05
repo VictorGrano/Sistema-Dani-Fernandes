@@ -19,6 +19,7 @@ import BuscaInsumosScreen from './screens/BuscaInsumo';
 import GerenciarScreen from './screens/MenuCadastro';
 import UsuariosScreen from './screens/Usuarios';
 import InsumosScreen from './screens/Insumos';
+import ProdutosScreen from './screens/Produtos';
 
 const Stack = createStackNavigator();
 
@@ -142,6 +143,11 @@ const App = () => {
           name="Insumos"
           component={InsumosScreen}
           options={{ title: 'Insumos' }}
+        />
+        <Stack.Screen
+          name="Produtos"
+          component={ProdutosScreen}
+          options={{ title: 'Produtos' }}
         />
         <Stack.Screen
           name="Historico"
