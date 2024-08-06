@@ -128,7 +128,7 @@ exports.deleteProduct = (req, res) => {
 
 exports.getLotes = (req, res) => {
   const { produto_id } = req.query;
-  const q = "SELECT * FROM lotes WHERE produto_id = ? AND quantidade > 0";
+  const q = "SELECT * FROM lotes WHERE produto_id = ? AND quantidade > 0 ORDER BY data_fabricacao";
 
   connection.query(q, [produto_id], (error, results) => {
     if (error) throw error;

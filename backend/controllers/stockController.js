@@ -1,11 +1,33 @@
 const connection = require("../database");
 
-const logChange = (iduser, usuario, tabela_alterada, tipo_mudanca, produto_id, lote, valor_inserido, valor_antigo, local_armazenado, coluna) => {
+const logChange = (
+  iduser,
+  usuario,
+  tabela_alterada,
+  tipo_mudanca,
+  produto_id,
+  lote,
+  valor_inserido,
+  valor_antigo,
+  local_armazenado,
+  coluna
+) => {
   const query = `
     INSERT INTO historico_mudancas 
     (id_usuario, usuario, tabela_alterada, tipo_mudanca, produto_id, lote, valor_movimentacao, valor_antigo, local_armazenado, coluna) 
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-  const params = [iduser, usuario, tabela_alterada, tipo_mudanca, produto_id, lote, valor_inserido, valor_antigo, local_armazenado, coluna];
+  const params = [
+    iduser,
+    usuario,
+    tabela_alterada,
+    tipo_mudanca,
+    produto_id,
+    lote,
+    valor_inserido,
+    valor_antigo,
+    local_armazenado,
+    coluna,
+  ];
 
   connection.query(query, params, (error, results) => {
     if (error) {
@@ -26,8 +48,132 @@ function validateDate(ddMMYYYY) {
   return `${year}-${month}-${day}`;
 }
 
+exports.getPrateleira = (req, res) => {
+  const q = `
+    SELECT 
+      lp.id, 
+      lp.produto_id, 
+      lp.lote_id, 
+      lp.quantidade, 
+      lp.concluido,
+      p.nome AS nome_produto,
+      l.nome_lote AS nome_lote
+    FROM 
+      lista_prateleira lp
+    JOIN 
+      produtos p ON lp.produto_id = p.id 
+    JOIN 
+      lotes l ON lp.lote_id = l.id;
+  `;
+  connection.query(q, (error, results) => {
+    if (error) {
+      console.error("Error executing query:", error);
+      res.status(500).json({ error: "Database query failed" });
+      return;
+    }
+    res.status(200).json(results);
+  });
+};
+
+exports.putPrateleira = (req, res) => {
+  const { id } = req.params;
+  const concluido = 'sim';
+
+  const updateQuery = `
+    UPDATE lista_prateleira 
+    SET concluido = ? 
+    WHERE id = ?`;
+
+  connection.query(updateQuery, [concluido, id], (error, results) => {
+    if (error) {
+      console.error("Error updating prateleira item:", error);
+      res.status(500).json({ error: "Database update failed" });
+      return;
+    }
+    res.status(200).json({ success: true });
+  });
+};
+
+exports.deletePrateleira = (req, res) => {
+  const { id } = req.params;
+
+  const deleteQuery = `
+    DELETE FROM lista_prateleira 
+    WHERE id = ?`;
+
+  connection.query(deleteQuery, [id], (error, results) => {
+    if (error) {
+      console.error("Error deleting prateleira item:", error);
+      res.status(500).json({ error: "Database delete failed" });
+      return;
+    }
+    res.status(200).json({ success: true });
+  });
+};
+
+exports.postPrateleira = (req, res) => {
+  const { produto_id, lote_id, quantidade } = req.body;
+
+  // Verifica se o produto já está na lista
+  const checkQuery =
+    "SELECT * FROM lista_prateleira WHERE produto_id = ? AND lote_id = ?";
+  connection.query(
+    checkQuery,
+    [produto_id, lote_id],
+    (checkError, checkResults) => {
+      if (checkError) {
+        console.error("Error executing query:", checkError);
+        res.status(500).json({ error: "Database query failed" });
+        return;
+      }
+
+      if (checkResults.length > 0) {
+        res.status(400).json({ error: "Produto já adicionado na lista" });
+        return;
+      }
+
+      // Se o produto não está na lista, insere o novo produto com concluido como false
+      const insertQuery =
+        "INSERT INTO lista_prateleira (produto_id, lote_id, quantidade, concluido) VALUES (?, ?, ?, ?)";
+      connection.query(
+        insertQuery,
+        [produto_id, lote_id, quantidade, false],
+        (insertError, insertResults) => {
+          if (insertError) {
+            console.error("Error executing query:", insertError);
+            res.status(500).json({ error: "Database query failed" });
+            return;
+          }
+
+          res.status(200).json({ success: true });
+        }
+      );
+    }
+  );
+};
+
+exports.putPrateleira = (req, res) => {
+  const { id } = req.params;
+  const { concluido } = req.body;
+
+  const updateQuery = `
+    UPDATE lista_prateleira 
+    SET concluido = ? 
+    WHERE id = ?`;
+
+  connection.query(updateQuery, [concluido, id], (error, results) => {
+    if (error) {
+      console.error("Error updating prateleira item:", error);
+      res.status(500).json({ error: "Database update failed" });
+      return;
+    }
+    res.status(200).json({ success: true });
+  });
+};
+
 exports.getStockQuantity = (req, res) => {
-  const q = "SELECT id, nome_local, estoque_total, estoque_utilizado, estoque_total - estoque_utilizado AS estoque_livre FROM locais_armazenamento WHERE id = ?";
+  const q =
+    "SELECT id, nome_local, estoque_total, estoque_utilizado, estoque_total - estoque_utilizado AS estoque_livre FROM locais_armazenamento WHERE id = ?";
   const { id } = req.query;
 
   connection.query(q, [parseInt(id)], (error, results) => {
@@ -51,7 +197,7 @@ exports.postEntrada = (req, res) => {
     coluna,
     quantidade_caixas,
     user,
-    iduser
+    iduser,
   } = req.body;
 
   if (
@@ -79,7 +225,8 @@ exports.postEntrada = (req, res) => {
   console.log("Dados recebidos:", req.body);
   console.log("Datas convertidas:", { validadeDate, fabricacaoDate });
 
-  const checkQuery = "SELECT id, quantidade, quantidade_caixas, local_armazenado_id, coluna FROM lotes WHERE nome_lote = ? AND produto_id = ?";
+  const checkQuery =
+    "SELECT id, quantidade, quantidade_caixas, local_armazenado_id, coluna FROM lotes WHERE nome_lote = ? AND produto_id = ?";
 
   connection.query(checkQuery, [lote, id], (error, results) => {
     if (error) {
@@ -90,41 +237,59 @@ exports.postEntrada = (req, res) => {
 
     if (results.length > 0) {
       const loteResult = results[0];
-      const updateQuery = "UPDATE lotes SET quantidade = quantidade + ?, local_armazenado_id = ?, coluna = ?, quantidade_caixas = quantidade_caixas + ? WHERE id = ?";
+      const updateQuery =
+        "UPDATE lotes SET quantidade = quantidade + ?, local_armazenado_id = ?, coluna = ?, quantidade_caixas = quantidade_caixas + ? WHERE id = ?";
       connection.query(
         updateQuery,
-        [quantidade, localArmazenado, coluna, quantidade_caixas, parseInt(loteResult.id)],
+        [
+          quantidade,
+          localArmazenado,
+          coluna,
+          quantidade_caixas,
+          parseInt(loteResult.id),
+        ],
         (updateError) => {
           if (updateError) {
             console.error("Erro ao atualizar lote:", updateError);
             res.status(500).json({ error: "Erro ao atualizar lote" });
             throw updateError;
           }
-          connection.query('UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado + ? WHERE id = ?', [quantidade_caixas, localArmazenado], (updateStockError) => {
-            if (updateStockError) {
-              console.error("Erro ao atualizar estoque:", updateStockError);
-              res.status(500).json({ error: "Erro ao atualizar estoque" });
-              throw updateStockError;
+          connection.query(
+            "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado + ? WHERE id = ?",
+            [quantidade_caixas, localArmazenado],
+            (updateStockError) => {
+              if (updateStockError) {
+                console.error("Erro ao atualizar estoque:", updateStockError);
+                res.status(500).json({ error: "Erro ao atualizar estoque" });
+                throw updateStockError;
+              }
+              // Registro da mudança
+              logChange(
+                iduser,
+                user,
+                "lotes",
+                "entrada",
+                id,
+                lote,
+                JSON.stringify({
+                  quantidade: quantidade,
+                  quantidade_caixas: quantidade_caixas,
+                }),
+                JSON.stringify({
+                  quantidade: loteResult.quantidade,
+                  quantidade_caixas: loteResult.quantidade_caixas,
+                }),
+                localArmazenado,
+                coluna
+              );
+              res.json({ message: "Lote atualizado com sucesso" });
             }
-            // Registro da mudança
-            logChange(
-              iduser,
-              user,
-              'lotes',
-              'entrada',
-              id,
-              lote,
-              JSON.stringify({ quantidade: quantidade, quantidade_caixas: quantidade_caixas}),
-              JSON.stringify({ quantidade: loteResult.quantidade, quantidade_caixas: loteResult.quantidade_caixas }),
-              localArmazenado,
-              coluna
-            );
-            res.json({ message: "Lote atualizado com sucesso" });
-          });
+          );
         }
       );
     } else {
-      const insertQuery = "INSERT INTO lotes (produto_id, nome_lote, quantidade, data_entrada, local_armazenado_id, data_validade, data_fabricacao, coluna, quantidade_caixas) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      const insertQuery =
+        "INSERT INTO lotes (produto_id, nome_lote, quantidade, data_entrada, local_armazenado_id, data_validade, data_fabricacao, coluna, quantidade_caixas) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
       connection.query(
         insertQuery,
         [
@@ -136,7 +301,7 @@ exports.postEntrada = (req, res) => {
           validadeDate,
           fabricacaoDate,
           coluna,
-          quantidade_caixas
+          quantidade_caixas,
         ],
         (insertError) => {
           if (insertError) {
@@ -144,27 +309,31 @@ exports.postEntrada = (req, res) => {
             res.status(500).json({ error: "Erro ao inserir lote" });
             throw insertError;
           }
-          connection.query('UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado + ? WHERE id = ?', [quantidade_caixas, localArmazenado], (updateStockError) => {
-            if (updateStockError) {
-              console.error("Erro ao atualizar estoque:", updateStockError);
-              res.status(500).json({ error: "Erro ao atualizar estoque" });
-              throw updateStockError;
+          connection.query(
+            "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado + ? WHERE id = ?",
+            [quantidade_caixas, localArmazenado],
+            (updateStockError) => {
+              if (updateStockError) {
+                console.error("Erro ao atualizar estoque:", updateStockError);
+                res.status(500).json({ error: "Erro ao atualizar estoque" });
+                throw updateStockError;
+              }
+              // Registro da mudança
+              logChange(
+                iduser,
+                user,
+                "lotes",
+                "entrada",
+                id,
+                lote,
+                JSON.stringify({ quantidade, quantidade_caixas }),
+                0,
+                localArmazenado,
+                coluna
+              );
+              res.json({ message: "Lote inserido com sucesso" });
             }
-            // Registro da mudança
-            logChange(
-              iduser,
-              user,
-              'lotes',
-              'entrada',
-              id,
-              lote,
-              JSON.stringify({ quantidade, quantidade_caixas }),
-              0,
-              localArmazenado,
-              coluna
-            );
-            res.json({ message: "Lote inserido com sucesso" });
-          });
+          );
         }
       );
     }
@@ -181,7 +350,8 @@ exports.postSaida = (req, res) => {
 
   console.log("Dados recebidos:", req.body);
 
-  const checkQuery = "SELECT id, quantidade, local_armazenado_id, coluna FROM lotes WHERE nome_lote = ? AND produto_id = ?";
+  const checkQuery =
+    "SELECT id, quantidade, local_armazenado_id, coluna FROM lotes WHERE nome_lote = ? AND produto_id = ?";
 
   connection.query(checkQuery, [lote, id], (error, results) => {
     if (error) {
@@ -198,7 +368,8 @@ exports.postSaida = (req, res) => {
           .json({ error: "Quantidade insuficiente no lote" });
       }
 
-      const updateQuery = "UPDATE lotes SET quantidade = quantidade - ?, quantidade_caixas = quantidade_caixas - ? WHERE id = ?";
+      const updateQuery =
+        "UPDATE lotes SET quantidade = quantidade - ?, quantidade_caixas = quantidade_caixas - ? WHERE id = ?";
       connection.query(
         updateQuery,
         [quantidade, quantidade_caixas, parseInt(loteResult.id)],
@@ -208,27 +379,37 @@ exports.postSaida = (req, res) => {
             res.status(500).json({ error: "Erro ao atualizar lote" });
             throw updateError;
           }
-          connection.query('UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado - ? WHERE id = ?', [quantidade_caixas, loteResult.local_armazenado_id], (updateStockError) => {
-            if (updateStockError) {
-              console.error("Erro ao atualizar estoque:", updateStockError);
-              res.status(500).json({ error: "Erro ao atualizar estoque" });
-              throw updateStockError;
+          connection.query(
+            "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado - ? WHERE id = ?",
+            [quantidade_caixas, loteResult.local_armazenado_id],
+            (updateStockError) => {
+              if (updateStockError) {
+                console.error("Erro ao atualizar estoque:", updateStockError);
+                res.status(500).json({ error: "Erro ao atualizar estoque" });
+                throw updateStockError;
+              }
+              // Registro da mudança
+              logChange(
+                iduser,
+                user,
+                "lotes",
+                "saída",
+                id,
+                lote,
+                JSON.stringify({
+                  quantidade: quantidade,
+                  quantidade_caixas: quantidade_caixas,
+                }),
+                JSON.stringify({
+                  quantidade: loteResult.quantidade,
+                  quantidade_caixas: loteResult.quantidade_caixas,
+                }),
+                loteResult.local_armazenado_id,
+                loteResult.coluna
+              );
+              res.json({ message: "Lote atualizado com sucesso" });
             }
-            // Registro da mudança
-            logChange(
-              iduser,
-              user,
-              'lotes',
-              'saída',
-              id,
-              lote,
-              JSON.stringify({ quantidade: quantidade, quantidade_caixas: quantidade_caixas }),
-              JSON.stringify({ quantidade: loteResult.quantidade, quantidade_caixas: loteResult.quantidade_caixas }),
-              loteResult.local_armazenado_id,
-              loteResult.coluna
-            );
-            res.json({ message: "Lote atualizado com sucesso" });
-          });
+          );
         }
       );
     } else {

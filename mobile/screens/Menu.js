@@ -258,6 +258,13 @@ const MenuScreen = () => {
             <FontAwesome5 name="download" size={24} color="white" />
             <Text style={styles.buttonText}>Registrar Saída</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Lista Prateleira")}
+          >
+            <FontAwesome5 name="list" size={24} color="white" />
+            <Text style={styles.buttonText}>Lista Prateleira</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleLogout}>
             <FontAwesome5 name="sign-out-alt" size={24} color="white" />
             <Text style={styles.buttonText}>Logout</Text>

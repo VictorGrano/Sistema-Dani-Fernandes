@@ -20,6 +20,7 @@ import GerenciarScreen from './screens/MenuCadastro';
 import UsuariosScreen from './screens/Usuarios';
 import InsumosScreen from './screens/Insumos';
 import ProdutosScreen from './screens/Produtos';
+import ListaPrateleiraScreen from './screens/ListaPrateleira';
 
 const Stack = createStackNavigator();
 
@@ -128,6 +129,11 @@ const App = () => {
           name="Escanear"
           component={EscanearScreen}
           options={{ title: 'Escanear QR Code' }}
+        />
+        <Stack.Screen
+          name="Lista Prateleira"
+          component={ListaPrateleiraScreen}
+          options={{ title: 'Lista de Item Prateleira' }}
         />
         <Stack.Screen
           name="Gerenciar"

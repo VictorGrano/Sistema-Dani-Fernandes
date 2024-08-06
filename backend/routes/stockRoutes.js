@@ -4,9 +4,11 @@ const stockController = require("../controllers/stockController");
 
 router.get("/QuantidadeEstoque", stockController.getStockQuantity);
 router.get("/Locais", stockController.getLocais);
+router.get("/ListaPrateleira", stockController.getPrateleira);
+router.put("/ListaPrateleira/Concluido/:id", stockController.putPrateleira);
+router.delete("/ListaPrateleira/:id", stockController.deletePrateleira);
+router.post("/AddPrateleira", stockController.postPrateleira);
 router.post("/Entrada", stockController.postEntrada);
 router.post("/Saida", stockController.postSaida);
-
-// Adicione outras rotas relacionadas a estoque aqui
 
 module.exports = router;
