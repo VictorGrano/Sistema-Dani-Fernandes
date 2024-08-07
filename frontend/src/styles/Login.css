@@ -1,0 +1,40 @@
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: hsl(218deg 50% 91%);
+	height: 100vh;
+}
+
+h1 {
+    color: #FFFFFF;
+    text-align: center;
+}
+
+input {
+        outline: none;
+        border: none;
+        &::placeholder {
+            color: hsl(0deg 0% 0%);
+            font-size: 0.9em;
+        }
+}
+
+label {
+    font-weight: bold;
+    font-size: 20px;
+    padding: 10px;
+    color: #FFFFFF;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.Card {
+    border-radius: 50px;
+    border-color: #222222;
+    border-width: 2;
+    box-shadow: #222222;
+    background-color: #222222;
+    padding: 50px;
+    text-align: center;
+}
