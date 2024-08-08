@@ -27,7 +27,7 @@ const ListaPrateleiraScreen = () => {
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.177:3000/produtos/")
+      .get("http://191.235.243.175/produtos/")
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -45,7 +45,7 @@ const ListaPrateleiraScreen = () => {
 
   const fetchListaPrateleira = () => {
     axios
-      .get("http://192.168.1.177:3000/estoque/ListaPrateleira")
+      .get("http://191.235.243.175/estoque/ListaPrateleira")
       .then((response) => {
         setListaPrateleira(response.data);
       })
@@ -57,7 +57,7 @@ const ListaPrateleiraScreen = () => {
   const handleProductSelect = (item) => {
     setSelectedProduct(item.value);
     axios
-      .get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${item.value}`)
+      .get(`http://191.235.243.175/produtos/Lotes?produto_id=${item.value}`)
       .then((response) => {
         if (response.data.length === 0) {
           setProductNotFound(true);
@@ -113,7 +113,7 @@ const ListaPrateleiraScreen = () => {
               try {
                 for (const dados of lotesUsados) {
                   await axios.post(
-                    "http://192.168.1.177:3000/estoque/AddPrateleira",
+                    "http://191.235.243.175/estoque/AddPrateleira",
                     { ...dados, concluido: 0 }
                   );
                 }
@@ -137,7 +137,7 @@ const ListaPrateleiraScreen = () => {
       try {
         for (const dados of lotesUsados) {
           await axios.post(
-            "http://192.168.1.177:3000/estoque/AddPrateleira",
+            "http://191.235.243.175/estoque/AddPrateleira",
             { ...dados, concluido: 0 }
           );
         }
@@ -159,7 +159,7 @@ const ListaPrateleiraScreen = () => {
 
   const handleExcluir = (itemId) => {
     axios
-      .delete(`http://192.168.1.177:3000/estoque/ListaPrateleira/${itemId}`)
+      .delete(`http://191.235.243.175/estoque/ListaPrateleira/${itemId}`)
       .then(() => {
         Alert.alert("Sucesso!", "Produto removido da lista!");
         fetchListaPrateleira(); // Refresh the list
@@ -171,7 +171,7 @@ const ListaPrateleiraScreen = () => {
 
   const handleConfere = (itemId) => {
     axios
-      .put(`http://192.168.1.177:3000/estoque/ListaPrateleira/Concluido/${itemId}`, { concluido: true })
+      .put(`http://191.235.243.175/estoque/ListaPrateleira/Concluido/${itemId}`, { concluido: true })
       .then(() => {
         Alert.alert("Sucesso!", "Produto marcado como concluído!");
         fetchListaPrateleira(); // Refresh the list

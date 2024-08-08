@@ -18,7 +18,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.victorgrano.AppDaniFernandes"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,6 +35,11 @@
           "cameraPermission": "Permita $(PRODUCT_NAME) Acessar sua câmera"
         }
       ]
-    ]
-  }  
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e6eb3a08-b280-4dee-a7df-8826c666869f"
+      }
+    }
+  }
 }

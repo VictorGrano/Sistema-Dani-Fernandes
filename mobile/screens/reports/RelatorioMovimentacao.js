@@ -9,10 +9,9 @@ import {
   Alert,
 } from "react-native";
 import axios from "axios";
-import { format, parseISO } from "date-fns";
+import { format, parse } from "date-fns";
 import { Dropdown } from "react-native-element-dropdown";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import Loading from "../../components/Loading";
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
@@ -27,10 +26,8 @@ const RelatorioMovimentacaoScreen = () => {
   const [mostraFiltros, setMostraFiltros] = useState(false);
   const [info, setInfo] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [dateInicio, setDateInicio] = useState(null);
-  const [dateFim, setDateFim] = useState(null);
-  const [showDateInicioPicker, setShowDateInicioPicker] = useState(false);
-  const [showDateFimPicker, setShowDateFimPicker] = useState(false);
+  const [dateInicio, setDateInicio] = useState("");
+  const [dateFim, setDateFim] = useState("");
   const [dataL, setDataL] = useState([]);
   const [selectedTipoM, setSelectedTipoM] = useState(null);
 
@@ -59,7 +56,7 @@ const RelatorioMovimentacaoScreen = () => {
     console.log(filters);
     setLoading(true);
     await axios
-      .post("http://192.168.1.177:3000/usuarios/Historico", filters)
+      .post("http://191.235.243.175/usuarios/Historico", filters)
       .then((response) => {
         const data = response.data.map((historico) => {
           const mov_data = JSON.parse(historico.valor_movimentacao);
@@ -90,7 +87,7 @@ const RelatorioMovimentacaoScreen = () => {
         }
       });
     await axios
-      .get("http://192.168.1.177:3000/produtos/")
+      .get("http://191.235.243.175/produtos/")
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -102,7 +99,7 @@ const RelatorioMovimentacaoScreen = () => {
         console.error("Error fetching products:", error);
       });
     await axios
-      .get("http://192.168.1.177:3000/usuarios/")
+      .get("http://191.235.243.175/usuarios/")
       .then((response) => {
         const usuariosData = response.data.map((usuario) => ({
           label: usuario.nome,
@@ -114,7 +111,7 @@ const RelatorioMovimentacaoScreen = () => {
         console.error("Error fetching users:", error);
       });
     await axios
-      .get("http://192.168.1.177:3000/estoque/Locais")
+      .get("http://191.235.243.175/estoque/Locais")
       .then((response) => {
         const dataLocais = response.data.map((local) => ({
           label: local.nome_local,
@@ -138,6 +135,7 @@ const RelatorioMovimentacaoScreen = () => {
     setLoading(false);
     setMostraFiltros(false);
   };
+  
   const handleFilterClear = async () => {
     setFilters({
       idusuario: "",
@@ -148,8 +146,8 @@ const RelatorioMovimentacaoScreen = () => {
       local_armazenado: "",
       tipo_mudanca: "",
     });
-    setDateInicio(null);
-    setDateFim(null);
+    setDateInicio("");
+    setDateFim("");
     setLoading(true);
     await fetchData();
     setLoading(false);
@@ -163,27 +161,45 @@ const RelatorioMovimentacaoScreen = () => {
     }));
   };
 
-  const handleDateInicioChange = (event, selectedDate) => {
-    const currentDate = selectedDate || dateInicio;
-    setShowDateInicioPicker(false);
-    setDateInicio(currentDate);
-    handleFilterChange("dataInicio", currentDate);
-  };
-
-  const handleDateFimChange = (event, selectedDate) => {
-    const currentDate = selectedDate || dateFim;
-    setShowDateFimPicker(false);
-    setDateFim(currentDate);
-    handleFilterChange("dataFim", currentDate);
+  const handleDateChange = (key, value) => {
+    const formattedValue = value
+      .replace(/\D/g, "")
+      .replace(/(\d{2})(\d)/, "$1/$2")
+      .replace(/(\d{2})(\d)/, "$1/$2")
+      .replace(/(\d{4})(\d)/, "$1");
+    
+    if (formattedValue.length === 10) {
+      try {
+        const parsedDate = parse(formattedValue, 'dd/MM/yyyy', new Date());
+        const formattedDate = format(parsedDate, 'yyyy-MM-dd');
+        handleFilterChange(key, formattedDate);
+  
+        if (key === "dataInicio") {
+          setDateInicio(formattedDate);
+        } else {
+          setDateFim(formattedDate);
+        }
+      } catch (error) {
+        console.error('Invalid date format:', error);
+      }
+    } else {
+      handleFilterChange(key, formattedValue);
+  
+      if (key === "dataInicio") {
+        setDateInicio(formattedValue);
+      } else {
+        setDateFim(formattedValue);
+      }
+    }
   };
 
   const calculaTotal = (item) => {
-    if (item.tipo_mudanca == "entrada") {
+    if (item.tipo_mudanca === "entrada") {
       if (isNaN(item.quantidadeAntiga)) {
         item.quantidadeAntiga = 0;
       }
       return parseInt(item.quantidadeAntiga) + parseInt(item.quantidade);
-    } else if (item.tipo_mudanca == "saída") {
+    } else if (item.tipo_mudanca === "saída") {
       return parseInt(item.quantidadeAntiga) - parseInt(item.quantidade);
     } else {
       return 0;
@@ -341,46 +357,20 @@ const RelatorioMovimentacaoScreen = () => {
               handleFilterChange("tipo_mudanca", item.value);
             }}
           />
-          <View>
-            <TouchableOpacity
-              onPress={() => setShowDateInicioPicker(true)}
-              style={styles.input}
-            >
-              <Text>
-                {filters.dataInicio
-                  ? format(filters.dataInicio, "dd/MM/yyyy")
-                  : "Data Início"}
-              </Text>
-            </TouchableOpacity>
-            {showDateInicioPicker && (
-              <DateTimePicker
-                value={dateInicio || new Date()}
-                mode="date"
-                display="default"
-                onChange={handleDateInicioChange}
-              />
-            )}
-          </View>
-          <View>
-            <TouchableOpacity
-              onPress={() => setShowDateFimPicker(true)}
-              style={styles.input}
-            >
-              <Text>
-                {filters.dataFim
-                  ? format(filters.dataFim, "dd/MM/yyyy")
-                  : "Data Fim"}
-              </Text>
-            </TouchableOpacity>
-            {showDateFimPicker && (
-              <DateTimePicker
-                value={dateFim || new Date()}
-                mode="date"
-                display="default"
-                onChange={handleDateFimChange}
-              />
-            )}
-          </View>
+          <TextInput
+            style={styles.input}
+            placeholder="Data Início (dd/MM/yyyy)"
+            value={dateInicio}
+            onChangeText={(value) => handleDateChange("dataInicio", value)}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Data Fim (dd/MM/yyyy)"
+            value={dateFim}
+            onChangeText={(value) => handleDateChange("dataFim", value)}
+            keyboardType="numeric"
+          />
           <TextInput
             style={styles.input}
             placeholder="Lote"

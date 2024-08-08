@@ -35,7 +35,7 @@ const InsumosScreen = () => {
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.177:3000/estoque/Locais")
+      .get("http://191.235.243.175/estoque/Locais")
       .then((response) => {
         const locaisData = response.data.map((local) => ({
           label: local.nome_local,
@@ -48,7 +48,7 @@ const InsumosScreen = () => {
       });
 
     axios
-      .get("http://192.168.1.177:3000/insumos/TiposInsumos")
+      .get("http://191.235.243.175/insumos/TiposInsumos")
       .then((response) => {
         const tiposData = response.data.map((tipo) => ({
           label: tipo.nome,
@@ -61,7 +61,7 @@ const InsumosScreen = () => {
       });
 
     axios
-      .get("http://192.168.1.177:3000/insumos/")
+      .get("http://191.235.243.175/insumos/")
       .then((response) => {
         const insumosData = response.data.map((insumo) => ({
           id: insumo.id,
@@ -104,7 +104,7 @@ const InsumosScreen = () => {
       };
       console.log(dados);
       const response = await axios.post(
-        "http://192.168.1.177:3000/insumos/CadastroInsumo",
+        "http://191.235.243.175/insumos/CadastroInsumo",
         dados
       );
 
@@ -138,7 +138,7 @@ const InsumosScreen = () => {
         coluna: coluna,
       };
       const response = await axios.put(
-        `http://192.168.1.177:3000/insumos/Atualizar`,
+        `http://191.235.243.175/insumos/Atualizar`,
         dados
       );
 
@@ -169,7 +169,7 @@ const InsumosScreen = () => {
 
   const handleDelete = async (item) => {
     console.log(item.id);
-    axios.delete(`http://192.168.1.177:3000/insumos/${item.id}:id`).then((response) => {
+    axios.delete(`http://191.235.243.175/insumos/${item.id}:id`).then((response) => {
       if (response.status == "200") {
         Alert.alert("Sucesso!", "Insumo deletado com sucesso!")
       }
