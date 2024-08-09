@@ -56,11 +56,13 @@ const LotesScreen = ({ route }) => {
 
   const handleSave = async (loteId) => {
     try {
-      await axios.post(`http://191.235.243.175/produtos/AtualizarLote`, {
+      const dados = {
         lote_id: loteId,
         local_armazenado: selectedLocal,
         coluna: coluna,
-      });
+      }
+      console.log(dados);
+      await axios.post(`http://191.235.243.175/produtos/AtualizarLote`, dados);
       Alert.alert("Sucesso", "Localização atualizada com sucesso!");
       setEditar(null);
       setSelectedLocal(null);
