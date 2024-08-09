@@ -21,7 +21,7 @@ const RelatorioAromaScreen = () => {
 
   useEffect(() => {
     axios
-      .get(`http://192.168.1.177:3000/produtos/Aromas`)
+      .get(`http://191.235.243.175/produtos/Aromas`)
       .then((response) => {
         const aromasData = response.data.map((aroma) => ({
           label: aroma.nome_aroma,
@@ -38,7 +38,7 @@ const RelatorioAromaScreen = () => {
     setSelectedAroma(item.value);
     console.log(aromas[0].categoria)
     axios
-      .get(`http://192.168.1.177:3000/produtos/InfoAromas?cod_aroma=${item.value}`)
+      .get(`http://191.235.243.175/produtos/InfoAromas?cod_aroma=${item.value}`)
       .then((response) => {
         const infoAromas = response.data.map((aroma) => ({
           nome_produto: aroma.nome,

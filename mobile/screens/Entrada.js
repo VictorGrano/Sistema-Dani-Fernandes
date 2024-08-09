@@ -40,7 +40,7 @@ const EntradaScreen = ({ route }) => {
     setNomeUser(AsyncStorage.getItem("nome"));
     setIdUser(AsyncStorage.getItem("id"));
     axios
-      .get(`http://192.168.1.177:3000/produtos/`)
+      .get(`http://191.235.243.175/produtos/`)
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -52,7 +52,7 @@ const EntradaScreen = ({ route }) => {
         console.error("Error fetching products:", error);
       });
     axios
-      .get(`http://192.168.1.177:3000/estoque/Locais`)
+      .get(`http://191.235.243.175/estoque/Locais`)
       .then((response) => {
         const locaisData = response.data.map((local) => ({
           label: local.nome_local,
@@ -68,7 +68,7 @@ const EntradaScreen = ({ route }) => {
   useEffect(() => {
     if (selectedProduct) {
       axios
-        .get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${id}`)
+        .get(`http://191.235.243.175/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage(
@@ -163,7 +163,7 @@ const EntradaScreen = ({ route }) => {
     };
     console.log(entradaData);
     axios
-      .post(`http://192.168.1.177:3000/estoque/Entrada`, entradaData)
+      .post(`http://191.235.243.175/estoque/Entrada`, entradaData)
       .then((response) => {
         console.log("Entrada criada com sucesso:", response.data);
         navigation.goBack();
@@ -182,7 +182,7 @@ const EntradaScreen = ({ route }) => {
       setValidade(validade);
       setFabricacao(fabricacao);
       axios
-        .get(`http://192.168.1.177:3000/produtos/InfoProduto?id=${id}`)
+        .get(`http://191.235.243.175/produtos/InfoProduto?id=${id}`)
         .then((response) => {
           setNome(response.data.nome);
         })
@@ -190,7 +190,7 @@ const EntradaScreen = ({ route }) => {
           console.error("Error fetching product data:", error);
         });
       axios
-        .get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${id}`)
+        .get(`http://191.235.243.175/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage(

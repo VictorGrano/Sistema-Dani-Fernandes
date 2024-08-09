@@ -55,7 +55,7 @@ const HistoricoScreen = () => {
     console.log(filters);
     setLoading(true);
     await axios
-      .post(`http://192.168.1.177:3000/usuarios/Historico`, filters)
+      .post(`http://191.235.243.175/usuarios/Historico`, filters)
       .then((response) => {
         const data = response.data.map((historico) => {
           const mov_data = JSON.parse(historico.valor_movimentacao);
@@ -86,7 +86,7 @@ const HistoricoScreen = () => {
         }
       });
     await axios
-      .get(`http://192.168.1.177:3000/produtos/`)
+      .get(`http://191.235.243.175/produtos/`)
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -98,7 +98,7 @@ const HistoricoScreen = () => {
         console.error("Error fetching products:", error);
       });
     await axios
-      .get(`http://192.168.1.177:3000/usuarios/`)
+      .get(`http://191.235.243.175/usuarios/`)
       .then((response) => {
         const usuariosData = response.data.map((usuario) => ({
           label: usuario.nome,
@@ -110,7 +110,7 @@ const HistoricoScreen = () => {
         console.error("Error fetching users:", error);
       });
     await axios
-      .get(`http://192.168.1.177:3000/estoque/Locais`)
+      .get(`http://191.235.243.175/estoque/Locais`)
       .then((response) => {
         const dataLocais = response.data.map((local) => ({
           label: local.nome_local,

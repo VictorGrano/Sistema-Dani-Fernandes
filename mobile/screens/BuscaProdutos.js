@@ -21,7 +21,7 @@ const BuscaProdutosScreen = () => {
 
   useEffect(() => {
     axios
-      .get(`http://192.168.1.177:3000/produtos/`)
+      .get(`http://191.235.243.175/produtos/`)
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -37,7 +37,7 @@ const BuscaProdutosScreen = () => {
   const handleProductSelect = (item) => {
     setSelectedProduct(item.value);
     axios
-      .get(`http://192.168.1.177:3000/produtos/InfoProduto?id=${item.value}`)
+      .get(`http://191.235.243.175/produtos/InfoProduto?id=${item.value}`)
       .then((response) => {
         setProductDetails(response.data);
         console.log(response.data);

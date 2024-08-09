@@ -19,7 +19,7 @@ const BuscaInsumosScreen = () => {
   
   useEffect(() => {
     axios
-      .get(`http://192.168.1.177:3000/insumos/`)
+      .get(`http://191.235.243.175/insumos/`)
       .then((response) => {
         const insumosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -33,7 +33,7 @@ const BuscaInsumosScreen = () => {
   const handleInsumoSelect = (item) => {
     setSelectedInsumo(item.value);
     axios
-      .get(`http://192.168.1.177:3000/insumos/InfoInsumo?id=${item.value}`)
+      .get(`http://191.235.243.175/insumos/InfoInsumo?id=${item.value}`)
       .then((response) => {
         setInsumoDetails(response.data);
         console.log(response.data);

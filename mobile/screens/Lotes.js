@@ -25,10 +25,10 @@ const LotesScreen = ({ route }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const lotesResponse = await axios.get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${id}`);
+        const lotesResponse = await axios.get(`http://191.235.243.175/produtos/Lotes?produto_id=${id}`);
         setLotes(lotesResponse.data);
         
-        const locaisResponse = await axios.get(`http://192.168.1.177:3000/estoque/Locais`);
+        const locaisResponse = await axios.get(`http://191.235.243.175/estoque/Locais`);
         const locaisData = locaisResponse.data.map((local) => ({
           label: local.nome_local,
           value: local.id,
@@ -64,7 +64,7 @@ const LotesScreen = ({ route }) => {
         coluna: coluna,
       };
       console.log(dados);
-      await axios.post(`http://192.168.1.177:3000/produtos/AtualizarLote`, dados);
+      await axios.post(`http://191.235.243.175/produtos/AtualizarLote`, dados);
       Alert.alert("Sucesso", "Localização atualizada com sucesso!");
       setEditar(null);
       setSelectedLocal(null);
