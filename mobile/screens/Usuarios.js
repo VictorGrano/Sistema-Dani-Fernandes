@@ -14,6 +14,7 @@ import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
+
 const UsuariosScreen = () => {
   const navigation = useNavigation();
   const [selectedTipoUsuario, setTipoUsuario] = useState(null);
@@ -35,7 +36,7 @@ const UsuariosScreen = () => {
 
   useEffect(() => {
     try {
-      axios.get("http://191.235.243.175/usuarios/").then((response) => {
+      axios.get(`http://192.168.1.177:3000/usuarios/`).then((response) => {
         const usuarios = response.data.map((usuario) => ({
           id: usuario.id, // Assumindo que cada usuário tem um ID único
           nome: usuario.nome,
@@ -68,7 +69,7 @@ const UsuariosScreen = () => {
       };
 
       const response = await axios.post(
-        "http://191.235.243.175/usuarios/Cadastro",
+        `http://192.168.1.177:3000/usuarios/Cadastro`,
         dados
       );
 
@@ -100,7 +101,7 @@ const UsuariosScreen = () => {
       };
 
       const response = await axios.put(
-        `http://191.235.243.175/usuarios/Atualizar`,
+        `http://192.168.1.177:3000/usuarios/Atualizar`,
         dados
       );
 
@@ -144,7 +145,7 @@ const UsuariosScreen = () => {
 
   const handleDelete = async () => {
     const id = usuarioSelecionado.id
-    axios.delete(`http://191.235.243.175/usuarios/${id}:id`).then((response) => {
+    axios.delete(`http://192.168.1.177:3000/usuarios/${id}:id`).then((response) => {
       if (response.status == "200") {
         Alert.alert("Sucesso!", "Usuário deletado com sucesso!")
       }

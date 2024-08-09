@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import RelatorioGeral from "./reports/RelatorioProdutos";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+
 const RelatorioMenuScreen = () => {
   const navigation = useNavigation();
 

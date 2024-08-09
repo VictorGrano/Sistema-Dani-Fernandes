@@ -174,10 +174,6 @@ exports.getLotes = (req, res) => {
 exports.updateLote = (req, res) => {
   const { lote_id, local_armazenado_id, coluna } = req.body;
 
-  if (!lote_id || !local_armazenado_id || !coluna) {
-    return res.status(400).json({ error: "Dados insuficientes para atualizar o lote" });
-  }
-
   const q = "UPDATE lotes SET local_armazenado_id = ?, coluna = ? WHERE id = ?";
 
   connection.query(q, [local_armazenado_id, coluna, lote_id], (error, result) => {

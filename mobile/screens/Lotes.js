@@ -11,6 +11,8 @@ import {
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 
+
+
 const LotesScreen = ({ route }) => {
   const [lotes, setLotes] = useState([]);
   const [info, setInfo] = useState(false);
@@ -23,10 +25,10 @@ const LotesScreen = ({ route }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const lotesResponse = await axios.get(`http://191.235.243.175/produtos/Lotes?produto_id=${id}`);
+        const lotesResponse = await axios.get(`http://192.168.1.177:3000/produtos/Lotes?produto_id=${id}`);
         setLotes(lotesResponse.data);
         
-        const locaisResponse = await axios.get("http://191.235.243.175/estoque/Locais");
+        const locaisResponse = await axios.get(`http://192.168.1.177:3000/estoque/Locais`);
         const locaisData = locaisResponse.data.map((local) => ({
           label: local.nome_local,
           value: local.id,
@@ -58,11 +60,11 @@ const LotesScreen = ({ route }) => {
     try {
       const dados = {
         lote_id: loteId,
-        local_armazenado: selectedLocal,
+        local_armazenado_id: selectedLocal !== null ? selectedLocal : lotes.find(lote => lote.id === loteId).local_armazenado_id,
         coluna: coluna,
-      }
+      };
       console.log(dados);
-      await axios.post(`http://191.235.243.175/produtos/AtualizarLote`, dados);
+      await axios.post(`http://192.168.1.177:3000/produtos/AtualizarLote`, dados);
       Alert.alert("Sucesso", "Localização atualizada com sucesso!");
       setEditar(null);
       setSelectedLocal(null);
@@ -73,6 +75,7 @@ const LotesScreen = ({ route }) => {
       Alert.alert("Erro", "Ocorreu um erro ao salvar a nova localização.");
     }
   };
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -86,6 +89,7 @@ const LotesScreen = ({ route }) => {
           )}
           <Text style={styles.detailsTextHeader}>Lote: {lote.nome_lote}</Text>
           <Text style={styles.detailsText}>Estoque: {lote.quantidade}</Text>
+          <Text style={styles.detailsText}>Quantidade de caixas: {lote.quantidade_caixas}</Text>
           <Text style={styles.detailsText}>
             Fabricação: {formatDate(lote.data_fabricacao)}
           </Text>

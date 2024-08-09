@@ -9,6 +9,8 @@ import {
 import { Camera, CameraView } from "expo-camera";
 import { useNavigation } from "@react-navigation/native";
 
+
+
 const EscanearScreen = ({ route }) => {
   const navigation = useNavigation();
   const [hasPermission, setHasPermission] = useState(null);

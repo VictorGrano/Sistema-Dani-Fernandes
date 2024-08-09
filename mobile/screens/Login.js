@@ -21,7 +21,7 @@ const LoginScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  
   const handleLogin = async () => {
     const loginData = {
       user: user,
@@ -31,7 +31,7 @@ const LoginScreen = () => {
 
     try {
       const response = await axios.post(
-        "http://191.235.243.175/usuarios/Login",
+        `http://192.168.1.177:3000/usuarios/Login`,
         loginData
       );
       const data = response.data;
@@ -68,7 +68,7 @@ const LoginScreen = () => {
       if (!id) {
         throw new Error("ID do usuário não encontrado.");
       }
-      const response = await axios.post("http://191.235.243.175/usuarios/NovaSenha", {
+      const response = await axios.post(`http://192.168.1.177:3000/usuarios/NovaSenha`, {
         id: id,
         senha: newPassword,
       });

@@ -14,6 +14,8 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loading from "../components/Loading";
 
+
+
 const MenuScreen = () => {
   const navigation = useNavigation();
   const [dados, setDados] = useState([]);
@@ -29,7 +31,7 @@ const MenuScreen = () => {
   const fetchDados = useCallback(async () => {
     setLoading(true);
     await axios
-      .get("http://191.235.243.175/estoque/Locais")
+      .get(`http://192.168.1.177:3000/estoque/Locais`)
       .then((response) => {
         const dataL = response.data;
         setQuantidadeL(dataL.length);
@@ -38,7 +40,7 @@ const MenuScreen = () => {
         console.error("Error fetching locations:", error);
       });
     await axios
-      .get(`http://191.235.243.175/estoque/QuantidadeEstoque?id=${id}`)
+      .get(`http://192.168.1.177:3000/estoque/QuantidadeEstoque?id=${id}`)
       .then((response) => {
         const data = response.data[0];
         setTotal(data.estoque_total);

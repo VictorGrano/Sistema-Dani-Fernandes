@@ -16,7 +16,7 @@
     "@react-navigation/stack": "^6.4.1",
     "axios": "^1.7.3",
     "date-fns": "^3.6.0",
-    "expo": "^51.0.25",
+    "expo": "^51.0.26",
     "expo-barcode-scanner": "^13.0.1",
     "expo-camera": "~15.0.14",
     "expo-file-system": "~17.0.1",
