@@ -56,7 +56,8 @@ const LotesScreen = ({ route }) => {
 
   const handleSave = async (loteId) => {
     try {
-      await axios.put(`http://191.235.243.175/produtos/AtualizarLote/${loteId}`, {
+      await axios.post(`http://191.235.243.175/produtos/AtualizarLote`, {
+        lote_id: loteId,
         local_armazenado: selectedLocal,
         coluna: coluna,
       });
@@ -66,7 +67,7 @@ const LotesScreen = ({ route }) => {
       setColuna('');
       fetchData();  // Recarrega os dados após a atualização
     } catch (error) {
-      console.error("Error saving data:", error);
+      console.error("Error saving data:", error.response.data);
       Alert.alert("Erro", "Ocorreu um erro ao salvar a nova localização.");
     }
   };
