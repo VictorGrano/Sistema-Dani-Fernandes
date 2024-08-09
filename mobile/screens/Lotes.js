@@ -1,25 +1,47 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from "react-native";
 import axios from "axios";
+import { Dropdown } from "react-native-element-dropdown";
 
 const LotesScreen = ({ route }) => {
   const [lotes, setLotes] = useState([]);
   const [info, setInfo] = useState(false);
+  const [editar, setEditar] = useState(null);
+  const [dataL, setDataL] = useState([]);
+  const [selectedLocal, setSelectedLocal] = useState(null);
+  const [coluna, setColuna] = useState('');
   const { id } = route.params;
 
   useEffect(() => {
-    axios
-      .get(`http://191.235.243.175/produtos/Lotes?produto_id=${id}`)
-      .then((response) => {
-        const lotes = response.data;
-        console.log(lotes);
-        setLotes(lotes);
-      })
-      .catch((error) => {
-        if (error.response.status == "404") {
+    const fetchData = async () => {
+      try {
+        const lotesResponse = await axios.get(`http://191.235.243.175/produtos/Lotes?produto_id=${id}`);
+        setLotes(lotesResponse.data);
+        
+        const locaisResponse = await axios.get("http://191.235.243.175/estoque/Locais");
+        const locaisData = locaisResponse.data.map((local) => ({
+          label: local.nome_local,
+          value: local.id,
+        }));
+        setDataL(locaisData);
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
           setInfo(true);
+        } else {
+          console.error("Error fetching data:", error);
         }
-      });
+      }
+    };
+
+    fetchData();
   }, [id]);
 
   const formatDate = (dateString) => {
@@ -28,30 +50,92 @@ const LotesScreen = ({ route }) => {
     return new Date(dateString).toLocaleDateString("pt-BR", options);
   };
 
+  const handleEditar = (loteId) => {
+    setEditar(loteId);
+  };
+
+  const handleSave = async (loteId) => {
+    try {
+      await axios.put(`http://191.235.243.175/produtos/AtualizarLote/${loteId}`, {
+        local_armazenado: selectedLocal,
+        coluna: coluna,
+      });
+      Alert.alert("Sucesso", "Localização atualizada com sucesso!");
+      setEditar(null);
+      setSelectedLocal(null);
+      setColuna('');
+      fetchData();  // Recarrega os dados após a atualização
+    } catch (error) {
+      console.error("Error saving data:", error);
+      Alert.alert("Erro", "Ocorreu um erro ao salvar a nova localização.");
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {lotes.map((lote, index) => (
         <View
-        key={lote.id}
-        style={[styles.detailsContainer, index === 0 && styles.firstLote]}
+          key={lote.id}
+          style={[styles.detailsContainer, index === 0 && styles.firstLote]}
         >
-          {index == 0 && (<Text style={styles.detailsTextHeader}>Prioridade de saída</Text>)}
+          {index == 0 && (
+            <Text style={styles.detailsTextHeader}>Prioridade de saída</Text>
+          )}
           <Text style={styles.detailsTextHeader}>Lote: {lote.nome_lote}</Text>
-          <Text style={styles.detailsText}>
-            Estoque: {lote.quantidade}
-          </Text>
-          <Text style={styles.detailsText}>
-            Local Armazenado: {lote.nome_local || "Não registrado"}
-          </Text>
-          <Text style={styles.detailsText}>
-            Coluna: {lote.coluna || "Não há esse produto no estoque"}
-          </Text>
+          <Text style={styles.detailsText}>Estoque: {lote.quantidade}</Text>
           <Text style={styles.detailsText}>
             Fabricação: {formatDate(lote.data_fabricacao)}
           </Text>
           <Text style={styles.detailsText}>
             Validade: {formatDate(lote.data_validade)}
           </Text>
+          {editar === lote.id ? (
+            <>
+              <Dropdown
+                style={styles.dropdown}
+                data={dataL}
+                search={true}
+                labelField="label"
+                valueField="value"
+                placeholder="Selecione o local"
+                value={selectedLocal}
+                onChange={(item) => setSelectedLocal(item.value)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Coluna"
+                value={coluna}
+                onChangeText={(value) => setColuna(value)}
+              />
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => handleSave(lote.id)}
+              >
+                <Text style={styles.buttonText}>Salvar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.buttonCancel}
+                onPress={() => setEditar(null)}
+              >
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text style={styles.detailsText}>
+                Local Armazenado: {lote.nome_local || "Não registrado"}
+              </Text>
+              <Text style={styles.detailsText}>
+                Coluna: {lote.coluna || "Não há esse produto no estoque"}
+              </Text>
+            </>
+          )}
+          <TouchableOpacity
+                style={styles.button}
+                onPress={() => handleEditar(lote.id)}
+              >
+                <Text style={styles.buttonText}>Editar Localização</Text>
+              </TouchableOpacity>
         </View>
       ))}
       {info && (
@@ -84,16 +168,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     color: "#333",
-    fontWeight: 'bold',
-    textAlign: 'center'
+    fontWeight: "bold",
+    textAlign: "center",
   },
   detailsTextHeader: {
     fontSize: 25,
     marginBottom: 10,
     color: "#333",
-    fontWeight: 'bold',
-    textAlign: 'center',
-
+    fontWeight: "bold",
+    textAlign: "center",
   },
   button: {
     backgroundColor: "#D8B4E2",
@@ -101,12 +184,37 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderRadius: 8,
     alignItems: "center",
-    width: "80%",
   },
   buttonText: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  buttonCancel: {
+    backgroundColor: "#F08080",
+    padding: 15,
+    marginVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingLeft: 8,
+    borderRadius: 5,
+    justifyContent: "center",
+    width: "100%",
+  },
+  dropdown: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    marginBottom: 10,
+    width: "100%",
   },
   infoText: {
     color: "red",

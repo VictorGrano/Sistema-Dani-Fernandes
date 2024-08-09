@@ -14,6 +14,7 @@ const BuscaProdutosScreen = () => {
   const [produtos, setProdutos] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
+
   const navigation = useNavigation();
 
   useEffect(() => {

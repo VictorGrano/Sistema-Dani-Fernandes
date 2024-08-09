@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import MenuScreen from './screens/Menu';
 import EntradaScreen from './screens/Entrada';
 import SaidaScreen from './screens/Saida';
@@ -25,66 +24,19 @@ import ListaPrateleiraScreen from './screens/ListaPrateleira';
 const Stack = createStackNavigator();
 
 const App = () => {
-  const [id, setID] = useState(null);
-  const [nome, setNome] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const bootstrapAsync = async () => {
-      try {
-        const storedId = await AsyncStorage.getItem('id');
-        const storedNome = await AsyncStorage.getItem('nome');
-        if (storedId !== null && storedNome !== null) {
-          setID(storedId);
-          setNome(storedNome);
-        }
-      } catch (e) {
-        console.log('Erro ao recuperar dados do AsyncStorage!', e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    bootstrapAsync();
-  }, []);
-
-  const handleLogin = async (userId, userName) => {
-    try {
-      await AsyncStorage.setItem('id', userId);
-      await AsyncStorage.setItem('nome', userName);
-      setID(userId);
-      setNome(userName);
-    } catch (e) {
-      console.log('Erro ao salvar dados no AsyncStorage!', e);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('id');
-      await AsyncStorage.removeItem('nome');
-      setID(null);
-      setNome(null);
-    } catch (e) {
-      console.log('Erro ao remover dados do AsyncStorage!', e);
-    }
-  };
-
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={id ? 'Menu' : 'Login'}>
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
           options={{ title: 'Login', headerShown: false }}
-        >
-          {props => <LoginScreen {...props} onLogin={handleLogin} />}
-        </Stack.Screen>
+          component={LoginScreen}
+        />
         <Stack.Screen
           name="Menu"
+          component={MenuScreen}
           options={{ title: 'Menu Principal' }}
-        >
-          {props => <MenuScreen {...props} onLogout={handleLogout} />}
-        </Stack.Screen>
+        />
         <Stack.Screen
           name="Menu Relatorio"
           component={RelatorioMenuScreen}

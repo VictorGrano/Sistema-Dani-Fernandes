@@ -171,6 +171,30 @@ exports.getLotes = (req, res) => {
   });
 };
 
+exports.updateLote = (req, res) => {
+  const { lote_id } = req.params;
+  const { local_armazenado_id, coluna } = req.body;
+
+  if (!lote_id || !local_armazenado_id || !coluna) {
+    return res.status(400).json({ error: "Dados insuficientes para atualizar o lote" });
+  }
+
+  const q = "UPDATE lotes SET local_armazenado_id = ?, coluna = ? WHERE id = ?";
+
+  connection.query(q, [local_armazenado_id, coluna, lote_id], (error, result) => {
+    if (error) {
+      console.error("Error updating lote:", error);
+      return res.status(500).json({ error: "Erro ao atualizar o lote" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Lote não encontrado" });
+    }
+
+    res.json({ message: "Lote atualizado com sucesso" });
+  });
+};
+
 exports.getAromas = (req, res) => {
   connection.query("SELECT * FROM aromas ORDER BY nome_aroma", (error, results) => {
     if (error) throw error;
