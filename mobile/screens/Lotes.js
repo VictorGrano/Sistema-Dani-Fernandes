@@ -137,12 +137,14 @@ const LotesScreen = ({ route }) => {
               </Text>
             </>
           )}
+          {!editar && (
           <TouchableOpacity
                 style={styles.button}
                 onPress={() => handleEditar(lote.id)}
               >
                 <Text style={styles.buttonText}>Editar Localização</Text>
               </TouchableOpacity>
+          )}
         </View>
       ))}
       {info && (
