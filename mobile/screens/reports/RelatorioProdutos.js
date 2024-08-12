@@ -14,8 +14,6 @@ import { shareAsync } from "expo-sharing";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Dropdown } from "react-native-element-dropdown";
 
-
-
 const RelatorioProdutosScreen = () => {
   const [loading, setLoading] = useState(false);
   const [produtos, setProdutos] = useState([]);
@@ -32,6 +30,8 @@ const RelatorioProdutosScreen = () => {
   const [aromas, setAromas] = useState([]);
   const [tipo, setTipo] = useState([]);
 
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -40,7 +40,7 @@ const RelatorioProdutosScreen = () => {
     setLoading(true);
     try {
       const produtosResponse = await axios.get(
-        `http://191.235.243.175/produtos/`
+        `${apiUrl}/produtos/`
       );
       const produtosData = produtosResponse.data.map((produto) => ({
         label: produto.nome,
@@ -48,7 +48,7 @@ const RelatorioProdutosScreen = () => {
       }));
       setProdutos(produtosData);
       const aromasResponse = await axios.get(
-        `http://191.235.243.175/produtos/Aromas`
+        `${apiUrl}/produtos/Aromas`
       );
       const aromaData = aromasResponse.data.map((aroma) => ({
         label: aroma.nome_aroma,
@@ -56,7 +56,7 @@ const RelatorioProdutosScreen = () => {
       }));
       setAromas(aromaData);
       const tipoResponse = await axios.get(
-        `http://191.235.243.175/produtos/Tipo`
+        `${apiUrl}/produtos/Tipo`
       );
       const tipoData = tipoResponse.data.map((aroma) => ({
         label: aroma.nome_categoria,
@@ -72,7 +72,7 @@ const RelatorioProdutosScreen = () => {
   const fetchProdutos = async () => {
     try {
       const response = await axios.post(
-        `http://191.235.243.175/produtos/RelatorioProdutos`,
+        `${apiUrl}/produtos/RelatorioProdutos`,
         filters
       );
       const produtosData = response.data.map((produto) => ({

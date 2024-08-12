@@ -13,8 +13,6 @@ import { Dropdown } from "react-native-element-dropdown";
 import { useNavigation } from "@react-navigation/native";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
-
-
 const ListaPrateleiraScreen = () => {
   const [produtos, setProdutos] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -25,11 +23,13 @@ const ListaPrateleiraScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [productNotFound, setProductNotFound] = useState(false);
 
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   const navigation = useNavigation();
 
   useEffect(() => {
     axios
-      .get(`http://191.235.243.175/produtos/`)
+      .get(`${apiUrl}/produtos/`)
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -47,7 +47,7 @@ const ListaPrateleiraScreen = () => {
 
   const fetchListaPrateleira = () => {
     axios
-      .get(`http://191.235.243.175/estoque/ListaPrateleira`)
+      .get(`${apiUrl}/estoque/ListaPrateleira`)
       .then((response) => {
         setListaPrateleira(response.data);
       })
@@ -59,7 +59,7 @@ const ListaPrateleiraScreen = () => {
   const handleProductSelect = (item) => {
     setSelectedProduct(item.value);
     axios
-      .get(`http://191.235.243.175/produtos/Lotes?produto_id=${item.value}`)
+      .get(`${apiUrl}/produtos/Lotes?produto_id=${item.value}`)
       .then((response) => {
         if (response.data.length === 0) {
           setProductNotFound(true);
@@ -115,7 +115,7 @@ const ListaPrateleiraScreen = () => {
               try {
                 for (const dados of lotesUsados) {
                   await axios.post(
-                    "http://191.235.243.175/estoque/AddPrateleira",
+                    "${apiUrl}/estoque/AddPrateleira",
                     { ...dados, concluido: 0 }
                   );
                 }
@@ -139,7 +139,7 @@ const ListaPrateleiraScreen = () => {
       try {
         for (const dados of lotesUsados) {
           await axios.post(
-            `http://191.235.243.175/estoque/AddPrateleira`,
+            `${apiUrl}/estoque/AddPrateleira`,
             { ...dados, concluido: 0 }
           );
         }
@@ -161,7 +161,7 @@ const ListaPrateleiraScreen = () => {
 
   const handleExcluir = (itemId) => {
     axios
-      .delete(`http://191.235.243.175/estoque/ListaPrateleira/${itemId}`)
+      .delete(`${apiUrl}/estoque/ListaPrateleira/${itemId}`)
       .then(() => {
         Alert.alert("Sucesso!", "Produto removido da lista!");
         fetchListaPrateleira(); // Refresh the list
@@ -173,7 +173,7 @@ const ListaPrateleiraScreen = () => {
 
   const handleConfere = (itemId) => {
     axios
-      .put(`http://191.235.243.175/estoque/ListaPrateleira/Concluido/${itemId}`, { concluido: true })
+      .put(`${apiUrl}/estoque/ListaPrateleira/Concluido/${itemId}`, { concluido: true })
       .then(() => {
         Alert.alert("Sucesso!", "Produto marcado como concluído!");
         fetchListaPrateleira(); // Refresh the list

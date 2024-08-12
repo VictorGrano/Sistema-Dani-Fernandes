@@ -14,8 +14,6 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 
-
-
 const InsumosScreen = () => {
   const navigation = useNavigation();
   const [locais, setLocais] = useState([]);
@@ -35,9 +33,11 @@ const InsumosScreen = () => {
   const [modal, setModal] = useState(false);
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
 
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   useEffect(() => {
     axios
-      .get(`http://191.235.243.175/estoque/Locais`)
+      .get(`${apiUrl}/estoque/Locais`)
       .then((response) => {
         const locaisData = response.data.map((local) => ({
           label: local.nome_local,
@@ -50,7 +50,7 @@ const InsumosScreen = () => {
       });
 
     axios
-      .get(`http://191.235.243.175/insumos/TiposInsumos`)
+      .get(`${apiUrl}/insumos/TiposInsumos`)
       .then((response) => {
         const tiposData = response.data.map((tipo) => ({
           label: tipo.nome,
@@ -63,7 +63,7 @@ const InsumosScreen = () => {
       });
 
     axios
-      .get(`http://191.235.243.175/insumos/`)
+      .get(`${apiUrl}/insumos/`)
       .then((response) => {
         const insumosData = response.data.map((insumo) => ({
           id: insumo.id,
@@ -106,7 +106,7 @@ const InsumosScreen = () => {
       };
       console.log(dados);
       const response = await axios.post(
-        `http://191.235.243.175/insumos/CadastroInsumo`,
+        `${apiUrl}/insumos/CadastroInsumo`,
         dados
       );
 
@@ -140,7 +140,7 @@ const InsumosScreen = () => {
         coluna: coluna,
       };
       const response = await axios.put(
-        `http://191.235.243.175/insumos/Atualizar`,
+        `${apiUrl}/insumos/Atualizar`,
         dados
       );
 
@@ -171,7 +171,7 @@ const InsumosScreen = () => {
 
   const handleDelete = async (item) => {
     console.log(item.id);
-    axios.delete(`http://191.235.243.175/insumos/${item.id}:id`).then((response) => {
+    axios.delete(`${apiUrl}/insumos/${item.id}:id`).then((response) => {
       if (response.status == "200") {
         Alert.alert("Sucesso!", "Insumo deletado com sucesso!")
       }

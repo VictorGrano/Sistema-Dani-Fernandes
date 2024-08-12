@@ -1,3 +1,5 @@
+//Conexão com o banco de dados:
+
 const mysql = require("mysql");
 const config = require("./config");
 

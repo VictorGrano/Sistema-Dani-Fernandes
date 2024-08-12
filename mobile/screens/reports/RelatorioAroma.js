@@ -11,17 +11,18 @@ import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import { Dropdown } from "react-native-element-dropdown";
 
-
 const RelatorioAromaScreen = () => {
   const [aromas, setAromas] = useState([]);
   const [selectedAroma, setSelectedAroma] = useState(null);
   const [aromaDetails, setAromaDetails] = useState([]);
   const [total, setTotal] = useState(0);
   const [valorEstoque, setValorEstoque] = useState(0);
+  
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     axios
-      .get(`http://191.235.243.175/produtos/Aromas`)
+      .get(`${apiUrl}/produtos/Aromas`)
       .then((response) => {
         const aromasData = response.data.map((aroma) => ({
           label: aroma.nome_aroma,
@@ -38,7 +39,7 @@ const RelatorioAromaScreen = () => {
     setSelectedAroma(item.value);
     console.log(aromas[0].categoria)
     axios
-      .get(`http://191.235.243.175/produtos/InfoAromas?cod_aroma=${item.value}`)
+      .get(`${apiUrl}/produtos/InfoAromas?cod_aroma=${item.value}`)
       .then((response) => {
         const infoAromas = response.data.map((aroma) => ({
           nome_produto: aroma.nome,

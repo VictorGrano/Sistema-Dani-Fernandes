@@ -16,8 +16,6 @@ import Loading from "../../components/Loading";
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 
-
-
 const RelatorioMovimentacaoScreen = () => {
   const [historicoData, setHistoricoData] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
@@ -32,6 +30,8 @@ const RelatorioMovimentacaoScreen = () => {
   const [dateFim, setDateFim] = useState("");
   const [dataL, setDataL] = useState([]);
   const [selectedTipoM, setSelectedTipoM] = useState(null);
+
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const dataM = [
     {
@@ -58,7 +58,7 @@ const RelatorioMovimentacaoScreen = () => {
     console.log(filters);
     setLoading(true);
     await axios
-      .post(`http://191.235.243.175/usuarios/Historico`, filters)
+      .post(`${apiUrl}/usuarios/Historico`, filters)
       .then((response) => {
         const data = response.data.map((historico) => {
           const mov_data = JSON.parse(historico.valor_movimentacao);
@@ -89,7 +89,7 @@ const RelatorioMovimentacaoScreen = () => {
         }
       });
     await axios
-      .get(`http://191.235.243.175/produtos/`)
+      .get(`${apiUrl}/produtos/`)
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -101,7 +101,7 @@ const RelatorioMovimentacaoScreen = () => {
         console.error("Error fetching products:", error);
       });
     await axios
-      .get(`http://191.235.243.175/usuarios/`)
+      .get(`${apiUrl}/usuarios/`)
       .then((response) => {
         const usuariosData = response.data.map((usuario) => ({
           label: usuario.nome,
@@ -113,7 +113,7 @@ const RelatorioMovimentacaoScreen = () => {
         console.error("Error fetching users:", error);
       });
     await axios
-      .get(`http://191.235.243.175/estoque/Locais`)
+      .get(`${apiUrl}/estoque/Locais`)
       .then((response) => {
         const dataLocais = response.data.map((local) => ({
           label: local.nome_local,

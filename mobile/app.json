@@ -36,7 +36,18 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      ["expo-build-properties", {
+        "android": {
+          "usesCleartextTraffic": true
+        },
+        "ios": {
+          "infoPlist": {
+            "NSAppTransportSecurity": { "NSAllowsArbitraryLoads": true }
+          },
+          "supportsTablet": true
+        }
+      }]
     ],
     "extra": {
       "eas": {

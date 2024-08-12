@@ -12,17 +12,17 @@ import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import { Dropdown } from "react-native-element-dropdown";
 
-
-
 const RelatorioLotesScreen = () => {
   const [produtos, setProdutos] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
   const [lotes, setLotes] = useState([]);
 
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  
   useEffect(() => {
     axios
-      .get(`http://191.235.243.175/produtos/`)
+      .get(`${apiUrl}/produtos/`)
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -38,7 +38,7 @@ const RelatorioLotesScreen = () => {
   const handleProductSelect = (item) => {
     setSelectedProduct(item.value);
     axios
-      .get(`http://191.235.243.175/produtos/InfoProduto?id=${item.value}`)
+      .get(`${apiUrl}/produtos/InfoProduto?id=${item.value}`)
       .then((response) => {
         setProductDetails(response.data);
         console.log(response.data);
@@ -47,7 +47,7 @@ const RelatorioLotesScreen = () => {
         console.error("Error fetching product details:", error);
       });
         axios
-          .get(`http://191.235.243.175/produtos/Lotes?produto_id=${item.value}`)
+          .get(`${apiUrl}/produtos/Lotes?produto_id=${item.value}`)
           .then((response) => {
             const lotes = response.data;
             console.log(lotes);

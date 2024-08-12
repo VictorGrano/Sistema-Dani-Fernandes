@@ -1,3 +1,5 @@
+//Qualquer parte lógica relacionada a insumos:
+
 const connection = require("../database");
 
 const queryAsync = (query, params) => {

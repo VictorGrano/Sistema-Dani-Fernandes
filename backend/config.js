@@ -1,3 +1,5 @@
+//Configuração do banco de dados:
+
 module.exports = {
     database: {
       host: "localhost",

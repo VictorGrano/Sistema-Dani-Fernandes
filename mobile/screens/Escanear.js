@@ -9,8 +9,6 @@ import {
 import { Camera, CameraView } from "expo-camera";
 import { useNavigation } from "@react-navigation/native";
 
-
-
 const EscanearScreen = ({ route }) => {
   const navigation = useNavigation();
   const [hasPermission, setHasPermission] = useState(null);
@@ -18,6 +16,8 @@ const EscanearScreen = ({ route }) => {
   const [linkEntrada, setLinkEntrada] = useState(false);
   const [linkSaida, setLinkSaida] = useState(false);
   const { tipo } = route.params;
+
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     const getCameraPermissions = async () => {

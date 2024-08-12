@@ -10,6 +10,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+//Rotas principais:
+
 app.use("/produtos", productRoutes);
 app.use("/estoque", stockRoutes);
 app.use("/usuarios", userRoutes);

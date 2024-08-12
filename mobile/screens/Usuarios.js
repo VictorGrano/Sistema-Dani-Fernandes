@@ -28,6 +28,8 @@ const UsuariosScreen = () => {
   const [search, setSearch] = useState("");
   const [filteredUsuarios, setFilteredUsuarios] = useState([]);
 
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   const tipos = ["admin", "almoxarifado", "escritorio"];
   const tiposdata = tipos.map((item) => ({
     label: item,
@@ -36,7 +38,7 @@ const UsuariosScreen = () => {
 
   useEffect(() => {
     try {
-      axios.get(`http://191.235.243.175/usuarios/`).then((response) => {
+      axios.get(`${apiUrl}/usuarios/`).then((response) => {
         const usuarios = response.data.map((usuario) => ({
           id: usuario.id, // Assumindo que cada usuário tem um ID único
           nome: usuario.nome,
@@ -69,7 +71,7 @@ const UsuariosScreen = () => {
       };
 
       const response = await axios.post(
-        `http://191.235.243.175/usuarios/Cadastro`,
+        `${apiUrl}/usuarios/Cadastro`,
         dados
       );
 
@@ -101,7 +103,7 @@ const UsuariosScreen = () => {
       };
 
       const response = await axios.put(
-        `http://191.235.243.175/usuarios/Atualizar`,
+        `${apiUrl}/usuarios/Atualizar`,
         dados
       );
 
@@ -145,7 +147,7 @@ const UsuariosScreen = () => {
 
   const handleDelete = async () => {
     const id = usuarioSelecionado.id
-    axios.delete(`http://191.235.243.175/usuarios/${id}:id`).then((response) => {
+    axios.delete(`${apiUrl}/usuarios/${id}:id`).then((response) => {
       if (response.status == "200") {
         Alert.alert("Sucesso!", "Usuário deletado com sucesso!")
       }

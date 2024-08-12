@@ -11,8 +11,6 @@ import {
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 
-
-
 const LotesScreen = ({ route }) => {
   const [lotes, setLotes] = useState([]);
   const [info, setInfo] = useState(false);
@@ -22,13 +20,15 @@ const LotesScreen = ({ route }) => {
   const [coluna, setColuna] = useState('');
   const { id } = route.params;
 
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const lotesResponse = await axios.get(`http://191.235.243.175/produtos/Lotes?produto_id=${id}`);
+        const lotesResponse = await axios.get(`${apiUrl}/produtos/Lotes?produto_id=${id}`);
         setLotes(lotesResponse.data);
         
-        const locaisResponse = await axios.get(`http://191.235.243.175/estoque/Locais`);
+        const locaisResponse = await axios.get(`${apiUrl}/estoque/Locais`);
         const locaisData = locaisResponse.data.map((local) => ({
           label: local.nome_local,
           value: local.id,
@@ -64,7 +64,7 @@ const LotesScreen = ({ route }) => {
         coluna: coluna,
       };
       console.log(dados);
-      await axios.post(`http://191.235.243.175/produtos/AtualizarLote`, dados);
+      await axios.post(`${apiUrl}/produtos/AtualizarLote`, dados);
       Alert.alert("Sucesso", "Localização atualizada com sucesso!");
       setEditar(null);
       setSelectedLocal(null);

@@ -27,7 +27,7 @@ const SaidaScreen = ({ route }) => {
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
 
-  
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,7 +41,7 @@ const SaidaScreen = ({ route }) => {
 
   useEffect(() => {
     axios
-      .get(`http://191.235.243.175/produtos`)
+      .get(`${apiUrl}/produtos`)
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           label: produto.nome,
@@ -57,7 +57,7 @@ const SaidaScreen = ({ route }) => {
   useEffect(() => {
     if (selectedProduct) {
       axios
-        .get(`http://191.235.243.175/buscarlotes?produto_id=${selectedProduct}`)
+        .get(`${apiUrl}/buscarlotes?produto_id=${selectedProduct}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage("Não existem lotes para este produto.");
@@ -103,7 +103,7 @@ const SaidaScreen = ({ route }) => {
     };
     console.log(saidaData);
     axios
-      .post(`http://191.235.243.175/estoque/Saida`, saidaData)
+      .post(`${apiUrl}/estoque/Saida`, saidaData)
       .then((response) => {
         console.log("Saída registrada com sucesso:", response.data);
         navigation.goBack();
@@ -120,7 +120,7 @@ const SaidaScreen = ({ route }) => {
       setQuantidade(quantidade);
       setSelectedLote(lote);
       axios
-        .get(`http://191.235.243.175/produtos/InfoProduto?id=${id}`)
+        .get(`${apiUrl}/produtos/InfoProduto?id=${id}`)
         .then((response) => {
           setNome(response.data.nome);
         })
@@ -128,7 +128,7 @@ const SaidaScreen = ({ route }) => {
           console.error("Error fetching product data:", error);
         });
       axios
-        .get(`http://191.235.243.175/produtos/Lotes?produto_id=${id}`)
+        .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage("Não existem lotes para este produto.");

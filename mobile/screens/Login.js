@@ -22,6 +22,8 @@ const LoginScreen = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   const handleLogin = async () => {
     const loginData = {
       user: user,
@@ -31,7 +33,7 @@ const LoginScreen = () => {
 
     try {
       const response = await axios.post(
-        `http://191.235.243.175/usuarios/Login`,
+        `${apiUrl}/usuarios/Login`,
         loginData
       );
       const data = response.data;
@@ -40,7 +42,7 @@ const LoginScreen = () => {
       await AsyncStorage.setItem("tipo", data[0].tipo);
       if (data[0].primeiro_login === "sim") {
         setIsModalVisible(true);
-      } else {
+      } else { 
         navigation.replace("Menu");
       }
     } catch (error) {
@@ -68,7 +70,7 @@ const LoginScreen = () => {
       if (!id) {
         throw new Error("ID do usuário não encontrado.");
       }
-      const response = await axios.post(`http://191.235.243.175/usuarios/NovaSenha`, {
+      const response = await axios.post(`${apiUrl}/usuarios/NovaSenha`, {
         id: id,
         senha: newPassword,
       });

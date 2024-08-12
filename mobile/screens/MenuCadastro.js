@@ -1,9 +1,7 @@
-import React, { useState, useCallback } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-
-
 
 const GerenciarScreen = () => {
   const navigation = useNavigation();

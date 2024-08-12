@@ -33,11 +33,11 @@ const ProdutosScreen = () => {
   const [modal, setModal] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
 
-  
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   
   useEffect(() => {
     axios
-      .get(`http://191.235.243.175/produtos/Aromas/`)
+      .get(`${apiUrl}/produtos/Aromas/`)
       .then((response) => {
         const aromasData = response.data.map((aroma) => ({
           label: aroma.nome_aroma,
@@ -49,7 +49,7 @@ const ProdutosScreen = () => {
         console.error("Error fetching aromas:", error);
       });
     axios
-      .get(`http://191.235.243.175/produtos/Tipo`)
+      .get(`${apiUrl}/produtos/Tipo`)
       .then((response) => {
         const tipoData = response.data.map((aroma) => ({
           label: aroma.nome_categoria,
@@ -62,7 +62,7 @@ const ProdutosScreen = () => {
       });
 
     axios
-      .get(`http://191.235.243.175/produtos/`)
+      .get(`${apiUrl}/produtos/`)
       .then((response) => {
         const produtosData = response.data.map((produto) => ({
           id: produto.id,
@@ -106,7 +106,7 @@ const ProdutosScreen = () => {
         aroma_id: selectedAroma,
       };
       const response = await axios.post(
-        `http://191.235.243.175/produtos/CadastroProduto`,
+        `${apiUrl}/produtos/CadastroProduto`,
         dados
       );
 
@@ -141,7 +141,7 @@ const ProdutosScreen = () => {
         cod_aroma: selectedAroma,
       };
       const response = await axios.put(
-        `http://191.235.243.175/produtos/Atualizar`,
+        `${apiUrl}/produtos/Atualizar`,
         dados
       );
 
@@ -173,7 +173,7 @@ const ProdutosScreen = () => {
 
   const handleDelete = async (item) => {
     axios
-      .delete(`http://191.235.243.175/produtos/${item.id}`)
+      .delete(`${apiUrl}/produtos/${item.id}`)
       .then((response) => {
         if (response.status == "200") {
           Alert.alert("Sucesso!", "Produto deletado com sucesso!");
