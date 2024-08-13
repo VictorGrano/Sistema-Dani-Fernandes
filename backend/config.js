@@ -4,8 +4,8 @@ module.exports = {
     database: {
       host: "localhost",
       user: "root",
-      password: "root",
-      port: "3306",
+      password: "usbw",
+      port: "3307",
       database: "danifernandes",
       charset: "utf8mb4",
     }

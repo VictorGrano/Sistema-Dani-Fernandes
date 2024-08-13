@@ -30,7 +30,7 @@ const UsuariosScreen = () => {
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-  const tipos = ["admin", "almoxarifado", "escritorio"];
+  const tipos = ["admin", "almoxarifado", "comum"];
   const tiposdata = tipos.map((item) => ({
     label: item,
     value: item,
@@ -51,7 +51,7 @@ const UsuariosScreen = () => {
     } catch (error) {
       console.log(error);
     }
-  }, []);
+  }, [usuarios]);
 
   useEffect(() => {
     setFilteredUsuarios(
@@ -118,6 +118,7 @@ const UsuariosScreen = () => {
           usuario.id === usuarioSelecionado.id ? { ...usuario, ...dados } : usuario
         );
         setUsuarios(updatedUsuarios);
+        setModal(false);
       } else {
         Alert.alert("Erro", response.data.message);
       }
@@ -147,7 +148,7 @@ const UsuariosScreen = () => {
 
   const handleDelete = async () => {
     const id = usuarioSelecionado.id
-    axios.delete(`${apiUrl}/usuarios/${id}:id`).then((response) => {
+    axios.delete(`${apiUrl}/usuarios/${id}`).then((response) => {
       if (response.status == "200") {
         Alert.alert("Sucesso!", "Usuário deletado com sucesso!")
       }
@@ -155,6 +156,7 @@ const UsuariosScreen = () => {
         Alert.alert("Erro!", "Erro ao deletar!")
       }
     })
+    setModal(false);
   }
 
   const renderItem = ({ item }) => {

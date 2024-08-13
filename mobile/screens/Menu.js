@@ -29,7 +29,6 @@ const MenuScreen = () => {
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const fetchDados = useCallback(async () => {
-    setLoading(true);
     await axios
       .get(`${apiUrl}/estoque/Locais`)
       .then((response) => {
@@ -67,7 +66,6 @@ const MenuScreen = () => {
       .catch((error) => {
         console.log(error);
       });
-    setLoading(false);
   }, [id]);
 
   useFocusEffect(

@@ -11,7 +11,7 @@ import {
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import { useNavigation } from "@react-navigation/native";
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 const ListaPrateleiraScreen = () => {
   const [produtos, setProdutos] = useState([]);
@@ -82,24 +82,32 @@ const ListaPrateleiraScreen = () => {
       Alert.alert("Erro", "Por favor, insira a quantidade.");
       return;
     }
-  
+
     const quantidadeNumber = parseFloat(quantidade);
     let quantidadeRestante = quantidadeNumber;
     let lotesUsados = [];
-  
+
     for (let i = 0; i < lotes.length; i++) {
       const lote = lotes[i];
       if (quantidadeRestante <= 0) break;
-  
+
       if (quantidadeRestante > lote.quantidade) {
-        lotesUsados.push({ produto_id: selectedProduct, lote_id: lote.id, quantidade: lote.quantidade });
+        lotesUsados.push({
+          produto_id: selectedProduct,
+          lote_id: lote.id,
+          quantidade: lote.quantidade,
+        });
         quantidadeRestante -= lote.quantidade;
       } else {
-        lotesUsados.push({ produto_id: selectedProduct, lote_id: lote.id, quantidade: quantidadeRestante });
+        lotesUsados.push({
+          produto_id: selectedProduct,
+          lote_id: lote.id,
+          quantidade: quantidadeRestante,
+        });
         quantidadeRestante = 0;
       }
     }
-  
+
     if (quantidadeRestante > 0) {
       Alert.alert(
         "Quantidade Insuficiente",
@@ -114,12 +122,15 @@ const ListaPrateleiraScreen = () => {
             onPress: async () => {
               try {
                 for (const dados of lotesUsados) {
-                  await axios.post(
-                    "${apiUrl}/estoque/AddPrateleira",
-                    { ...dados, concluido: 0 }
-                  );
+                  await axios.post("${apiUrl}/estoque/AddPrateleira", {
+                    ...dados,
+                    concluido: 0,
+                  });
                 }
-                Alert.alert("Sucesso!", "Produto adicionado com a quantidade disponível.");
+                Alert.alert(
+                  "Sucesso!",
+                  "Produto adicionado com a quantidade disponível."
+                );
                 fetchListaPrateleira(); // Refresh the list
               } catch (error) {
                 if (
@@ -138,10 +149,10 @@ const ListaPrateleiraScreen = () => {
     } else {
       try {
         for (const dados of lotesUsados) {
-          await axios.post(
-            `${apiUrl}/estoque/AddPrateleira`,
-            { ...dados, concluido: 0 }
-          );
+          await axios.post(`${apiUrl}/estoque/AddPrateleira`, {
+            ...dados,
+            concluido: 0,
+          });
         }
         Alert.alert("Sucesso!", "Produto adicionado com sucesso na lista!");
         fetchListaPrateleira(); // Refresh the list
@@ -157,7 +168,6 @@ const ListaPrateleiraScreen = () => {
       }
     }
   };
-  
 
   const handleExcluir = (itemId) => {
     axios
@@ -173,7 +183,9 @@ const ListaPrateleiraScreen = () => {
 
   const handleConfere = (itemId) => {
     axios
-      .put(`${apiUrl}/estoque/ListaPrateleira/Concluido/${itemId}`, { concluido: true })
+      .put(`${apiUrl}/estoque/ListaPrateleira/Concluido/${itemId}`, {
+        concluido: true,
+      })
       .then(() => {
         Alert.alert("Sucesso!", "Produto marcado como concluído!");
         fetchListaPrateleira(); // Refresh the list
@@ -202,9 +214,7 @@ const ListaPrateleiraScreen = () => {
             onChange={handleProductSelect}
           />
           {productNotFound && (
-            <Text style={styles.error}>
-              Produto não encontrado no estoque.
-            </Text>
+            <Text style={styles.error}>Produto não encontrado no estoque.</Text>
           )}
           {selectedProduct && !productNotFound && (
             <View style={styles.containerAdd}>
@@ -243,13 +253,39 @@ const ListaPrateleiraScreen = () => {
               <Text style={styles.tableHeaderText}>Ações</Text>
             </View>
             <FlatList
-              data={listaPrateleira}
+              data={listaPrateleira.sort((a, b) => a.concluido - b.concluido)}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
-                <View style={[styles.tableRow, item.concluido && styles.tableRowCompleted]}>
-                  <Text style={[styles.tableCell, item.concluido && styles.tableCellCompleted]}>{item.nome_produto}</Text>
-                  <Text style={[styles.tableCell, item.concluido && styles.tableCellCompleted]}>{item.nome_lote}</Text>
-                  <Text style={[styles.tableCell, item.concluido && styles.tableCellCompleted]}>{item.quantidade}</Text>
+                <View
+                  style={[
+                    styles.tableRow,
+                    item.concluido && styles.tableRowCompleted,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      item.concluido && styles.tableCellCompleted,
+                    ]}
+                  >
+                    {item.nome_produto}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      item.concluido && styles.tableCellCompleted,
+                    ]}
+                  >
+                    {item.nome_lote}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      item.concluido && styles.tableCellCompleted,
+                    ]}
+                  >
+                    {item.quantidade}
+                  </Text>
                   <View style={styles.actionsContainer}>
                     {!item.concluido && (
                       <TouchableOpacity
