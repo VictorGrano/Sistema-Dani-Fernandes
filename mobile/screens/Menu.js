@@ -25,6 +25,7 @@ const MenuScreen = () => {
   const [total, setTotal] = useState();
   const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [modalEntradaSaida, setModalEntradaSaida] = useState(false);
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -129,6 +130,19 @@ const MenuScreen = () => {
   const handleBuscarInsumos = () => {
     setModal(false);
     navigation.navigate("Buscar Insumos");
+  };
+
+  const handleModalEntradaSaidaOpen = () => {
+    setModalEntradaSaida(true);
+  };
+
+  const handleModalEntradaSaidaClose = () => {
+    setModalEntradaSaida(false);
+  };
+
+  const handleEntradaSaida = (tipoMovimento, tipoItem) => {
+    setModalEntradaSaida(false);
+    navigation.navigate("Escanear", { tipo: tipoMovimento, item: tipoItem });
   };
 
   if (loading) {
@@ -246,18 +260,54 @@ const MenuScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Escanear", { tipo: "entrada" })}
+            onPress={handleModalEntradaSaidaOpen}
           >
-            <FontAwesome5 name="upload" size={24} color="white" />
-            <Text style={styles.buttonText}>Registrar Entrada</Text>
+            <FontAwesome5 name="exchange-alt" size={24} color="white" />
+            <Text style={styles.buttonText}>Entrada/Saída</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate("Escanear", { tipo: "saida" })}
+          <Modal
+            visible={modalEntradaSaida}
+            animationType="slide"
+            transparent={true}
           >
-            <FontAwesome5 name="download" size={24} color="white" />
-            <Text style={styles.buttonText}>Registrar Saída</Text>
-          </TouchableOpacity>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text style={styles.modalHeader}>Escolher Ação</Text>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => handleEntradaSaida("entrada", "produto")}
+                >
+                  <Text style={styles.modalButtonText}>
+                    Entrada de Produtos
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => handleEntradaSaida("saida", "produto")}
+                >
+                  <Text style={styles.modalButtonText}>Saída de Produtos</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => handleEntradaSaida("entrada", "insumo")}
+                >
+                  <Text style={styles.modalButtonText}>Entrada de Insumos</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => handleEntradaSaida("saida", "insumo")}
+                >
+                  <Text style={styles.modalButtonText}>Saída de Insumos</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={handleModalEntradaSaidaClose}
+                >
+                  <Text style={styles.modalCloseButtonText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate("Lista Prateleira")}

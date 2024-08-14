@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Select from "react-select";
-import { format, parse } from "date-fns";
+import { format, parse, parseISO, addHours } from "date-fns";
 import "./styles/App.css";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -125,7 +125,7 @@ function App() {
             <p>
               Número da caixa: {i + 1}/{quantidadeCaixas}
             </p>
-            <p>Mês de Fabricação: {format(dataFabricacao, 'MM/yyyy')}</p>
+            <p>Mês de Fabricação: {format(new Date(dataFabricacao), 'MM/yyyy')}</p>
             <p>Validade: {`${mesValidade}/${anoValidade}`}</p>
           </div>
           <QRCodeSVG value={qrValue} className="qrCode" />
@@ -167,12 +167,13 @@ function App() {
         .get(`${apiUrl}/produtos/InfoProduto?id=${productId}`)
         .then((response) => {
           const { sigla, cod_aroma } = response.data;
-          const date = new Date(dataFabricacao);
-          const formattedDate = format(date, "MMddyy");
+          const date = parseISO(dataFabricacao);
+          const adjustedDate = addHours(date, 12); // Adiciona 12 horas para ajustar o fuso horário
+          const formattedDate = format(adjustedDate, "MMddyy");
           const nomeLote = `${sigla}${cod_aroma}${formattedDate}`;
           setNewLoteName(nomeLote);
           setCreatingLote(false);
-          setDataFabricacao(format(date, "dd-MM-yyyy")); // Formata a data de fabricação
+          setDataFabricacao(format(adjustedDate, "yyyy-MM-dd")); // Formata a data de fabricação
         })
         .catch((error) => {
           console.error("Error fetching product details:", error);
@@ -192,7 +193,8 @@ function App() {
   const extractFabricacaoDate = (loteName) => {
     const dateStr = loteName.slice(-6);
     const date = parse(dateStr, "MMddyy", new Date());
-    return format(date, "yyyy-MM-dd");
+    const adjustedDate = addHours(date, 12); // Adiciona 12 horas para ajustar o fuso horário
+    return format(adjustedDate, "yyyy-MM-dd");
   };
 
   const handleLoteChange = (selectedOption) => {
@@ -297,6 +299,7 @@ function App() {
             </div>
           )}
           <br />
+          <br />
           <label>Digite a quantidade na caixa:</label>
           <br />
           <input
@@ -358,7 +361,7 @@ function App() {
               <p>Produto: {productName}</p>
               <p>Quantidade: {quantidade}</p>
               <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
-              <p>Mês de Fabricação: {format(dataFabricacao, 'MM/yyyy')}</p>
+              <p>Mês de Fabricação: {format(new Date(dataFabricacao), 'MM/yyyy')}</p>
               <p>Validade: {`${mesValidade}/${anoValidade}`}</p>
             </div>
             <QRCodeSVG value={qrValue} />

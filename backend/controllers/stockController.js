@@ -340,6 +340,66 @@ exports.postEntrada = (req, res) => {
   });
 };
 
+exports.postEntradaInsumo = (req, res) => {
+  const {
+    id,
+    quantidade,
+    quantidade_caixas,
+    localArmazenado,
+    coluna,
+    user,
+    iduser,
+  } = req.body;
+
+  if (!id || !quantidade || !localArmazenado || !quantidade_caixas || !coluna) {
+    console.error("Todos os campos são necessários:", req.body);
+    return res.status(400).json({ error: "Todos os campos são necessários" });
+  }
+
+  console.log("Dados recebidos:", req.body);
+
+  const updateQuery =
+    "UPDATE insumos SET estoque = estoque + ?, local_armazenado = ?, coluna = ? WHERE id = ?";
+
+  connection.query(
+    updateQuery,
+    [quantidade, localArmazenado, coluna, parseInt(id)],
+    (updateError) => {
+      if (updateError) {
+        console.error("Erro ao atualizar insumo:", updateError);
+        res.status(500).json({ error: "Erro ao atualizar insumo" });
+        return;
+      }
+
+      connection.query(
+        "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado + ?, quantidade_insumos = quantidade_insumos + ? WHERE id = ?",
+        [quantidade_caixas, quantidade, localArmazenado],
+        (updateStockError) => {
+          if (updateStockError) {
+            console.error("Erro ao atualizar estoque:", updateStockError);
+            res.status(500).json({ error: "Erro ao atualizar estoque" });
+            return;
+          }
+          // Registro da mudança
+          logChange(
+            iduser,
+            user,
+            "insumos",
+            "entrada",
+            id,
+            "NÃO POSSUI", // lote não se aplica a insumos
+            JSON.stringify({ quantidade, quantidade_caixas }),
+            0,
+            localArmazenado,
+            coluna
+          );
+          res.json({ message: "Insumo atualizado com sucesso" });
+        }
+      );
+    }
+  );
+};
+
 exports.postSaida = (req, res) => {
   const { id, quantidade, lote, quantidade_caixas, user, iduser } = req.body;
 
@@ -414,6 +474,81 @@ exports.postSaida = (req, res) => {
       );
     } else {
       res.status(404).json({ error: "Lote não encontrado" });
+    }
+  });
+};
+
+exports.postSaidaInsumo = (req, res) => {
+  const { id, quantidade, quantidade_caixas, user, iduser } = req.body;
+
+  if (!id || !quantidade || !quantidade_caixas) {
+    console.error("Todos os campos são necessários:", req.body);
+    return res.status(400).json({ error: "Todos os campos são necessários" });
+  }
+
+  console.log("Dados recebidos:", req.body);
+
+  const checkQuery =
+    "SELECT id, estoque, local_armazenado, coluna FROM insumos WHERE id = ?";
+
+  connection.query(checkQuery, [id], (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+
+    if (results.length > 0) {
+      const insumoResult = results[0];
+      if (insumoResult.quantidade < quantidade) {
+        return res
+          .status(400)
+          .json({ error: "Quantidade insuficiente no insumo" });
+      }
+
+      const updateQuery =
+        "UPDATE insumos SET estoque = estoque - ? WHERE id = ?";
+      connection.query(
+        updateQuery,
+        [quantidade, quantidade_caixas, parseInt(insumoResult.id)],
+        (updateError) => {
+          if (updateError) {
+            console.error("Erro ao atualizar insumo:", updateError);
+            res.status(500).json({ error: "Erro ao atualizar insumo" });
+            return;
+          }
+          connection.query(
+            "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado - ?, quantidade_insumos = quantidade_insumos - ? WHERE id = ?",
+            [quantidade_caixas, quantidade, insumoResult.local_armazenado_id],
+            (updateStockError) => {
+              if (updateStockError) {
+                console.error("Erro ao atualizar estoque:", updateStockError);
+                res.status(500).json({ error: "Erro ao atualizar estoque" });
+                return;
+              }
+              // Registro da mudança
+              logChange(
+                iduser,
+                user,
+                "insumos",
+                "saída",
+                id,
+                null, // lote não se aplica a insumos
+                JSON.stringify({ quantidade, quantidade_caixas }),
+                JSON.stringify({
+                  quantidade: insumoResult.quantidade,
+                  quantidade_caixas: insumoResult.quantidade_caixas,
+                }),
+                insumoResult.local_armazenado_id,
+                insumoResult.coluna
+              );
+              res.json({ message: "Insumo atualizado com sucesso" });
+            }
+          );
+        }
+      );
+    } else {
+      res.status(404).json({ error: "Insumo não encontrado" });
     }
   });
 };

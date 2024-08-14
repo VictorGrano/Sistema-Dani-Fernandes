@@ -9,6 +9,7 @@ router.put("/ListaPrateleira/Concluido/:id", stockController.putPrateleira);
 router.delete("/ListaPrateleira/:id", stockController.deletePrateleira);
 router.post("/AddPrateleira", stockController.postPrateleira);
 router.post("/Entrada", stockController.postEntrada);
-router.post("/Saida", stockController.postSaida);
+router.post("/EntradaInsumo", stockController.postEntradaInsumo);
+router.post("/SaidaInsumo", stockController.postSaidaInsumo);
 
 module.exports = router;

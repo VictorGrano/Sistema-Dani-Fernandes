@@ -20,6 +20,8 @@ import UsuariosScreen from './screens/Usuarios';
 import InsumosScreen from './screens/Insumos';
 import ProdutosScreen from './screens/Produtos';
 import ListaPrateleiraScreen from './screens/ListaPrateleira';
+import EntradaInsumoScreen from './screens/EntradaInsumo';
+import SaidaInsumoScreen from './screens/SaidaInsumo';
 
 const Stack = createStackNavigator();
 
@@ -73,8 +75,18 @@ const App = () => {
           options={{ title: 'Registrar Entrada' }}
         />
         <Stack.Screen
+          name="Entrada Insumo"
+          component={EntradaInsumoScreen}
+          options={{ title: 'Registrar Entrada' }}
+        />
+        <Stack.Screen
           name="Saida"
           component={SaidaScreen}
+          options={{ title: 'Registrar Saída' }}
+        />
+        <Stack.Screen
+          name="Saida Insumo"
+          component={SaidaInsumoScreen}
           options={{ title: 'Registrar Saída' }}
         />
         <Stack.Screen

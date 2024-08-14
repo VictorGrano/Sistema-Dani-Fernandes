@@ -69,6 +69,7 @@ button:hover {
   height: 5cm; /* Altura da etiqueta */
   page-break-after: always; /* Garante que cada etiqueta esteja em uma página separada */
   text-align: left;
+  margin: auto; /* Centraliza horizontalmente */
 }
 
 .etiqueta div {

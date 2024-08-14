@@ -15,7 +15,7 @@ const EscanearScreen = ({ route }) => {
   const [scanned, setScanned] = useState(false);
   const [linkEntrada, setLinkEntrada] = useState(false);
   const [linkSaida, setLinkSaida] = useState(false);
-  const { tipo } = route.params;
+  const { tipo, item } = route.params;
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -41,7 +41,7 @@ const EscanearScreen = ({ route }) => {
   const handleBarCodeScanned = ({ data }) => {
     setScanned(true);
     const dados = JSON.parse(data);
-    if (tipo === "entrada") {
+    if (tipo === "entrada" && item === "produto") {
       navigation.navigate("Entrada", {
         id: dados.id,
         quantidade: dados.quantidade,
@@ -49,11 +49,21 @@ const EscanearScreen = ({ route }) => {
         validade: dados.validade,
         fabricacao: dados.fabricacao,
       });
-    } else if (tipo === "saida") {
+    } else if (tipo === "saida" && item === "produto") {
       navigation.navigate("Saida", {
         id: dados.id,
         quantidade: dados.quantidade,
         lote: dados.lote,
+      });
+    } else if (tipo === "entrada" && item === "insumo") {
+      navigation.navigate("Entrada Insumo", {
+        id: dados.id,
+        quantidade: dados.quantidade,
+      });
+    } else if (tipo === "saida" && item === "insumo") {
+      navigation.navigate("Saida Insumo", {
+        id: dados.id,
+        quantidade: dados.quantidade,
       });
     }
   };
@@ -86,7 +96,7 @@ const EscanearScreen = ({ route }) => {
         {linkEntrada && (
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Entrada")}
+            onPress={() => item === "produto" ? navigation.navigate("Entrada") : navigation.navigate("Entrada Insumo")}
           >
             <Text style={styles.buttonText}>Dar Entrada manualmente</Text>
           </TouchableOpacity>
@@ -94,7 +104,7 @@ const EscanearScreen = ({ route }) => {
         {linkSaida && (
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Saida")}
+            onPress={() => item === "produto" ? navigation.navigate("Saida") : navigation.navigate("Saida Insumo")}
           >
             <Text style={styles.buttonText}>Dar Saída manualmente</Text>
           </TouchableOpacity>
