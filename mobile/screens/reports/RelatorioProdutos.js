@@ -13,6 +13,7 @@ import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Dropdown } from "react-native-element-dropdown";
+import Loading from "../../components/Loading";
 
 const RelatorioProdutosScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,7 @@ const RelatorioProdutosScreen = () => {
   const [selectedAroma, setSelectedAroma] = useState(null);
   const [selectedTipo, setSelectedTipo] = useState(null);
   const [aromas, setAromas] = useState([]);
-  const [tipo, setTipo] = useState([]);
+  const [tipos, setTipos] = useState([]);
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -36,35 +37,38 @@ const RelatorioProdutosScreen = () => {
     fetchData();
   }, []);
 
+  // Carrega dados de produtos, aromas e tipos
   const fetchData = async () => {
     setLoading(true);
     try {
-      const produtosResponse = await axios.get(
-        `${apiUrl}/produtos/`
+      const [produtosResponse, aromasResponse, tipoResponse] = await Promise.all([
+        axios.get(`${apiUrl}/produtos/`),
+        axios.get(`${apiUrl}/produtos/Aromas`),
+        axios.get(`${apiUrl}/produtos/Tipo`)
+      ]);
+      
+      setProdutos(
+        produtosResponse.data.map((produto) => ({
+          label: produto.nome,
+          value: produto.id,
+        }))
       );
-      const produtosData = produtosResponse.data.map((produto) => ({
-        label: produto.nome,
-        value: produto.id,
-      }));
-      setProdutos(produtosData);
-      const aromasResponse = await axios.get(
-        `${apiUrl}/produtos/Aromas`
+      
+      setAromas(
+        aromasResponse.data.map((aroma) => ({
+          label: aroma.nome_aroma,
+          value: aroma.cod_aroma,
+        }))
       );
-      const aromaData = aromasResponse.data.map((aroma) => ({
-        label: aroma.nome_aroma,
-        value: aroma.cod_aroma,
-      }));
-      setAromas(aromaData);
-      const tipoResponse = await axios.get(
-        `${apiUrl}/produtos/Tipo`
+      
+      setTipos(
+        tipoResponse.data.map((tipo) => ({
+          label: tipo.nome_categoria,
+          value: tipo.id,
+        }))
       );
-      const tipoData = tipoResponse.data.map((aroma) => ({
-        label: aroma.nome_categoria,
-        value: aroma.id,
-      }));
-      setTipo(tipoData);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      Alert.alert("Erro", "Falha ao carregar dados. Tente novamente.");
     }
     setLoading(false);
   };
@@ -75,35 +79,32 @@ const RelatorioProdutosScreen = () => {
         `${apiUrl}/produtos/RelatorioProdutos`,
         filters
       );
-      const produtosData = response.data.map((produto) => ({
+      return response.data.map((produto) => ({
         nome: produto.nome,
         descricao: produto.descricao,
         estoque: parseFloat(produto.estoque_total) || 0,
         unidade: produto.unidade,
         valor_unitario: parseFloat(produto.preco) || 0,
-        valor_total:
-          (parseFloat(produto.preco) || 0) *
-          (parseFloat(produto.estoque_total) || 0),
+        valor_total: (parseFloat(produto.preco) || 0) * (parseFloat(produto.estoque_total) || 0),
       }));
-      return produtosData;
     } catch (error) {
-      console.error("Error fetching products:", error);
+      Alert.alert("Erro", "Falha ao buscar produtos.");
       throw error;
     }
   };
 
-  const handleAplicarFiltro = async () => {
+  const aplicarFiltro = async () => {
     setLoading(true);
     try {
       await fetchProdutos();
     } catch (error) {
-      console.error("Error applying filters:", error);
+      console.error("Erro ao aplicar filtros:", error);
     }
     setLoading(false);
     setMostraFiltros(false);
   };
 
-  const handleFilterClear = async () => {
+  const limparFiltros = async () => {
     setFilters({
       id: "",
       categoria_id: "",
@@ -130,16 +131,8 @@ const RelatorioProdutosScreen = () => {
     setLoading(true);
     try {
       const produtos = await fetchProdutos();
-      let totalEstoque = 0;
-      let valorTotalEstoque = 0;
-
-      produtos.forEach((item) => {
-        totalEstoque += item.estoque;
-        valorTotalEstoque += item.valor_total;
-      });
-
-      totalEstoque = isNaN(totalEstoque) ? 0 : totalEstoque;
-      valorTotalEstoque = isNaN(valorTotalEstoque) ? 0 : valorTotalEstoque;
+      let totalEstoque = produtos.reduce((acc, item) => acc + item.estoque, 0);
+      let valorTotalEstoque = produtos.reduce((acc, item) => acc + item.valor_total, 0);
 
       let htmlContent = `
         <html>
@@ -186,6 +179,7 @@ const RelatorioProdutosScreen = () => {
                 })}</td>
               </tr>`;
       });
+
       htmlContent += `
             </table>
           </body>
@@ -193,22 +187,18 @@ const RelatorioProdutosScreen = () => {
 
       const { uri } = await Print.printToFileAsync({
         html: htmlContent,
-        base64: false,
         fileName: `Relatorio_Estoque_${
           new Date().toISOString().split("T")[0]
         }.pdf`,
       });
-      console.log("File has been saved to:", uri);
 
       Alert.alert(
         "PDF Gerado",
-        "O relatório de estoque foi gerado com sucesso!",
-        [{ text: "OK" }]
+        "O relatório de estoque foi gerado com sucesso!"
       );
 
       await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
     } catch (error) {
-      console.error("Error generating PDF:", error);
       Alert.alert("Erro", "Ocorreu um erro ao gerar o PDF.");
     } finally {
       setLoading(false);
@@ -217,10 +207,7 @@ const RelatorioProdutosScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Carregando...</Text>
-      </View>
+      <Loading/>
     );
   }
 
@@ -234,13 +221,11 @@ const RelatorioProdutosScreen = () => {
         onPress={() => setMostraFiltros(!mostraFiltros)}
       >
         <FontAwesome5 name="filter" size={24} color="white" />
-        {mostraFiltros ? (
-          <Text style={styles.buttonText}>Ocultar filtros</Text>
-        ) : (
-          <Text style={styles.buttonText}>Mostrar filtros</Text>
-        )}
+        <Text style={styles.buttonText}>
+          {mostraFiltros ? "Ocultar filtros" : "Mostrar filtros"}
+        </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={handleFilterClear}>
+      <TouchableOpacity style={styles.button} onPress={limparFiltros}>
         <FontAwesome5 name="trash" size={24} color="white" />
         <Text style={styles.buttonText}>Limpar filtros</Text>
       </TouchableOpacity>
@@ -274,7 +259,7 @@ const RelatorioProdutosScreen = () => {
           />
           <Dropdown
             style={styles.dropdown}
-            data={tipo}
+            data={tipos}
             search={true}
             labelField="label"
             valueField="value"
@@ -288,17 +273,17 @@ const RelatorioProdutosScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="Preço"
-            value={filters.lote}
+            value={filters.preco}
             onChangeText={(value) => handleFilterChange("preco", value)}
           />
-          <TouchableOpacity style={styles.button} onPress={handleAplicarFiltro}>
+          <TouchableOpacity style={styles.button} onPress={aplicarFiltro}>
             <FontAwesome5 name="check" size={24} color="white" />
             <Text style={styles.buttonText}>Aplicar filtros</Text>
           </TouchableOpacity>
         </View>
       )}
       <TouchableOpacity style={styles.button} onPress={gerarRelatorio}>
-        <FontAwesome5 name="check" size={24} color="white" />
+        <FontAwesome5 name="file-pdf" size={24} color="white" />
         <Text style={styles.buttonText}>Gerar PDF</Text>
       </TouchableOpacity>
     </View>

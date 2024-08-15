@@ -11,8 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-
+import Loading from "../components/Loading";
 
 const EntradaScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -35,40 +34,48 @@ const EntradaScreen = ({ route }) => {
   const [isNewLote, setIsNewLote] = useState(false);
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
+  const [loading, setLoading] = useState(false); // Estado de loading
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
-    setNomeUser(AsyncStorage.getItem("nome"));
-    setIdUser(AsyncStorage.getItem("id"));
-    axios
-      .get(`${apiUrl}/produtos/`)
-      .then((response) => {
-        const produtosData = response.data.map((produto) => ({
+    const fetchData = async () => {
+      setLoading(true); // Inicia o loading
+      try {
+        const storedNome = await AsyncStorage.getItem("nome");
+        const storedID = await AsyncStorage.getItem("id");
+        setNomeUser(storedNome || "Usuário");
+        setIdUser(storedID || null);
+
+        const [produtosResponse, locaisResponse] = await Promise.all([
+          axios.get(`${apiUrl}/produtos/`),
+          axios.get(`${apiUrl}/estoque/Locais`),
+        ]);
+
+        const produtosData = produtosResponse.data.map((produto) => ({
           label: produto.nome,
           value: produto.id,
         }));
         setProdutos(produtosData);
-      })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-      });
-    axios
-      .get(`${apiUrl}/estoque/Locais`)
-      .then((response) => {
-        const locaisData = response.data.map((local) => ({
+
+        const locaisData = locaisResponse.data.map((local) => ({
           label: local.nome_local,
           value: local.id,
         }));
         setLocais(locaisData);
-      })
-      .catch((error) => {
-        console.error("Error fetching locations:", error);
-      });
-  }, []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Finaliza o loading
+      }
+    };
+
+    fetchData();
+  }, [apiUrl]);
 
   useEffect(() => {
     if (selectedProduct) {
+      setLoading(true); // Inicia o loading
       axios
         .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
@@ -96,58 +103,12 @@ const EntradaScreen = ({ route }) => {
           } else {
             console.error("Error fetching lots:", error);
           }
+        })
+        .finally(() => {
+          setLoading(false); // Finaliza o loading
         });
     }
-  }, [selectedProduct]);
-
-  const handleValidadeChange = (text) => {
-    if (text.length === 2 && validade.length < 2) {
-      setValidade(text + "-");
-    } else {
-      setValidade(text);
-    }
-  };
-
-  const handleFabricacaoChange = (text) => {
-    if (text.length === 2 && fabricacao.length < 2) {
-      setFabricacao(text + "-");
-    } else {
-      setFabricacao(text);
-    }
-  };
-
-  const handleColunaChange = (text) => {
-    setColuna(text);
-  };
-
-  const handleQuantidadeCaixasChange = (text) => {
-    setQuantidadeCaixas(text);
-  };
-
-  const handleQuantidadeChange = (text) => {
-    setQuantidade(text);
-  };
-
-  const handleLoteChange = (text) => {
-    setLote(text);
-  };
-
-  const handleNewLoteChange = (text) => {
-    setNewLote(text);
-  };
-
-  useEffect(() => {
-    const fetchNome = async () => {
-      const storedNome = await AsyncStorage.getItem("nome");
-      setNomeUser(storedNome || "Usuário");
-    };
-    const fetchID = async () => {
-      const storedID = await AsyncStorage.getItem("id");
-      setIdUser(storedID || null);
-    };
-    fetchNome();
-    fetchID();
-  }, []);
+  }, [selectedProduct, id, apiUrl]);
 
   const handleEntrar = () => {
     const quantidadeTotal = quantidade * (quantidadeCaixas || 1);
@@ -163,7 +124,8 @@ const EntradaScreen = ({ route }) => {
       user: nomeUser,
       iduser: idUser,
     };
-    console.log(entradaData);
+
+    setLoading(true); // Inicia o loading
     axios
       .post(`${apiUrl}/estoque/Entrada`, entradaData)
       .then((response) => {
@@ -172,6 +134,9 @@ const EntradaScreen = ({ route }) => {
       })
       .catch((error) => {
         console.error("Erro ao criar entrada:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading
       });
   };
 
@@ -183,6 +148,8 @@ const EntradaScreen = ({ route }) => {
       setSelectedLote(lote);
       setValidade(validade);
       setFabricacao(fabricacao);
+
+      setLoading(true); // Inicia o loading
       axios
         .get(`${apiUrl}/produtos/InfoProduto?id=${id}`)
         .then((response) => {
@@ -190,7 +157,11 @@ const EntradaScreen = ({ route }) => {
         })
         .catch((error) => {
           console.error("Error fetching product data:", error);
+        })
+        .finally(() => {
+          setLoading(false); // Finaliza o loading
         });
+
       axios
         .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
@@ -213,7 +184,11 @@ const EntradaScreen = ({ route }) => {
           console.error("Error fetching lots:", error);
         });
     }
-  }, [route.params]);
+  }, [route.params, apiUrl]);
+
+  if (loading) {
+    return <Loading />; // Exibe o componente Loading
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -232,7 +207,7 @@ const EntradaScreen = ({ route }) => {
             editable={true}
             keyboardType="numeric"
             placeholder="Digite a quantidade de caixas aqui"
-            onChangeText={handleQuantidadeCaixasChange}
+            onChangeText={setQuantidadeCaixas}
             value={quantidadeCaixas}
           />
           <Text style={styles.subheader}>Quantidade de produtos na Caixa:</Text>
@@ -240,13 +215,11 @@ const EntradaScreen = ({ route }) => {
             style={styles.input}
             value={String(quantidade)}
             editable={false}
-            onChangeText={handleQuantidadeChange}
           />
           <Text style={styles.subheader}>Lote:</Text>
           <TextInput
             style={styles.input}
             value={String(selectedLote)}
-            onChangeText={handleLoteChange}
             editable={false}
           />
           <Text style={styles.subheader}>Quantidade no Lote:</Text>
@@ -263,7 +236,6 @@ const EntradaScreen = ({ route }) => {
             value={String(fabricacao)}
             editable={false}
             keyboardType="numeric"
-            onChangeText={handleFabricacaoChange}
           />
           <Text style={styles.subheader}>Data de Validade:</Text>
           <TextInput
@@ -271,7 +243,6 @@ const EntradaScreen = ({ route }) => {
             value={String(validade)}
             editable={false}
             keyboardType="numeric"
-            onChangeText={handleValidadeChange}
           />
           <Text style={styles.subheader}>Local Armazenado:</Text>
           <Dropdown
@@ -282,15 +253,13 @@ const EntradaScreen = ({ route }) => {
             valueField="value"
             placeholder="Selecione um local para armazenar"
             value={selectedLocal}
-            onChange={(item) => {
-              setSelectedLocal(item.value);
-            }}
+            onChange={(item) => setSelectedLocal(item.value)}
           />
           <Text style={styles.subheader}>Coluna armazenada:</Text>
           <TextInput
             style={styles.input}
             placeholder="Ex: A1"
-            onChangeText={handleColunaChange}
+            onChangeText={setColuna}
             value={coluna}
           />
           <TouchableOpacity style={styles.button} onPress={handleEntrar}>
@@ -321,7 +290,7 @@ const EntradaScreen = ({ route }) => {
             editable={true}
             keyboardType="numeric"
             placeholder="Digite a quantidade de caixas aqui"
-            onChangeText={handleQuantidadeCaixasChange}
+            onChangeText={setQuantidadeCaixas}
             value={quantidadeCaixas}
           />
           <Text style={styles.subheader}>Quantidade de produtos na Caixa:</Text>
@@ -329,7 +298,7 @@ const EntradaScreen = ({ route }) => {
             style={styles.input}
             placeholder="Quantidade"
             keyboardType="numeric"
-            onChangeText={handleQuantidadeChange}
+            onChangeText={setQuantidade}
             value={quantidade}
           />
           <Text style={styles.subheader}>Lote:</Text>
@@ -344,7 +313,7 @@ const EntradaScreen = ({ route }) => {
                 style={styles.input}
                 placeholder="Nome do Lote"
                 value={newLote}
-                onChangeText={handleNewLoteChange}
+                onChangeText={setNewLote}
               />
               {lotes.length > 0 ? (
                 <TouchableOpacity
@@ -367,9 +336,7 @@ const EntradaScreen = ({ route }) => {
                 valueField="value"
                 placeholder="Selecione um lote"
                 value={selectedLote}
-                onChange={(item) => {
-                  setSelectedLote(item.label);
-                }}
+                onChange={(item) => setSelectedLote(item.label)}
               />
               <TouchableOpacity
                 style={styles.button}
@@ -395,7 +362,7 @@ const EntradaScreen = ({ route }) => {
             placeholder="MM-YYYY"
             keyboardType="numeric"
             value={fabricacao}
-            onChangeText={handleFabricacaoChange}
+            onChangeText={setFabricacao}
             maxLength={7}
           />
           <Text style={styles.subheader}>Data de Validade:</Text>
@@ -404,7 +371,7 @@ const EntradaScreen = ({ route }) => {
             placeholder="DD-MM-YYYY"
             keyboardType="numeric"
             value={validade}
-            onChangeText={handleValidadeChange}
+            onChangeText={setValidade}
             maxLength={10}
           />
           <Text style={styles.subheader}>Local Armazenado:</Text>
@@ -416,15 +383,13 @@ const EntradaScreen = ({ route }) => {
             valueField="value"
             placeholder="Selecione um local para armazenar"
             value={selectedLocal}
-            onChange={(item) => {
-              setSelectedLocal(item.value);
-            }}
+            onChange={(item) => setSelectedLocal(item.value)}
           />
           <Text style={styles.subheader}>Coluna armazenada:</Text>
           <TextInput
             style={styles.input}
             placeholder="Ex: A1"
-            onChangeText={handleColunaChange}
+            onChangeText={setColuna}
             value={coluna}
           />
           <TouchableOpacity style={styles.buttonEntrada} onPress={handleEntrar}>

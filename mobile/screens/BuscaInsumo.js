@@ -4,20 +4,21 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
 } from "react-native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
-import { useNavigation } from "@react-navigation/native";
+import Loading from "../components/Loading"; // Importa o componente de Loading
 
 const BuscaInsumosScreen = () => {
   const [insumos, setInsumos] = useState([]);
   const [selectedInsumo, setSelectedInsumo] = useState(null);
   const [insumoDetails, setInsumoDetails] = useState(null);
+  const [loading, setLoading] = useState(false); // Estado de loading
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-  
+
   useEffect(() => {
+    setLoading(true); // Inicia o loading
     axios
       .get(`${apiUrl}/insumos/`)
       .then((response) => {
@@ -27,21 +28,33 @@ const BuscaInsumosScreen = () => {
         }));
         setInsumos(insumosData);
       })
-      .catch()
-  }, []);
+      .catch((error) => {
+        console.error("Error fetching insumos:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading
+      });
+  }, [apiUrl]);
 
   const handleInsumoSelect = (item) => {
     setSelectedInsumo(item.value);
+    setLoading(true); // Inicia o loading
     axios
       .get(`${apiUrl}/insumos/InfoInsumo?id=${item.value}`)
       .then((response) => {
         setInsumoDetails(response.data);
-        console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching product details:", error);
+        console.error("Error fetching insumo details:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading
       });
   };
+
+  if (loading) {
+    return <Loading />; // Exibe o componente Loading
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -52,7 +65,7 @@ const BuscaInsumosScreen = () => {
         search={true}
         labelField="label"
         valueField="value"
-        placeholder="Selecione um produto"
+        placeholder="Selecione um insumo"
         value={selectedInsumo}
         onChange={handleInsumoSelect}
       />
@@ -62,7 +75,7 @@ const BuscaInsumosScreen = () => {
           <Text style={styles.detailsText}>Tipo de Insumo: {insumoDetails.tipo_insumo}</Text>
           <Text style={styles.detailsText}>
             Estoque:{" "}
-            {insumoDetails.estoque.toLocaleString('pt-br') || "Não há esse produto no estoque."}
+            {insumoDetails.estoque.toLocaleString('pt-br') || "Não há esse insumo no estoque."}
           </Text>
           <Text style={styles.detailsText}>
             Preço Unitário: R${insumoDetails.preco.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0"}
@@ -71,7 +84,7 @@ const BuscaInsumosScreen = () => {
             Descrição: {insumoDetails.descricao || "Não há descrição."}
           </Text>
           <Text style={styles.detailsText}>
-            Local Armazenado: {insumoDetails.nome_local || "Não há descrição."}
+            Local Armazenado: {insumoDetails.nome_local || "Não há local de armazenamento."}
           </Text>
           <Text style={styles.detailsText}>
             Coluna: {insumoDetails.coluna || "Não há descrição."}
@@ -117,18 +130,6 @@ const styles = StyleSheet.create({
   detailsText: {
     fontSize: 16,
     marginBottom: 10,
-  },
-  button: {
-    backgroundColor: "#D8B4E2",
-    padding: 15,
-    marginVertical: 10,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
   },
 });
 

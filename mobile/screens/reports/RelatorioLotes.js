@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
-  Button,
   Text,
   Alert,
   TouchableOpacity,
@@ -11,16 +10,20 @@ import axios from "axios";
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import { Dropdown } from "react-native-element-dropdown";
+import Loading from "../../components/Loading"; // Importe o componente de Loading
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 const RelatorioLotesScreen = () => {
   const [produtos, setProdutos] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
   const [lotes, setLotes] = useState([]);
+  const [loading, setLoading] = useState(false); // Estado de loading
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   
   useEffect(() => {
+    setLoading(true); // Inicia o loading
     axios
       .get(`${apiUrl}/produtos/`)
       .then((response) => {
@@ -32,41 +35,48 @@ const RelatorioLotesScreen = () => {
       })
       .catch((error) => {
         console.error("Error fetching products:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading
       });
-  }, []);
+  }, [apiUrl]);
 
   const handleProductSelect = (item) => {
     setSelectedProduct(item.value);
+    setLoading(true); // Inicia o loading
     axios
       .get(`${apiUrl}/produtos/InfoProduto?id=${item.value}`)
       .then((response) => {
         setProductDetails(response.data);
-        console.log(response.data);
       })
       .catch((error) => {
         console.error("Error fetching product details:", error);
       });
-        axios
-          .get(`${apiUrl}/produtos/Lotes?produto_id=${item.value}`)
-          .then((response) => {
-            const lotes = response.data;
-            console.log(lotes);
-            setLotes(lotes);
-          })
-          .catch((error) => {
-            if (error.response.status == "404") {
-              console.log('Erro 404');
-            }
-          });
+
+    axios
+      .get(`${apiUrl}/produtos/Lotes?produto_id=${item.value}`)
+      .then((response) => {
+        setLotes(response.data);
+      })
+      .catch((error) => {
+        if (error.response?.status === 404) {
+          console.log("Erro 404");
+        }
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading
+      });
   };
+
   const formatDate = (dateString) => {
     if (!dateString) return "Data não disponível";
     const options = { month: "numeric", year: "numeric" };
     return new Date(dateString).toLocaleDateString("pt-BR", options);
   };
+
   const formatDateEntrada = (dateString) => {
     if (!dateString) return "Data não disponível";
-    const options = { month: "numeric", year: "numeric", day: 'numeric' };
+    const options = { day: "numeric", month: "numeric", year: "numeric" };
     return new Date(dateString).toLocaleDateString("pt-BR", options);
   };
 
@@ -84,10 +94,10 @@ const RelatorioLotesScreen = () => {
             </style>
           </head>
           <body>
-            <h1>Relatório de Lotes - ${productDetails.nome}</h1>
-            <h3>Tipo de Produto: ${productDetails.categoria}</h3>
-            <h3>Total de Produtos: ${productDetails.estoque_total}</h3>
-            <h3>Total de Caixas: ${productDetails.total_caixas}</h3>
+            <h1>Relatório de Lotes - ${productDetails?.nome}</h1>
+            <h3>Tipo de Produto: ${productDetails?.categoria}</h3>
+            <h3>Total de Produtos: ${productDetails?.estoque_total}</h3>
+            <h3>Total de Caixas: ${productDetails?.total_caixas}</h3>
             <table>
               <tr>
                 <th>Lote do Produto</th>
@@ -106,9 +116,9 @@ const RelatorioLotesScreen = () => {
                 <td>${item.nome_lote}</td>
                 <td>${item.quantidade}</td>
                 <td>${item.quantidade_caixas}</td>
-                <td>${formatDateEntrada(item.data_entrada) || 'Não Possui'}</td>
-                <td>${formatDate(item.data_fabricacao) || 'Não Possui'}</td>
-                <td>${formatDate(item.data_validade) || 'Não Possui'}</td>
+                <td>${formatDateEntrada(item.data_entrada) || "Não Possui"}</td>
+                <td>${formatDate(item.data_fabricacao) || "Não Possui"}</td>
+                <td>${formatDate(item.data_validade) || "Não Possui"}</td>
                 <td>${item.nome_local}</td>
                 <td>${item.coluna}</td>
               </tr>`;
@@ -121,18 +131,14 @@ const RelatorioLotesScreen = () => {
 
       const { uri } = await Print.printToFileAsync({
         html: htmlContent,
-        fileName: `Relatorio_Estoque_${
-          new Date().toISOString().split("T")[0]
-        }.pdf`,
-        OrientationType: 'landscape'
+        fileName: `Relatorio_Estoque_${new Date().toISOString().split("T")[0]}.pdf`,
+        OrientationType: "landscape",
       });
       console.log("File has been saved to:", uri);
 
-      Alert.alert(
-        "PDF Gerado",
-        "O relatório de estoque foi gerado com sucesso!",
-        [{ text: "OK" }]
-      );
+      Alert.alert("PDF Gerado", "O relatório de estoque foi gerado com sucesso!", [
+        { text: "OK" },
+      ]);
 
       await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
     } catch (error) {
@@ -141,9 +147,13 @@ const RelatorioLotesScreen = () => {
     }
   };
 
+  if (loading) {
+    return <Loading />; // Exibe o componente Loading durante o carregamento
+  }
+
   return (
     <View style={styles.container}>
-        <Text style={styles.header}>Escolha o Produto: </Text>
+      <Text style={styles.header}>Escolha o Produto: </Text>
       <Dropdown
         style={styles.dropdown}
         data={produtos}
@@ -161,16 +171,13 @@ const RelatorioLotesScreen = () => {
             Aroma: {productDetails.nome_aroma || "Não registrado."}
           </Text>
           <Text style={styles.detailsText}>
-            Estoque:{" "}
-            {productDetails.estoque_total || "Não há esse produto no estoque."}
+            Estoque: {productDetails.estoque_total || "Não há esse produto no estoque."}
           </Text>
           <Text style={styles.detailsText}>
-            Quantidade de Caixas:{" "}
-            {productDetails.total_caixas || 0}
+            Quantidade de Caixas: {productDetails.total_caixas || 0}
           </Text>
           <Text style={styles.detailsText}>
-            Unidade de Medida:{" "}
-            {productDetails.unidade || "Não há uma unidade de medida definida."}
+            Unidade de Medida: {productDetails.unidade || "Não há uma unidade de medida definida."}
           </Text>
           <Text style={styles.detailsText}>
             Preço Unitário: {productDetails.preco || "Preço não registrado."}
@@ -178,10 +185,11 @@ const RelatorioLotesScreen = () => {
           <Text style={styles.detailsText}>
             Descrição: {productDetails.descricao || "Não há descrição."}
           </Text>
-      </View>
+        </View>
       )}
       <TouchableOpacity style={styles.button} onPress={generatePDF}>
-        <Text style={styles.buttonText} >Gerar PDF</Text>
+      <FontAwesome5 name="file-pdf" size={24} color="white" />
+        <Text style={styles.buttonText}>Gerar PDF</Text>
       </TouchableOpacity>
     </View>
   );
@@ -192,14 +200,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     backgroundColor: "#ecf0f1",
-    alignItems: 'center',
+    alignItems: "center",
     padding: 8,
-  },
-  spacer: {
-    height: 8,
-  },
-  printer: {
-    textAlign: "center",
   },
   button: {
     backgroundColor: "#D8B4E2",

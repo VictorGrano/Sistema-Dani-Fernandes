@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loading from "../components/Loading";
 
 const EntradaInsumoScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -25,11 +26,13 @@ const EntradaInsumoScreen = ({ route }) => {
   const [selectedLocal, setSelectedLocal] = useState(null);
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const storedNome = await AsyncStorage.getItem("nome");
         const storedID = await AsyncStorage.getItem("id");
@@ -54,6 +57,8 @@ const EntradaInsumoScreen = ({ route }) => {
         setLocais(locaisData);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -65,6 +70,7 @@ const EntradaInsumoScreen = ({ route }) => {
       const { id, quantidade } = route.params;
       setID(id);
       setQuantidade(quantidade);
+      setLoading(true);
 
       axios
         .get(`${apiUrl}/insumos/InfoInsumo?id=${id}`)
@@ -73,6 +79,9 @@ const EntradaInsumoScreen = ({ route }) => {
         })
         .catch((error) => {
           console.error("Error fetching insumo data:", error);
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   }, [route.params, apiUrl]);
@@ -89,6 +98,7 @@ const EntradaInsumoScreen = ({ route }) => {
       iduser: idUser,
     };
 
+    setLoading(true);
     axios
       .post(`${apiUrl}/estoque/EntradaInsumo`, entradaData)
       .then((response) => {
@@ -97,8 +107,15 @@ const EntradaInsumoScreen = ({ route }) => {
       })
       .catch((error) => {
         console.error("Erro ao criar entrada:", error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <ScrollView style={styles.container}>

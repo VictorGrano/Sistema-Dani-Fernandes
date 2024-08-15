@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -12,7 +11,7 @@ import axios from "axios";
 import { format, parse } from "date-fns";
 import { Dropdown } from "react-native-element-dropdown";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import Loading from "../../components/Loading";
+import Loading from "../../components/Loading"; // Importe o componente de Loading
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 
@@ -25,7 +24,7 @@ const RelatorioMovimentacaoScreen = () => {
   const [selectedLocal, setSelectedLocal] = useState(null);
   const [mostraFiltros, setMostraFiltros] = useState(false);
   const [info, setInfo] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Estado de loading
   const [dateInicio, setDateInicio] = useState("");
   const [dateFim, setDateFim] = useState("");
   const [dataL, setDataL] = useState([]);
@@ -34,14 +33,8 @@ const RelatorioMovimentacaoScreen = () => {
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const dataM = [
-    {
-      label: "Saída",
-      value: "saída",
-    },
-    {
-      label: "Entrada",
-      value: "entrada",
-    },
+    { label: "Saída", value: "saída" },
+    { label: "Entrada", value: "entrada" },
   ];
 
   const [filters, setFilters] = useState({
@@ -56,75 +49,67 @@ const RelatorioMovimentacaoScreen = () => {
 
   const fetchData = async () => {
     console.log(filters);
-    setLoading(true);
-    await axios
-      .post(`${apiUrl}/usuarios/Historico`, filters)
-      .then((response) => {
-        const data = response.data.map((historico) => {
-          const mov_data = JSON.parse(historico.valor_movimentacao);
-          const mov_antigo = JSON.parse(historico.valor_antigo);
-          const parsedDate = historico.data_mudanca;
-          return {
-            usuario: historico.usuario,
-            tabela: historico.tabela_alterada,
-            tipo_mudanca: historico.tipo_mudanca,
-            produto: historico.nome_produto,
-            lote: historico.lote,
-            quantidade: mov_data.quantidade,
-            caixas: mov_data.quantidade_caixas,
-            quantidadeAntiga: mov_antigo.quantidade,
-            caixasAntiga: mov_antigo.quantidade_caixas,
-            local_armazenado: historico.nome_local,
-            coluna: historico.coluna,
-            data_mudanca: format(parsedDate, "dd/MM/yyyy"),
-            hora_mudanca: format(parsedDate, "HH:mm:ss"),
-          };
-        });
-        setHistoricoData(data);
-        setInfo(data.length === 0);
-      })
-      .catch((error) => {
-        if (error.response && error.response.status === 404) {
-          setInfo(true);
-        }
+    setLoading(true); // Inicia o loading
+    try {
+      const response = await axios.post(`${apiUrl}/usuarios/Historico`, filters);
+      const data = response.data.map((historico) => {
+        const mov_data = JSON.parse(historico.valor_movimentacao);
+        const mov_antigo = JSON.parse(historico.valor_antigo);
+        const parsedDate = historico.data_mudanca;
+        return {
+          usuario: historico.usuario,
+          tabela: historico.tabela_alterada,
+          tipo_mudanca: historico.tipo_mudanca,
+          produto: historico.nome_produto,
+          lote: historico.lote,
+          quantidade: mov_data.quantidade,
+          caixas: mov_data.quantidade_caixas,
+          quantidadeAntiga: mov_antigo.quantidade,
+          caixasAntiga: mov_antigo.quantidade_caixas,
+          local_armazenado: historico.nome_local,
+          coluna: historico.coluna,
+          data_mudanca: format(parsedDate, "dd/MM/yyyy"),
+          hora_mudanca: format(parsedDate, "HH:mm:ss"),
+        };
       });
-    await axios
-      .get(`${apiUrl}/produtos/`)
-      .then((response) => {
-        const produtosData = response.data.map((produto) => ({
+      setHistoricoData(data);
+      setInfo(data.length === 0);
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        setInfo(true);
+      }
+    }
+    try {
+      const [produtosResponse, usuariosResponse, locaisResponse] = await Promise.all([
+        axios.get(`${apiUrl}/produtos/`),
+        axios.get(`${apiUrl}/usuarios/`),
+        axios.get(`${apiUrl}/estoque/Locais`)
+      ]);
+
+      setProdutos(
+        produtosResponse.data.map((produto) => ({
           label: produto.nome,
           value: produto.id,
-        }));
-        setProdutos(produtosData);
-      })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-      });
-    await axios
-      .get(`${apiUrl}/usuarios/`)
-      .then((response) => {
-        const usuariosData = response.data.map((usuario) => ({
+        }))
+      );
+
+      setUsuarios(
+        usuariosResponse.data.map((usuario) => ({
           label: usuario.nome,
           value: usuario.id,
-        }));
-        setUsuarios(usuariosData);
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-      });
-    await axios
-      .get(`${apiUrl}/estoque/Locais`)
-      .then((response) => {
-        const dataLocais = response.data.map((local) => ({
+        }))
+      );
+
+      setDataL(
+        locaisResponse.data.map((local) => ({
           label: local.nome_local,
           value: local.id,
-        }));
-        setDataL(dataLocais);
-      })
-      .catch((error) => {
-        console.error("Error fetching locations:", error);
-      });
-    setLoading(false);
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    setLoading(false); // Finaliza o loading
   };
 
   useEffect(() => {
@@ -132,12 +117,12 @@ const RelatorioMovimentacaoScreen = () => {
   }, []);
 
   const handleAplicarFiltro = async () => {
-    setLoading(true);
+    setLoading(true); // Inicia o loading
     await fetchData();
-    setLoading(false);
+    setLoading(false); // Finaliza o loading
     setMostraFiltros(false);
   };
-  
+
   const handleFilterClear = async () => {
     setFilters({
       idusuario: "",
@@ -150,9 +135,9 @@ const RelatorioMovimentacaoScreen = () => {
     });
     setDateInicio("");
     setDateFim("");
-    setLoading(true);
+    setLoading(true); // Inicia o loading
     await fetchData();
-    setLoading(false);
+    setLoading(false); // Finaliza o loading
     setMostraFiltros(false);
   };
 
@@ -169,24 +154,24 @@ const RelatorioMovimentacaoScreen = () => {
       .replace(/(\d{2})(\d)/, "$1/$2")
       .replace(/(\d{2})(\d)/, "$1/$2")
       .replace(/(\d{4})(\d)/, "$1");
-    
+
     if (formattedValue.length === 10) {
       try {
-        const parsedDate = parse(formattedValue, 'dd/MM/yyyy', new Date());
-        const formattedDate = format(parsedDate, 'yyyy-MM-dd');
+        const parsedDate = parse(formattedValue, "dd/MM/yyyy", new Date());
+        const formattedDate = format(parsedDate, "yyyy-MM-dd");
         handleFilterChange(key, formattedDate);
-  
+
         if (key === "dataInicio") {
           setDateInicio(formattedDate);
         } else {
           setDateFim(formattedDate);
         }
       } catch (error) {
-        console.error('Invalid date format:', error);
+        console.error("Invalid date format:", error);
       }
     } else {
       handleFilterChange(key, formattedValue);
-  
+
       if (key === "dataInicio") {
         setDateInicio(formattedValue);
       } else {
@@ -209,7 +194,7 @@ const RelatorioMovimentacaoScreen = () => {
   };
 
   if (loading) {
-    return <Loading />;
+    return <Loading />; // Exibe o componente de loading
   }
 
   const criaPDF = async () => {
@@ -266,10 +251,9 @@ const RelatorioMovimentacaoScreen = () => {
       const { uri } = await Print.printToFileAsync({
         html: htmlContent,
         base64: false,
-        fileName: `Relatorio_movimentacao${
-          new Date().toISOString().split("T")[0]
-        }.pdf`,
+        fileName: `Relatorio_movimentacao_${new Date().toISOString().split("T")[0]}.pdf`,
       });
+
       console.log("File has been saved to:", uri);
 
       Alert.alert(
@@ -391,7 +375,7 @@ const RelatorioMovimentacaoScreen = () => {
         </Text>
       ) : (
         <TouchableOpacity style={styles.button} onPress={criaPDF}>
-          <FontAwesome5 name="check" size={24} color="white" />
+          <FontAwesome5 name="file-pdf" size={24} color="white" />
           <Text style={styles.buttonText}>Gerar PDF</Text>
         </TouchableOpacity>
       )}
@@ -425,17 +409,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 10,
   },
-  itemContainer: {
-    backgroundColor: "#fff",
-    padding: 15,
-    marginVertical: 8,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-  },
   button: {
     backgroundColor: "#D8B4E2",
     elevation: 10,
@@ -458,10 +431,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
-  },
-  text: {
-    fontSize: 14,
-    marginBottom: 5,
+    marginBottom: 10,
   },
   infoText: {
     fontSize: 16,

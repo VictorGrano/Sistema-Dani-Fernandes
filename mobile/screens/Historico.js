@@ -52,76 +52,65 @@ const HistoricoScreen = () => {
   });
 
   const fetchData = async () => {
-    console.log(filters);
     setLoading(true);
-    await axios
-      .post(`${apiUrl}/usuarios/Historico`, filters)
-      .then((response) => {
-        const data = response.data.map((historico) => {
-          const mov_data = JSON.parse(historico.valor_movimentacao);
-          const mov_antigo = JSON.parse(historico.valor_antigo);
-          const parsedDate = historico.data_mudanca;
-          return {
-            usuario: historico.usuario,
-            tabela: historico.tabela_alterada,
-            tipo_mudanca: historico.tipo_mudanca,
-            produto: historico.nome_produto,
-            lote: historico.lote,
-            quantidade: mov_data.quantidade,
-            caixas: mov_data.quantidade_caixas,
-            quantidadeAntiga: mov_antigo.quantidade,
-            caixasAntiga: mov_antigo.quantidade_caixas,
-            local_armazenado: historico.nome_local,
-            coluna: historico.coluna,
-            data_mudanca: format(parsedDate, "dd/MM/yyyy"),
-            hora_mudanca: format(parsedDate, "HH:mm:ss"),
-          };
-        });
-        setHistoricoData(data);
-        setInfo(data.length === 0);
-      })
-      .catch((error) => {
-        if (error.response && error.response.status === 404) {
-          setInfo(true);
-        }
+    try {
+      // Executa todas as requisições em paralelo
+      const [historicoResponse, produtosResponse, usuariosResponse, locaisResponse] = await Promise.all([
+        axios.post(`${apiUrl}/usuarios/Historico`, filters),
+        axios.get(`${apiUrl}/produtos/`),
+        axios.get(`${apiUrl}/usuarios/`),
+        axios.get(`${apiUrl}/estoque/Locais`)
+      ]);
+  
+      // Processa os dados do histórico
+      const data = historicoResponse.data.map((historico) => {
+        const mov_data = JSON.parse(historico.valor_movimentacao);
+        const mov_antigo = JSON.parse(historico.valor_antigo);
+        const parsedDate = historico.data_mudanca;
+        return {
+          usuario: historico.usuario,
+          tabela: historico.tabela_alterada,
+          tipo_mudanca: historico.tipo_mudanca,
+          produto: historico.nome_produto,
+          lote: historico.lote,
+          quantidade: mov_data.quantidade,
+          caixas: mov_data.quantidade_caixas,
+          quantidadeAntiga: mov_antigo.quantidade,
+          caixasAntiga: mov_antigo.quantidade_caixas,
+          local_armazenado: historico.nome_local,
+          coluna: historico.coluna,
+          data_mudanca: format(parsedDate, "dd/MM/yyyy"),
+          hora_mudanca: format(parsedDate, "HH:mm:ss"),
+        };
       });
-    await axios
-      .get(`${apiUrl}/produtos/`)
-      .then((response) => {
-        const produtosData = response.data.map((produto) => ({
-          label: produto.nome,
-          value: produto.id,
-        }));
-        setProdutos(produtosData);
-      })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-      });
-    await axios
-      .get(`${apiUrl}/usuarios/`)
-      .then((response) => {
-        const usuariosData = response.data.map((usuario) => ({
-          label: usuario.nome,
-          value: usuario.id,
-        }));
-        setUsuarios(usuariosData);
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-      });
-    await axios
-      .get(`${apiUrl}/estoque/Locais`)
-      .then((response) => {
-        const dataLocais = response.data.map((local) => ({
-          label: local.nome_local,
-          value: local.id,
-        }));
-        setDataL(dataLocais);
-      })
-      .catch((error) => {
-        console.error("Error fetching locations:", error);
-      });
-    setLoading(false);
+      setHistoricoData(data);
+      setInfo(data.length === 0);
+  
+      // Processa os dados dos produtos, usuários e locais
+      const produtosData = produtosResponse.data.map((produto) => ({
+        label: produto.nome,
+        value: produto.id,
+      }));
+      setProdutos(produtosData);
+  
+      const usuariosData = usuariosResponse.data.map((usuario) => ({
+        label: usuario.nome,
+        value: usuario.id,
+      }));
+      setUsuarios(usuariosData);
+  
+      const dataLocais = locaisResponse.data.map((local) => ({
+        label: local.nome_local,
+        value: local.id,
+      }));
+      setDataL(dataLocais);
+  
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setInfo(true);  // Caso ocorra um erro
+    } finally {
+      setLoading(false);  // Tirar o estado de loading ao fim do processo
+    }
   };
 
   useEffect(() => {
@@ -131,11 +120,14 @@ const HistoricoScreen = () => {
   const handleAplicarFiltro = async () => {
     setLoading(true);
     await fetchData();
-    setLoading(false);
     setMostraFiltros(false);
   };
 
   const handleFilterClear = async () => {
+    // Colocar a aplicação em estado de loading
+    setLoading(true);
+  
+    // Resetar os filtros e os estados de filtro visual antes de buscar os dados
     setFilters({
       idusuario: "",
       dataInicio: "",
@@ -145,18 +137,25 @@ const HistoricoScreen = () => {
       local_armazenado: "",
       tipo_mudanca: "",
     });
-    await fetchData();
     setDateInicio(null);
     setDateFim(null);
     setSelectedUsuario(null);
     setSelectedProduct(null);
     setSelectedLocal(null);
     setSelectedTipoM(null);
-    setLoading(true);
+  
+    // Agora fazer a requisição dos dados com os filtros limpos
+    await fetchData();
+  
+    // Depois que os dados forem carregados, tirar o loading
     setLoading(false);
+    await fetchData();
+  
+    // Fechar a tela de filtros
     setMostraFiltros(false);
   };
-
+  
+  
   const handleFilterChange = (key, value) => {
     setFilters((prevFilters) => ({
       ...prevFilters,

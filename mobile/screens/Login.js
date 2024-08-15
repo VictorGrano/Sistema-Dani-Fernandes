@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import Loading from "../components/Loading";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -21,7 +22,7 @@ const LoginScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+  const [loading, setLoading] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const handleLogin = async () => {
@@ -29,7 +30,7 @@ const LoginScreen = () => {
       user: user,
       senha: senha,
     };
-  
+    setLoading(true);
     try {
       const response = await axios.post(
         `${apiUrl}/usuarios/Login`,
@@ -66,12 +67,15 @@ const LoginScreen = () => {
           navigation.replace("Menu", { primeiro_login: false });
         }
       } else {
+        setLoading(false);
         alert("Usuário ou senha inválidos!");
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
+        setLoading(false);
         alert("Usuário ou senha inválidos!");
       } else {
+        setLoading(false);
         console.error(error);
         alert("Ocorreu um erro ao fazer login. Por favor, tente novamente.");
       }
@@ -89,8 +93,10 @@ const LoginScreen = () => {
     }
 
     try {
+      setLoading(true);
       const id = await AsyncStorage.getItem("id");
       if (!id) {
+        setLoading(false);
         throw new Error("ID do usuário não encontrado.");
       }
       const response = await axios.post(`${apiUrl}/usuarios/NovaSenha`, {
@@ -99,18 +105,24 @@ const LoginScreen = () => {
       });
       console.log(response)
       if (response.data.success) {
+        setLoading(false);
         Alert.alert("Sucesso", "Senha alterada com sucesso!");
         setIsModalVisible(false);
         navigation.replace("Menu", {primeiro_login: true});
       } else {
+        setLoading(false);
         Alert.alert("Erro", "Ocorreu um erro ao alterar a senha. Tente novamente.");
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
       Alert.alert("Erro", "Ocorreu um erro.");
     }
   };
 
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Login</Text>

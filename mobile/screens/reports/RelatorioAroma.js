@@ -10,6 +10,8 @@ import axios from "axios";
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import { Dropdown } from "react-native-element-dropdown";
+import Loading from "../../components/Loading"; // Importe o componente de Loading
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 const RelatorioAromaScreen = () => {
   const [aromas, setAromas] = useState([]);
@@ -17,10 +19,12 @@ const RelatorioAromaScreen = () => {
   const [aromaDetails, setAromaDetails] = useState([]);
   const [total, setTotal] = useState(0);
   const [valorEstoque, setValorEstoque] = useState(0);
+  const [loading, setLoading] = useState(false); // Adiciona estado de loading
   
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
+    setLoading(true); // Inicia o loading
     axios
       .get(`${apiUrl}/produtos/Aromas`)
       .then((response) => {
@@ -31,13 +35,16 @@ const RelatorioAromaScreen = () => {
         setAromas(aromasData);
       })
       .catch((error) => {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching aromas:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading
       });
   }, []);
 
   const handleAromaSelect = (item) => {
     setSelectedAroma(item.value);
-    console.log(aromas[0].categoria)
+    setLoading(true); // Inicia o loading ao selecionar o aroma
     axios
       .get(`${apiUrl}/produtos/InfoAromas?cod_aroma=${item.value}`)
       .then((response) => {
@@ -59,7 +66,10 @@ const RelatorioAromaScreen = () => {
         setAromaDetails(infoAromas);
       })
       .catch((error) => {
-        console.error("Error fetching product details:", error);
+        console.error("Error fetching aroma details:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading
       });
   };
 
@@ -77,7 +87,7 @@ const RelatorioAromaScreen = () => {
             </style>
           </head>
           <body>
-            <h1>Relatório de Aromas - ${aromaDetails[0].nome_aroma}</h1>
+            <h1>Relatório de Aromas - ${aromaDetails[0]?.nome_aroma}</h1>
             <h3>Total de Produtos: ${total.toLocaleString('pt-br')}</h3>
             <h3>Valor total no estoque: R$${valorEstoque.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
             <table>
@@ -126,6 +136,10 @@ const RelatorioAromaScreen = () => {
     }
   };
 
+  if (loading) {
+    return <Loading />; // Exibe o componente Loading
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Escolha o Aroma: </Text>
@@ -145,17 +159,18 @@ const RelatorioAromaScreen = () => {
             Estoque: {total.toLocaleString('pt-br')}
           </Text>
           <Text style={styles.detailsText}>
-            Unidade de Medida: {aromaDetails[0].unidade || "Não há uma unidade de medida definida."}
+            Unidade de Medida: {aromaDetails[0]?.unidade || "Não há uma unidade de medida definida."}
           </Text>
           <Text style={styles.detailsText}>
             Valor Total no Estoque: R${valorEstoque.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </Text>
           <Text style={styles.detailsText}>
-            Descrição: {aromaDetails[0].descricao || "Não há descrição."}
+            Descrição: {aromaDetails[0]?.descricao || "Não há descrição."}
           </Text>
         </View>
       )}
       <TouchableOpacity style={styles.button} onPress={generatePDF}>
+      <FontAwesome5 name="file-pdf" size={24} color="white" />
         <Text style={styles.buttonText}>Gerar PDF</Text>
       </TouchableOpacity>
     </View>

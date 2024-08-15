@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
+import Loading from "../components/Loading";
 
 const LotesScreen = ({ route }) => {
   const [lotes, setLotes] = useState([]);
@@ -18,6 +19,7 @@ const LotesScreen = ({ route }) => {
   const [dataL, setDataL] = useState([]);
   const [selectedLocal, setSelectedLocal] = useState(null);
   const [coluna, setColuna] = useState('');
+  const [loading, setLoading] = useState(false);
   const { id } = route.params;
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -34,8 +36,10 @@ const LotesScreen = ({ route }) => {
           value: local.id,
         }));
         setDataL(locaisData);
+        setLoading(true);
       } catch (error) {
         if (error.response && error.response.status === 404) {
+          setLoading(false);
           setInfo(true);
         } else {
           console.error("Error fetching data:", error);
@@ -64,18 +68,25 @@ const LotesScreen = ({ route }) => {
         coluna: coluna,
       };
       console.log(dados);
+      setLoading(true);
       await axios.post(`${apiUrl}/produtos/AtualizarLote`, dados);
-      Alert.alert("Sucesso", "Localização atualizada com sucesso!");
+      Alert.alert("Sucesso", "Localização atualizada com sucesso!")
+      setLoading(false);
       setEditar(null);
       setSelectedLocal(null);
       setColuna('');
-      fetchData();  // Recarrega os dados após a atualização
+      fetchData(); 
+       // Recarrega os dados após a atualização
     } catch (error) {
+      setLoading(false);
       console.error("Error saving data:", error.response.data);
       Alert.alert("Erro", "Ocorreu um erro ao salvar a nova localização.");
     }
   };
-  
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

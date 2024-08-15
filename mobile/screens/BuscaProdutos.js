@@ -9,16 +9,19 @@ import {
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import { useNavigation } from "@react-navigation/native";
+import Loading from "../components/Loading";
 
 const BuscaProdutosScreen = () => {
   const [produtos, setProdutos] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
+  const [loading, setLoading] = useState(false); // Estado de loading
   const navigation = useNavigation();
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
+    setLoading(true); // Inicia o loading
     axios
       .get(`${apiUrl}/produtos/`)
       .then((response) => {
@@ -30,21 +33,31 @@ const BuscaProdutosScreen = () => {
       })
       .catch((error) => {
         console.error("Error fetching products:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading
       });
-  }, []);
+  }, [apiUrl]);
 
   const handleProductSelect = (item) => {
     setSelectedProduct(item.value);
+    setLoading(true); // Inicia o loading
     axios
       .get(`${apiUrl}/produtos/InfoProduto?id=${item.value}`)
       .then((response) => {
         setProductDetails(response.data);
-        console.log(response.data);
       })
       .catch((error) => {
         console.error("Error fetching product details:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading
       });
   };
+
+  if (loading) {
+    return <Loading />; // Exibe o componente Loading
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -74,7 +87,11 @@ const BuscaProdutosScreen = () => {
             {productDetails.unidade || "Não há uma unidade de medida definida."}
           </Text>
           <Text style={styles.detailsText}>
-            Preço Unitário: R${productDetails.preco.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0"}
+            Preço Unitário: R$
+            {productDetails.preco.toLocaleString('pt-br', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }) || "0"}
           </Text>
           <Text style={styles.detailsText}>
             Descrição: {productDetails.descricao || "Não há descrição."}

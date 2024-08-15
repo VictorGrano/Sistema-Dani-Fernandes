@@ -13,6 +13,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
+import Loading from "../components/Loading";
 
 const InsumosScreen = () => {
   const navigation = useNavigation();
@@ -32,10 +33,11 @@ const InsumosScreen = () => {
   const [info, setInfo] = useState(true);
   const [modal, setModal] = useState(false);
   const [insumoSelecionado, setInsumoSelecionado] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(`${apiUrl}/estoque/Locais`)
       .then((response) => {
@@ -82,6 +84,9 @@ const InsumosScreen = () => {
       })
       .catch(() => {
         setInfo(true);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
@@ -104,19 +109,17 @@ const InsumosScreen = () => {
         local_armazenado: selectedLocal,
         coluna: coluna,
       };
-      console.log(dados);
+      setLoading(true);
       const response = await axios.post(
         `${apiUrl}/insumos/CadastroInsumo`,
         dados
       );
 
-      if (response.status == "201") {
+      if (response.status === 201) {
         Alert.alert("Sucesso", "Insumo cadastrado com sucesso!");
         navigation.goBack();
       } else {
         Alert.alert("Erro", response.data.message);
-        setNome(null);
-        setEstoque(null);
       }
     } catch (error) {
       console.log(error);
@@ -124,6 +127,10 @@ const InsumosScreen = () => {
         "Erro",
         "Ocorreu um erro ao registrar o insumo. Tente novamente mais tarde."
       );
+    } finally {
+      setLoading(false);
+      setNome(null);
+      setEstoque(null);
     }
   };
 
@@ -139,10 +146,8 @@ const InsumosScreen = () => {
         local_armazenado: selectedLocal,
         coluna: coluna,
       };
-      const response = await axios.put(
-        `${apiUrl}/insumos/Atualizar`,
-        dados
-      );
+      setLoading(true);
+      const response = await axios.put(`${apiUrl}/insumos/Atualizar`, dados);
 
       if (response.data.message === "Insumo atualizado com sucesso!") {
         Alert.alert("Sucesso", response.data.message);
@@ -152,7 +157,6 @@ const InsumosScreen = () => {
         setEstoque(null);
         setPreco(null);
         setColuna(null);
-        // Atualizar a lista de insumos
         const updatedInsumos = insumos.map((insumo) =>
           insumo.id === insumoSelecionado.id ? { ...insumo, ...dados } : insumo
         );
@@ -166,20 +170,29 @@ const InsumosScreen = () => {
         "Erro",
         "Ocorreu um erro ao atualizar o insumo. Tente novamente mais tarde."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (item) => {
-    console.log(item.id);
-    axios.delete(`${apiUrl}/insumos/${item.id}:id`).then((response) => {
-      if (response.status == "200") {
-        Alert.alert("Sucesso!", "Insumo deletado com sucesso!")
+    try {
+      setLoading(true);
+      const response = await axios.delete(`${apiUrl}/insumos/${item.id}`);
+      if (response.status === 200) {
+        Alert.alert("Sucesso!", "Insumo deletado com sucesso!");
+        setInsumos((prevInsumos) =>
+          prevInsumos.filter((insumo) => insumo.id !== item.id)
+        );
+      } else {
+        Alert.alert("Erro!", "Erro ao deletar!");
       }
-      else {
-        Alert.alert("Erro!", "Erro ao deletar!")
-      }
-    })
-  }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const abrirModalEdicao = (insumo) => {
     setInsumoSelecionado(insumo);
@@ -225,6 +238,10 @@ const InsumosScreen = () => {
       </View>
     );
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <View style={styles.container}>

@@ -10,71 +10,74 @@ import {
 } from "react-native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
-import { useNavigation } from "@react-navigation/native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import Loading from "../components/Loading";
 
 const ListaPrateleiraScreen = () => {
   const [produtos, setProdutos] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [lotes, setLotes] = useState(null);
+  const [lotes, setLotes] = useState([]);
   const [quantidade, setQuantidade] = useState("");
   const [lista, setLista] = useState(true);
   const [listaPrateleira, setListaPrateleira] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [productNotFound, setProductNotFound] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-  const navigation = useNavigation();
-
   useEffect(() => {
-    axios
-      .get(`${apiUrl}/produtos/`)
-      .then((response) => {
-        const produtosData = response.data.map((produto) => ({
-          label: produto.nome,
-          value: produto.id,
-        }));
-        setProdutos(produtosData);
-      })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-      });
-
-    // Fetch the existing items in the list
+    fetchProdutos();
     fetchListaPrateleira();
   }, []);
 
-  const fetchListaPrateleira = () => {
-    axios
-      .get(`${apiUrl}/estoque/ListaPrateleira`)
-      .then((response) => {
-        setListaPrateleira(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching lista prateleira:", error);
-      });
+  const fetchProdutos = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${apiUrl}/produtos/`);
+      const produtosData = response.data.map((produto) => ({
+        label: produto.nome,
+        value: produto.id,
+      }));
+      setProdutos(produtosData);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleProductSelect = (item) => {
+  const fetchListaPrateleira = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${apiUrl}/estoque/ListaPrateleira`);
+      setListaPrateleira(response.data);
+    } catch (error) {
+      console.error("Error fetching lista prateleira:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProductSelect = async (item) => {
+    setLoading(true);
     setSelectedProduct(item.value);
-    axios
-      .get(`${apiUrl}/produtos/Lotes?produto_id=${item.value}`)
-      .then((response) => {
-        if (response.data.length === 0) {
-          setProductNotFound(true);
-        } else {
-          setLotes(response.data);
-          setProductNotFound(false);
-        }
-      })
-      .catch((error) => {
-        if (error.response && error.response.status === 404) {
-          setProductNotFound(true);
-        } else {
-          console.error("Error fetching product details:", error);
-        }
-      });
+    try {
+      const response = await axios.get(
+        `${apiUrl}/produtos/Lotes?produto_id=${item.value}`
+      );
+      if (response.data.length === 0) {
+        setProductNotFound(true);
+      } else {
+        setLotes(response.data);
+        setProductNotFound(false);
+      }
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      setProductNotFound(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdicionar = async () => {
@@ -108,6 +111,7 @@ const ListaPrateleiraScreen = () => {
       }
     }
 
+    setLoading(true);
     if (quantidadeRestante > 0) {
       Alert.alert(
         "Quantidade Insuficiente",
@@ -116,84 +120,76 @@ const ListaPrateleiraScreen = () => {
           {
             text: "Cancelar",
             style: "cancel",
+            onPress: () => setLoading(false),
           },
           {
             text: "Adicionar",
             onPress: async () => {
-              try {
-                for (const dados of lotesUsados) {
-                  await axios.post("${apiUrl}/estoque/AddPrateleira", {
-                    ...dados,
-                    concluido: 0,
-                  });
-                }
-                Alert.alert(
-                  "Sucesso!",
-                  "Produto adicionado com a quantidade disponível."
-                );
-                fetchListaPrateleira(); // Refresh the list
-              } catch (error) {
-                if (
-                  error.response &&
-                  error.response.data.error === "Produto já adicionado na lista"
-                ) {
-                  setErrorMessage("Produto já adicionado na lista");
-                } else {
-                  console.error("Error adding product to list:", error);
-                }
-              }
+              await adicionarProdutos(lotesUsados);
             },
           },
         ]
       );
     } else {
-      try {
-        for (const dados of lotesUsados) {
-          await axios.post(`${apiUrl}/estoque/AddPrateleira`, {
-            ...dados,
-            concluido: 0,
-          });
-        }
-        Alert.alert("Sucesso!", "Produto adicionado com sucesso na lista!");
-        fetchListaPrateleira(); // Refresh the list
-      } catch (error) {
-        if (
-          error.response &&
-          error.response.data.error === "Produto já adicionado na lista"
-        ) {
-          setErrorMessage("Produto já adicionado na lista");
-        } else {
-          console.error("Error adding product to list:", error);
-        }
-      }
+      await adicionarProdutos(lotesUsados);
     }
   };
 
-  const handleExcluir = (itemId) => {
-    axios
-      .delete(`${apiUrl}/estoque/ListaPrateleira/${itemId}`)
-      .then(() => {
-        Alert.alert("Sucesso!", "Produto removido da lista!");
-        fetchListaPrateleira(); // Refresh the list
-      })
-      .catch((error) => {
-        console.error("Error deleting item from list:", error);
-      });
+  const adicionarProdutos = async (lotesUsados) => {
+    try {
+      for (const dados of lotesUsados) {
+        await axios.post(`${apiUrl}/estoque/AddPrateleira`, {
+          ...dados,
+          concluido: 0,
+        });
+      }
+      Alert.alert("Sucesso!", "Produto adicionado com sucesso na lista!");
+      fetchListaPrateleira(); // Refresh the list
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data.error === "Produto já adicionado na lista"
+      ) {
+        setErrorMessage("Produto já adicionado na lista");
+      } else {
+        console.error("Error adding product to list:", error);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleConfere = (itemId) => {
-    axios
-      .put(`${apiUrl}/estoque/ListaPrateleira/Concluido/${itemId}`, {
-        concluido: true,
-      })
-      .then(() => {
-        Alert.alert("Sucesso!", "Produto marcado como concluído!");
-        fetchListaPrateleira(); // Refresh the list
-      })
-      .catch((error) => {
-        console.error("Error marking item as completed:", error);
-      });
+  const handleExcluir = async (itemId) => {
+    setLoading(true);
+    try {
+      await axios.delete(`${apiUrl}/estoque/ListaPrateleira/${itemId}`);
+      Alert.alert("Sucesso!", "Produto removido da lista!");
+      fetchListaPrateleira(); // Refresh the list
+    } catch (error) {
+      console.error("Error deleting item from list:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleConfere = async (itemId) => {
+    setLoading(true);
+    try {
+      await axios.put(`${apiUrl}/estoque/ListaPrateleira/Concluido/${itemId}`, {
+        concluido: true,
+      });
+      Alert.alert("Sucesso!", "Produto marcado como concluído!");
+      fetchListaPrateleira(); // Refresh the list
+    } catch (error) {
+      console.error("Error marking item as completed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <View style={styles.container}>
@@ -339,19 +335,6 @@ const styles = StyleSheet.create({
     borderColor: "#444",
     paddingHorizontal: 8,
   },
-  detailsContainer: {
-    marginTop: 20,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    backgroundColor: "#f7f7f7",
-    width: "100%",
-  },
-  detailsText: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
   button: {
     backgroundColor: "#D8B4E2",
     padding: 15,
@@ -422,11 +405,6 @@ const styles = StyleSheet.create({
     padding: 5,
     marginHorizontal: 5,
     borderRadius: 4,
-  },
-  actionButtonText: {
-    color: "#FFF",
-    fontSize: 14,
-    fontWeight: "bold",
   },
   error: {
     color: "red",

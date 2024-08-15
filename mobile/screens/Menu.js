@@ -30,6 +30,7 @@ const MenuScreen = ({ route }) => {
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const fetchDados = useCallback(async () => {
+    setLoading(true);
     await axios
       .get(`${apiUrl}/estoque/Locais`)
       .then((response) => {
@@ -63,10 +64,12 @@ const MenuScreen = ({ route }) => {
         ];
         setLocal(data.nome_local);
         setDados(dadosr);
+        setLoading(false);
       })
       .catch((error) => {
         console.log(error);
       });
+      setLoading(false);
   }, [id]);
 
   useFocusEffect(
@@ -113,14 +116,6 @@ const MenuScreen = ({ route }) => {
     await AsyncStorage.removeItem("nome");
     await AsyncStorage.removeItem("token");
     navigation.replace("Login");
-  };
-
-  const handleModalEntradaSaidaOpen = () => {
-    setModalEntradaSaida(true);
-  };
-
-  const handleModalEntradaSaidaClose = () => {
-    setModalEntradaSaida(false);
   };
 
   const handleEntradaSaida = (tipoMovimento, tipoItem) => {

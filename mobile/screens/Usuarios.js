@@ -13,7 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-
+import Loading from "../components/Loading";
 
 const UsuariosScreen = () => {
   const navigation = useNavigation();
@@ -27,7 +27,7 @@ const UsuariosScreen = () => {
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
   const [search, setSearch] = useState("");
   const [filteredUsuarios, setFilteredUsuarios] = useState([]);
-
+  const [loading, setLoading] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   const tipos = ["admin", "almoxarifado", "comum"];
@@ -37,6 +37,7 @@ const UsuariosScreen = () => {
   }));
 
   useEffect(() => {
+    setLoading(true);
     try {
       axios.get(`${apiUrl}/usuarios/`).then((response) => {
         const usuarios = response.data.map((usuario) => ({
@@ -51,6 +52,7 @@ const UsuariosScreen = () => {
     } catch (error) {
       console.log(error);
     }
+    setLoading(false);
   }, [usuarios]);
 
   useEffect(() => {
@@ -62,6 +64,7 @@ const UsuariosScreen = () => {
   }, [search, usuarios]);
 
   const handleRegistro = async () => {
+    setLoading(true);
     try {
       const dados = {
         nome,
@@ -91,9 +94,11 @@ const UsuariosScreen = () => {
         "Ocorreu um erro ao registrar o usuário. Tente novamente mais tarde."
       );
     }
+    setLoading(false);
   };
 
   const handleEdicao = async () => {
+    setLoading(true);
     try {
       const dados = {
         id: usuarioSelecionado.id,
@@ -108,6 +113,7 @@ const UsuariosScreen = () => {
       );
 
       if (response.data.message === "Usuário atualizado com sucesso!") {
+        setLoading(false);
         Alert.alert("Sucesso", response.data.message);
         setModal(false);
         setNome(null);
@@ -120,9 +126,11 @@ const UsuariosScreen = () => {
         setUsuarios(updatedUsuarios);
         setModal(false);
       } else {
+        setLoading(false);
         Alert.alert("Erro", response.data.message);
       }
     } catch (error) {
+      setLoading(false);
       console.log(error);
       Alert.alert(
         "Erro",
@@ -147,12 +155,15 @@ const UsuariosScreen = () => {
   };
 
   const handleDelete = async () => {
+    setLoading(true);
     const id = usuarioSelecionado.id
     axios.delete(`${apiUrl}/usuarios/${id}`).then((response) => {
       if (response.status == "200") {
+        setLoading(false);
         Alert.alert("Sucesso!", "Usuário deletado com sucesso!")
       }
       else {
+        setLoading(false);
         Alert.alert("Erro!", "Erro ao deletar!")
       }
     })
@@ -173,6 +184,10 @@ const UsuariosScreen = () => {
       </View>
     );
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <View style={styles.container}>

@@ -13,6 +13,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
+import Loading from "../components/Loading";
 
 const ProdutosScreen = () => {
   const navigation = useNavigation();
@@ -32,10 +33,12 @@ const ProdutosScreen = () => {
   const [info, setInfo] = useState(true);
   const [modal, setModal] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   
   useEffect(() => {
+    setLoading(true);
     axios
       .get(`${apiUrl}/produtos/Aromas/`)
       .then((response) => {
@@ -58,7 +61,7 @@ const ProdutosScreen = () => {
         setTipos(tipoData);
       })
       .catch((error) => {
-        console.error("Error fetching aromas:", error);
+        console.error("Error fetching tipos:", error);
       });
 
     axios
@@ -84,6 +87,7 @@ const ProdutosScreen = () => {
         console.error("Error fetching produtos:", error);
         setInfo(true);
       });
+      setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -105,20 +109,24 @@ const ProdutosScreen = () => {
         tipo: selectedTipo,
         aroma_id: selectedAroma,
       };
+      setLoading(true);
       const response = await axios.post(
         `${apiUrl}/produtos/CadastroProduto`,
         dados
       );
 
       if (response.status == "201") {
+        setLoading(false);
         Alert.alert("Sucesso", "Produto cadastrado com sucesso!");
         navigation.goBack();
       } else {
+        setLoading(false);
         Alert.alert("Erro", response.data.message);
         setNome(null);
         setEstoque(null);
       }
     } catch (error) {
+      setLoading(false);
       console.log(error);
       Alert.alert(
         "Erro",
@@ -140,12 +148,14 @@ const ProdutosScreen = () => {
         tipo: selectedTipo,
         cod_aroma: selectedAroma,
       };
+      setLoading(true);
       const response = await axios.put(
         `${apiUrl}/produtos/Atualizar`,
         dados
       );
 
       if (response.data.message === "Produto atualizado com sucesso!") {
+        setLoading(false);
         Alert.alert("Sucesso", response.data.message);
         setModal(false);
         setNome(null);
@@ -160,9 +170,11 @@ const ProdutosScreen = () => {
         );
         setProdutos(updatedProdutos);
       } else {
+        setLoading(false);
         Alert.alert("Erro", response.data.message);
       }
     } catch (error) {
+      setLoading(false);
       console.log(error);
       Alert.alert(
         "Erro",
@@ -172,17 +184,21 @@ const ProdutosScreen = () => {
   };
 
   const handleDelete = async (item) => {
+    setLoading(true);
     axios
       .delete(`${apiUrl}/produtos/${item.id}`)
       .then((response) => {
         if (response.status == "200") {
+          setLoading(false);
           Alert.alert("Sucesso!", "Produto deletado com sucesso!");
           setProdutos(produtos.filter((produto) => produto.id !== item.id));
         } else {
+          setLoading(false);
           Alert.alert("Erro!", "Erro ao deletar!");
         }
       })
       .catch((error) => {
+        setLoading(false);
         console.error("Error deleting produto:", error);
         Alert.alert("Erro!", "Erro ao deletar!");
       });
@@ -233,6 +249,10 @@ const ProdutosScreen = () => {
       </View>
     );
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <View style={styles.container}>

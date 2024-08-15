@@ -2,17 +2,20 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
+import Loading from "../components/Loading";
 
 const VencimentoScreen = () => {
   const [info, setInfo] = useState(false);
   const [dataL, setDataL] = useState([]);
   const [lotesVencimentoProximo, setLotesVencimentoProximo] = useState([]);
   const [filtro, setFiltro] = useState(30); // Default: 30 dias
+  const [loading, setLoading] = useState(false);
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const lotesResponse = await axios.get(`${apiUrl}/produtos/AllLotes`);
         const lotesData = lotesResponse.data;
@@ -34,15 +37,17 @@ const VencimentoScreen = () => {
         });
 
         setLotesVencimentoProximo(lotesProximos);
-
+        
         if (lotesProximos.length === 0) {
           setInfo(true);
         } else {
           setInfo(false);
         }
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
         if (error.response && error.response.status === 404) {
+          setLoading(false);
           setInfo(true);
         }
       }
@@ -56,6 +61,10 @@ const VencimentoScreen = () => {
     const options = { month: "numeric", year: "numeric" };
     return new Date(dateString).toLocaleDateString("pt-BR", options);
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

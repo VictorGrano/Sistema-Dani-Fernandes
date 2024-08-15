@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loading from "../components/Loading";
 
 const SaidaInsumoScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -18,18 +19,17 @@ const SaidaInsumoScreen = ({ route }) => {
   const [id, setID] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [quantidadeCaixas, setQuantidadeCaixas] = useState("1");
-  const [coluna, setColuna] = useState("");
   const [insumos, setInsumos] = useState([]);
   const [locais, setLocais] = useState([]);
   const [selectedInsumo, setSelectedInsumo] = useState(null);
-  const [selectedLocal, setSelectedLocal] = useState(null);
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const storedNome = await AsyncStorage.getItem("nome");
         const storedID = await AsyncStorage.getItem("id");
@@ -52,7 +52,9 @@ const SaidaInsumoScreen = ({ route }) => {
           value: local.id,
         }));
         setLocais(locaisData);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         console.error("Error fetching data:", error);
       }
     };
@@ -65,7 +67,6 @@ const SaidaInsumoScreen = ({ route }) => {
       const { id, quantidade } = route.params;
       setID(id);
       setQuantidade(quantidade);
-
       axios
         .get(`${apiUrl}/insumos/InfoInsumo?id=${id}`)
         .then((response) => {
@@ -86,17 +87,23 @@ const SaidaInsumoScreen = ({ route }) => {
       user: nomeUser,
       iduser: idUser,
     };
-
+    setLoading(true);
     axios
       .post(`${apiUrl}/estoque/SaidaInsumo`, saidaData)
       .then((response) => {
+        setLoading(false);
         console.log("Saída registrada com sucesso:", response.data);
         navigation.goBack();
       })
       .catch((error) => {
+        setLoading(false);
         console.error("Erro ao registrar saída:", error);
       });
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <ScrollView style={styles.container}>

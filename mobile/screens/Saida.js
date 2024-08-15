@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loading from "../components/Loading";
 
 const SaidaScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -26,7 +27,7 @@ const SaidaScreen = ({ route }) => {
   const [noLotesMessage, setNoLotesMessage] = useState("");
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -40,6 +41,7 @@ const SaidaScreen = ({ route }) => {
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(`${apiUrl}/produtos`)
       .then((response) => {
@@ -48,14 +50,17 @@ const SaidaScreen = ({ route }) => {
           value: produto.id,
         }));
         setProdutos(produtosData);
+        setLoading(false);
       })
       .catch((error) => {
+        setLoading(false);
         console.error("Error fetching products:", error);
       });
   }, []);
 
   useEffect(() => {
     if (selectedProduct) {
+      setLoading(true);
       axios
         .get(`${apiUrl}/buscarlotes?produto_id=${selectedProduct}`)
         .then((response) => {
@@ -71,9 +76,11 @@ const SaidaScreen = ({ route }) => {
             setLotes(lotesData);
             setNoLotesMessage("");
           }
+          setLoading(false);
         })
         .catch((error) => {
           if (error.response.status === "404") {
+            setLoading(false);
             setNoLotesMessage("Não existem lotes para este produto.");
             setLotes([]);
           } else {
@@ -102,13 +109,16 @@ const SaidaScreen = ({ route }) => {
       iduser: idUser,
     };
     console.log(saidaData);
+    setLoading(true);
     axios
       .post(`${apiUrl}/estoque/Saida`, saidaData)
       .then((response) => {
+        setLoading(false);
         console.log("Saída registrada com sucesso:", response.data);
         navigation.goBack();
       })
       .catch((error) => {
+        setLoading(false);
         console.error("Erro ao registrar saída:", error.response.data);
       });
   };
@@ -119,6 +129,7 @@ const SaidaScreen = ({ route }) => {
       setID(id);
       setQuantidade(quantidade);
       setSelectedLote(lote);
+      setLoading(true);
       axios
         .get(`${apiUrl}/produtos/InfoProduto?id=${id}`)
         .then((response) => {
@@ -130,6 +141,7 @@ const SaidaScreen = ({ route }) => {
       axios
         .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
+          setLoading(false);
           if (response.data.length === 0) {
             setNoLotesMessage("Não existem lotes para este produto.");
             setLotes([]);
@@ -144,10 +156,15 @@ const SaidaScreen = ({ route }) => {
           }
         })
         .catch((error) => {
+          setLoading(false);
           console.log(error);
         });
     }
   }, [route.params]);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <ScrollView style={styles.container}>
