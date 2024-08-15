@@ -1,5 +1,7 @@
 const connection = require("../database");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
+const secretKey = 'chaveSecretaD@niFernandes2024';
 
 // Função para formatar a data de dd/mm/aaaa para aaaa-mm-dd HH:MM:SS
 function formatDateToBeginingOfDay(date) {
@@ -24,33 +26,60 @@ function Encriptar(senha) {
   });
 }
 
-exports.login = (req, res) => {
+exports.login = async (req, res) => {
   const { user, senha } = req.body;
-  const q = `SELECT * FROM usuarios WHERE login = ?`;
-  connection.query(q, [user], (error, results) => {
-    if (error) {
-      console.error("Erro no servidor:", error);
-      res.status(500).json({ error: "Erro no servidor" });
-      return;
-    }
-    if (results.length > 0) {
-      bcrypt.compare(senha, results[0].senha, function (err, result) {
-        if (err) {
-          console.error("Erro no servidor:", err);
-          res.status(500).json({ error: "Erro no servidor" });
-          return;
-        }
-        if (result) {
-          res.status(200).json(results);
-        } else {
-          res.status(404).json({ message: "Erro no login" });
+
+  // Validação de entrada
+  if (!user || !senha) {
+    return res.status(400).json({ error: "Usuário e senha são obrigatórios" });
+  }
+
+  try {
+    const q = `SELECT * FROM usuarios WHERE login = ?`;
+    
+    // Consulta ao banco de dados
+    connection.query(q, [user], async (error, results) => {
+      if (error) {
+        console.error("Erro no servidor:", error);
+        return res.status(500).json({ error: "Erro no servidor" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+
+      const usuario = results[0];
+
+      // Comparação de senha
+      const isMatch = await bcrypt.compare(senha, usuario.senha);
+
+      if (!isMatch) {
+        return res.status(401).json({ error: "Senha incorreta" });
+      }
+
+      // Gerar token JWT
+      const token = jwt.sign({ id: usuario.id }, secretKey, { expiresIn: '24h' });
+
+      // Retornar os dados do usuário junto com o token
+      return res.status(200).json({
+        message: "Autenticado com sucesso",
+        token: token,
+        usuario: {
+          id: usuario.id,
+          nome: usuario.nome,
+          login: usuario.login,
+          tipo: usuario.tipo,
+          primeiro_login: usuario.primeiro_login,
         }
       });
-    } else {
-      res.status(404).json({ message: "Erro no login" });
-    }
-  });
+    });
+  } catch (error) {
+    console.error("Erro no servidor:", error);
+    return res.status(500).json({ error: "Erro no servidor" });
+  }
 };
+
+
 
 exports.historico = (req, res) => {
   const {

@@ -22,8 +22,10 @@ import ProdutosScreen from './screens/Produtos';
 import ListaPrateleiraScreen from './screens/ListaPrateleira';
 import EntradaInsumoScreen from './screens/EntradaInsumo';
 import SaidaInsumoScreen from './screens/SaidaInsumo';
+import VencimentoScreen from './screens/Vencimentos';
 
 const Stack = createStackNavigator();
+
 
 const App = () => {
   return (
@@ -37,7 +39,7 @@ const App = () => {
         <Stack.Screen
           name="Menu"
           component={MenuScreen}
-          options={{ title: 'Menu Principal' }}
+          options={{ title: 'Menu Principal'}}
         />
         <Stack.Screen
           name="Menu Relatorio"
@@ -93,6 +95,11 @@ const App = () => {
           name="Escanear"
           component={EscanearScreen}
           options={{ title: 'Escanear QR Code' }}
+        />
+        <Stack.Screen
+          name="Vencimentos"
+          component={VencimentoScreen}
+          options={{ title: 'Verificar Vencimentos' }}
         />
         <Stack.Screen
           name="Lista Prateleira"

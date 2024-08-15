@@ -13,8 +13,6 @@ import { Dropdown } from "react-native-element-dropdown";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Loading from "../components/Loading";
 
-
-
 const HistoricoScreen = () => {
   const [historicoData, setHistoricoData] = useState([]);
   const [usuarios, setUsuarios] = useState([]);

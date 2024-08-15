@@ -77,7 +77,7 @@ exports.getPrateleira = (req, res) => {
 
 exports.putPrateleira = (req, res) => {
   const { id } = req.params;
-  const concluido = 'sim';
+  const concluido = "sim";
 
   const updateQuery = `
     UPDATE lista_prateleira 
@@ -215,15 +215,14 @@ exports.postEntrada = (req, res) => {
   }
 
   const validadeDate = convertToValidDate(validade);
-  const fabricacaoDate = validateDate(fabricacao);
 
-  if (!validadeDate || !fabricacaoDate) {
+  if (!validadeDate) {
     console.error("Formato de data inválido:", { validade, fabricacao });
     return res.status(400).json({ error: "Formato de data inválido" });
   }
 
   console.log("Dados recebidos:", req.body);
-  console.log("Datas convertidas:", { validadeDate, fabricacaoDate });
+  console.log("Datas convertidas:", { validadeDate });
 
   const checkQuery =
     "SELECT id, quantidade, quantidade_caixas, local_armazenado_id, coluna FROM lotes WHERE nome_lote = ? AND produto_id = ?";
@@ -299,7 +298,7 @@ exports.postEntrada = (req, res) => {
           new Date().toISOString().split("T")[0],
           localArmazenado,
           validadeDate,
-          fabricacaoDate,
+          fabricacao,
           coluna,
           quantidade_caixas,
         ],
@@ -508,45 +507,45 @@ exports.postSaidaInsumo = (req, res) => {
 
       const updateQuery =
         "UPDATE insumos SET estoque = estoque - ? WHERE id = ?";
-      connection.query(
-        updateQuery,
-        [quantidade, quantidade_caixas, parseInt(insumoResult.id)],
-        (updateError) => {
-          if (updateError) {
-            console.error("Erro ao atualizar insumo:", updateError);
-            res.status(500).json({ error: "Erro ao atualizar insumo" });
-            return;
-          }
-          connection.query(
-            "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado - ?, quantidade_insumos = quantidade_insumos - ? WHERE id = ?",
-            [quantidade_caixas, quantidade, insumoResult.local_armazenado_id],
-            (updateStockError) => {
-              if (updateStockError) {
-                console.error("Erro ao atualizar estoque:", updateStockError);
-                res.status(500).json({ error: "Erro ao atualizar estoque" });
-                return;
-              }
-              // Registro da mudança
-              logChange(
-                iduser,
-                user,
-                "insumos",
-                "saída",
-                id,
-                null, // lote não se aplica a insumos
-                JSON.stringify({ quantidade, quantidade_caixas }),
-                JSON.stringify({
-                  quantidade: insumoResult.quantidade,
-                  quantidade_caixas: insumoResult.quantidade_caixas,
-                }),
-                insumoResult.local_armazenado_id,
-                insumoResult.coluna
-              );
-              res.json({ message: "Insumo atualizado com sucesso" });
-            }
-          );
+      connection.query(updateQuery, [quantidade, id], (updateError) => {
+        if (updateError) {
+          console.error("Erro ao atualizar insumo:", updateError);
+          res.status(500).json({ error: "Erro ao atualizar insumo" });
+          return;
         }
-      );
+
+        // Aqui continuamos com a atualização de locais_armazenamento
+        connection.query(
+          "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado - ?, quantidade_insumos = quantidade_insumos - ? WHERE id = ?",
+          [quantidade_caixas, quantidade, insumoResult.local_armazenado],
+          (updateStockError) => {
+            if (updateStockError) {
+              console.error("Erro ao atualizar estoque:", updateStockError);
+              res.status(500).json({ error: "Erro ao atualizar estoque" });
+              return;
+            }
+
+            // Registro da mudança no log
+            logChange(
+              iduser,
+              user,
+              "insumos",
+              "saída",
+              id,
+              "NÃO POSSUI", // lote não se aplica a insumos
+              JSON.stringify({ quantidade, quantidade_caixas }),
+              JSON.stringify({
+                quantidade: insumoResult.estoque, // Corrigido para estoque, em vez de quantidade
+                quantidade_caixas: insumoResult.quantidade_caixas,
+              }),
+              insumoResult.local_armazenado,
+              insumoResult.coluna
+            );
+
+            res.json({ message: "Insumo atualizado com sucesso" });
+          }
+        );
+      });
     } else {
       res.status(404).json({ error: "Insumo não encontrado" });
     }

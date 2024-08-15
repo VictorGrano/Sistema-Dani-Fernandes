@@ -29,21 +29,44 @@ const LoginScreen = () => {
       user: user,
       senha: senha,
     };
-    console.log(loginData);
-
+  
     try {
       const response = await axios.post(
         `${apiUrl}/usuarios/Login`,
         loginData
       );
       const data = response.data;
-      await AsyncStorage.setItem("nome", data[0].nome);
-      await AsyncStorage.setItem("id", String(data[0].id));
-      await AsyncStorage.setItem("tipo", data[0].tipo);
-      if (data[0].primeiro_login === "sim") {
-        setIsModalVisible(true);
-      } else { 
-        navigation.replace("Menu");
+  
+      if (data.token) {
+        // Armazene o token no AsyncStorage
+        await AsyncStorage.setItem("token", data.token);
+        
+        // Definir o interceptor do axios diretamente após o login
+        axios.interceptors.request.use(
+          async (config) => {
+            const token = await AsyncStorage.getItem("token");
+            if (token) {
+              config.headers['x-access-token'] = token; // Cabeçalho personalizado
+            }
+            return config;
+          },
+          (error) => {
+            return Promise.reject(error);
+          }
+        );
+        
+        // Armazene os outros dados do usuário
+        await AsyncStorage.setItem("nome", data.usuario.nome);
+        await AsyncStorage.setItem("id", String(data.usuario.id));
+        await AsyncStorage.setItem("tipo", data.usuario.tipo);
+  
+        if (data.usuario.primeiro_login === "sim") {
+          setIsModalVisible(true);
+        } else {
+          navigation.replace("Menu", { primeiro_login: false });
+        }
+      } else {
+        alert("Usuário ou senha inválidos!");
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -54,7 +77,7 @@ const LoginScreen = () => {
       }
     }
   };
-
+  
   const handlePassword = () => {
     setVisualizarSenha(!visualizarSenha);
   };
@@ -78,7 +101,7 @@ const LoginScreen = () => {
       if (response.data.success) {
         Alert.alert("Sucesso", "Senha alterada com sucesso!");
         setIsModalVisible(false);
-        navigation.replace("Menu");
+        navigation.replace("Menu", {primeiro_login: true});
       } else {
         Alert.alert("Erro", "Ocorreu um erro ao alterar a senha. Tente novamente.");
       }

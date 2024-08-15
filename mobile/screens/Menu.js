@@ -14,7 +14,7 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loading from "../components/Loading";
 
-const MenuScreen = () => {
+const MenuScreen = ({ route }) => {
   const navigation = useNavigation();
   const [dados, setDados] = useState([]);
   const [id, setId] = useState(1);
@@ -23,9 +23,9 @@ const MenuScreen = () => {
   const [tipo, setTipo] = useState("");
   const [local, setLocal] = useState("");
   const [total, setTotal] = useState();
-  const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [modalEntradaSaida, setModalEntradaSaida] = useState(false);
+  const { primeiro_login } = route.params;
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -111,25 +111,8 @@ const MenuScreen = () => {
   const handleLogout = async () => {
     await AsyncStorage.removeItem("id");
     await AsyncStorage.removeItem("nome");
+    await AsyncStorage.removeItem("token");
     navigation.replace("Login");
-  };
-
-  const handleModalOpen = () => {
-    setModal(true);
-  };
-
-  const handleModalClose = () => {
-    setModal(false);
-  };
-
-  const handleBuscarProdutos = () => {
-    setModal(false);
-    navigation.navigate("Buscar Produtos");
-  };
-
-  const handleBuscarInsumos = () => {
-    setModal(false);
-    navigation.navigate("Buscar Insumos");
   };
 
   const handleModalEntradaSaidaOpen = () => {
@@ -167,7 +150,15 @@ const MenuScreen = () => {
   return (
     <View style={styles.container}>
       <ScrollView>
-        <Text style={styles.headerNome}>Olá, {nome}!</Text>
+        {primeiro_login ? (
+          <>
+            <Text style={styles.headerNome}>Olá {nome}! Seja bem vindo!</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.headerNome}>Bem vindo de volta, {nome}!</Text>
+          </>
+        )}
         <View style={styles.card}>
           <Text style={styles.header}>{local}</Text>
           <PieChart
@@ -206,119 +197,127 @@ const MenuScreen = () => {
         <View style={styles.buttonContainer}>
           {tipo == "admin" && (
             <>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate("Menu Relatorio")}
+              <Text style={styles.cardTittle}>Administração</Text>
+              <ScrollView
+                horizontal
+                style={styles.horizontalScrollContainer}
+                contentContainerStyle={
+                  styles.horizontalScrollContainer.contentContainer
+                }
               >
-                <FontAwesome5 name="chart-bar" size={24} color="white" />
-                <Text style={styles.buttonText}>Relatório</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate("Historico")}
-              >
-                <FontAwesome5 name="clock" size={24} color="white" />
-                <Text style={styles.buttonText}>Histórico de Movimentação</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate("Gerenciar")}
-              >
-                <FontAwesome5 name="edit" size={24} color="white" />
-                <Text style={styles.buttonText}>Gerenciar</Text>
-              </TouchableOpacity>
-            </>
-          )}
-          <Modal visible={modal} animationType="slide" transparent={true}>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalView}>
-                <Text style={styles.modalHeader}>Escolher Busca</Text>
                 <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={handleBuscarProdutos}
+                  style={styles.button}
+                  onPress={() => navigation.navigate("Menu Relatorio")}
                 >
-                  <Text style={styles.modalButtonText}>Buscar Produtos</Text>
+                  <FontAwesome5 name="chart-bar" size={24} color="white" />
+                  <Text style={styles.buttonText}>Relatórios</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={handleBuscarInsumos}
+                  style={styles.button}
+                  onPress={() => navigation.navigate("Historico")}
                 >
-                  <Text style={styles.modalButtonText}>Buscar Insumos</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalCloseButton}
-                  onPress={handleModalClose}
-                >
-                  <Text style={styles.modalCloseButtonText}>Cancelar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-          <TouchableOpacity style={styles.button} onPress={handleModalOpen}>
-            <FontAwesome5 name="search" size={24} color="white" />
-            <Text style={styles.buttonText}>Buscar Produtos/Insumos</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleModalEntradaSaidaOpen}
-          >
-            <FontAwesome5 name="exchange-alt" size={24} color="white" />
-            <Text style={styles.buttonText}>Entrada/Saída</Text>
-          </TouchableOpacity>
-          <Modal
-            visible={modalEntradaSaida}
-            animationType="slide"
-            transparent={true}
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalView}>
-                <Text style={styles.modalHeader}>Escolher Ação</Text>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => handleEntradaSaida("entrada", "produto")}
-                >
-                  <Text style={styles.modalButtonText}>
-                    Entrada de Produtos
+                  <FontAwesome5 name="clock" size={24} color="white" />
+                  <Text style={styles.buttonText}>
+                    Histórico de Movimentação
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => handleEntradaSaida("saida", "produto")}
+                  style={styles.button}
+                  onPress={() => navigation.navigate("Gerenciar")}
                 >
-                  <Text style={styles.modalButtonText}>Saída de Produtos</Text>
+                  <FontAwesome5 name="edit" size={24} color="white" />
+                  <Text style={styles.buttonText}>Gerenciar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => handleEntradaSaida("entrada", "insumo")}
-                >
-                  <Text style={styles.modalButtonText}>Entrada de Insumos</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => handleEntradaSaida("saida", "insumo")}
-                >
-                  <Text style={styles.modalButtonText}>Saída de Insumos</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalCloseButton}
-                  onPress={handleModalEntradaSaidaClose}
-                >
-                  <Text style={styles.modalCloseButtonText}>Cancelar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate("Lista Prateleira")}
+              </ScrollView>
+            </>
+          )}
+          <Text style={styles.cardTittle}>Produtos</Text>
+          <ScrollView
+            horizontal
+            style={styles.horizontalScrollContainer}
+            contentContainerStyle={
+              styles.horizontalScrollContainer.contentContainer
+            }
           >
-            <FontAwesome5 name="list" size={24} color="white" />
-            <Text style={styles.buttonText}>Lista Prateleira</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleLogout}>
-            <FontAwesome5 name="sign-out-alt" size={24} color="white" />
-            <Text style={styles.buttonText}>Logout</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Buscar Produtos")}
+            >
+              <FontAwesome5 name="search" size={24} color="white" />
+              <Text style={styles.buttonText}>Buscar Produtos</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Vencimentos")}
+            >
+              <FontAwesome5 name="clock" size={24} color="white" />
+              <Text style={styles.buttonText}>Vencimentos</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleEntradaSaida("entrada", "produto")}
+            >
+              <FontAwesome5 name="upload" size={24} color="white" />
+              <Text style={styles.buttonText}>Entrada</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleEntradaSaida("saida", "produto")}
+            >
+              <FontAwesome5 name="download" size={24} color="white" />
+              <Text style={styles.buttonText}>Saída</Text>
+            </TouchableOpacity>
+          </ScrollView>
+          <Text style={styles.cardTittle}>Insumos</Text>
+          <ScrollView
+            horizontal
+            style={styles.horizontalScrollContainer}
+            contentContainerStyle={
+              styles.horizontalScrollContainer.contentContainer
+            }
+          >
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Buscar Insumos")}
+            >
+              <FontAwesome5 name="search" size={24} color="white" />
+              <Text style={styles.buttonText}>Buscar Insumos</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleEntradaSaida("entrada", "insumo")}
+            >
+              <FontAwesome5 name="upload" size={24} color="white" />
+              <Text style={styles.buttonText}>Entrada</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleEntradaSaida("saida", "insumo")}
+            >
+              <FontAwesome5 name="download" size={24} color="white" />
+              <Text style={styles.buttonText}>Saída</Text>
+            </TouchableOpacity>
+          </ScrollView>
+          <Text style={styles.cardTittle}>Outros</Text>
+          <ScrollView
+            horizontal
+            style={styles.horizontalScrollContainer}
+            contentContainerStyle={
+              styles.horizontalScrollContainer.contentContainer
+            }
+          >
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Lista Prateleira")}
+            >
+              <FontAwesome5 name="list" size={24} color="white" />
+              <Text style={styles.buttonText}>Lista Prateleira</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleLogout}>
+              <FontAwesome5 name="sign-out-alt" size={24} color="white" />
+              <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
+          </ScrollView>
         </View>
       </ScrollView>
     </View>
@@ -340,14 +339,12 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#D8B4E2",
-    padding: 20,
-    elevation: 10,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 15,
     width: 150,
     height: 150,
+    margin: 15,
   },
   buttonText: {
     color: "white",
@@ -365,6 +362,24 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     margin: 20,
     flex: 1,
+  },
+  cardTittle: {
+    fontWeight: "bold",
+    fontSize: 20,
+    textAlign: "left",
+  },
+
+  horizontalScrollContainer: {
+    contentContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+      paddingRight: 30,
+    },
+    backgroundColor: "#FFFFFF",
+    margin: 10,
+    elevation: 10,
+    padding: 20,
+    borderRadius: 20,
   },
   headerNome: {
     fontSize: 25,

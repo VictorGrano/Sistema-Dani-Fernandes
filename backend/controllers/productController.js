@@ -171,6 +171,35 @@ exports.getLotes = (req, res) => {
   });
 };
 
+exports.getAllLotes = (req, res) => {
+  const { produto_id } = req.query;
+
+  // Query para buscar os lotes e fazer o join com a tabela de produtos e locais_armazenamento
+  const q = `
+    SELECT 
+      lotes.*, 
+      produtos.nome, 
+      locais_armazenamento.nome_local 
+    FROM lotes
+    LEFT JOIN produtos ON lotes.produto_id = produtos.id
+    LEFT JOIN locais_armazenamento ON lotes.local_armazenado_id = locais_armazenamento.id
+  `;
+
+  connection.query(q, [produto_id], (error, results) => {
+    if (error) {
+      console.error("Error fetching lotes:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    if (results.length > 0) {
+      res.json(results);
+    } else {
+      res.status(404).json({ error: "Lotes não encontrados" });
+    }
+  });
+};
+
+
 exports.updateLote = (req, res) => {
   const { lote_id, local_armazenado_id, coluna } = req.body;
 
