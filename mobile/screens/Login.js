@@ -61,8 +61,9 @@ const LoginScreen = () => {
         await AsyncStorage.setItem("id", String(data.usuario.id));
         await AsyncStorage.setItem("tipo", data.usuario.tipo);
   
-        if (data.usuario.primeiro_login === "sim") {
+        if (data.usuario.primeiro_login == true) {
           setIsModalVisible(true);
+          setLoading(false);
         } else {
           navigation.replace("Menu", { primeiro_login: false });
         }

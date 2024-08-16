@@ -278,7 +278,7 @@ exports.cadastraUsuario = async (req, res) => {
           "INSERT INTO usuarios (nome, login, senha, tipo, primeiro_login) values (?, ?, ?, ?, ?)";
         connection.query(
           q2,
-          [nome, login, hashedSenha, tipo, "sim"],
+          [nome, login, hashedSenha, tipo, true],
           (error, results) => {
             if (error) {
               console.error("Erro no servidor:", error);
@@ -303,7 +303,7 @@ exports.setNewPassword = async (req, res) => {
   try {
     const hashedSenha = await Encriptar(senha);
     const q =
-      "UPDATE usuarios SET senha = ?, primeiro_login = 'nao' WHERE id = ?";
+      "UPDATE usuarios SET senha = ?, primeiro_login = false WHERE id = ?";
     connection.query(q, [hashedSenha, id], (error, results) => {
       if (error) {
         console.error("Erro no servidor:", error);

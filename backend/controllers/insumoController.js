@@ -94,6 +94,40 @@ exports.updateInsumo = async (req, res) => {
   });
 };
 
+exports.updateTipoInsumo = async (req, res) => {
+  const { id, nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna } = req.body;
+
+  // Verifica se o nome já existe, exceto para o insumo atual
+  const q1 = "SELECT * FROM tipo_insumo WHERE nome = ? AND id != ?";
+  connection.query(q1, [nome, id], async (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+    if (results.length > 0) {
+      res.status(409).json({
+        message: "Erro ao atualizar! Já existe um tipo de insumo com este nome no sistema!",
+      });
+    } else {
+      try {
+        const q2 = "UPDATE tipo_insumo SET nome = ? WHERE id = ?";
+        const params = [nome, id];
+
+        connection.query(q2, params, (error, results) => {
+          if (error) {
+            res.status(500).json({ error: "Erro no servidor" });
+            return;
+          }
+          res.status(200).json({ message: "Insumo atualizado com sucesso!" });
+        });
+      } catch (error) {
+        res.status(500).json({ error: "Erro ao atualizar o insumo" });
+      }
+    }
+  });
+};
+
 exports.deleteInsumo = (req, res) => {
   const { id } = req.params;
 
@@ -108,6 +142,24 @@ exports.deleteInsumo = (req, res) => {
       res.status(200).json({ message: "Insumo deletado com sucesso!" });
     } else {
       res.status(404).json({ error: "Insumo não encontrado" });
+    }
+  });
+};
+
+exports.deleteTipoInsumo = (req, res) => {
+  const { id } = req.params;
+
+  const q = "DELETE FROM tipo_insumo WHERE id = ?";
+  connection.query(q, [id], (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+    if (results.affectedRows > 0) {
+      res.status(200).json({ message: "Tipo de insumo deletado com sucesso!" });
+    } else {
+      res.status(404).json({ error: "Tipo de insumo não encontrado" });
     }
   });
 };
@@ -153,6 +205,16 @@ exports.getInfoInsumo = async (req, res) => {
   }
 };
 
+exports.postCadastroTipoInsumo = async (req, res) => {
+  const { nome } = req.body;
+  const q = "INSERT INTO tipo_insumo (nome) VALUES (?)";
+  try {
+    const result = await queryAsync(q, nome);
+    res.status(201).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Erro no servidor" });
+  }
+};
 exports.postCadastroInsumo = async (req, res) => {
   const { nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna } = req.body;
   const q = "INSERT INTO insumos (nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna) VALUES (?, ?, ?, ?, ?, ?, ?)";

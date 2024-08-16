@@ -30,7 +30,7 @@ const UsuariosScreen = () => {
   const [loading, setLoading] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-  const tipos = ["admin", "almoxarifado", "comum"];
+  const tipos = ["admin", "comum"];
   const tiposdata = tipos.map((item) => ({
     label: item,
     value: item,

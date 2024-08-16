@@ -23,6 +23,7 @@ import ListaPrateleiraScreen from './screens/ListaPrateleira';
 import EntradaInsumoScreen from './screens/EntradaInsumo';
 import SaidaInsumoScreen from './screens/SaidaInsumo';
 import VencimentoScreen from './screens/Vencimentos';
+import TipoInsumosScreen from './screens/TipoInsumos';
 
 const Stack = createStackNavigator();
 
@@ -120,6 +121,11 @@ const App = () => {
           name="Insumos"
           component={InsumosScreen}
           options={{ title: 'Insumos' }}
+        />
+        <Stack.Screen
+          name="Tipo Insumos"
+          component={TipoInsumosScreen}
+          options={{ title: 'Tipo Insumos' }}
         />
         <Stack.Screen
           name="Produtos"
