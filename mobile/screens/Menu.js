@@ -67,7 +67,7 @@ const MenuScreen = ({ route }) => {
         setLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+ 
       });
       setLoading(false);
   }, [id]);

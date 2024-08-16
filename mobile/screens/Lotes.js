@@ -67,7 +67,7 @@ const LotesScreen = ({ route }) => {
         local_armazenado_id: selectedLocal !== null ? selectedLocal : lotes.find(lote => lote.id === loteId).local_armazenado_id,
         coluna: coluna,
       };
-      console.log(dados);
+ 
       setLoading(true);
       await axios.post(`${apiUrl}/produtos/AtualizarLote`, dados);
       Alert.alert("Sucesso", "Localização atualizada com sucesso!")

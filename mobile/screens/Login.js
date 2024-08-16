@@ -104,7 +104,7 @@ const LoginScreen = () => {
         id: id,
         senha: newPassword,
       });
-      console.log(response)
+ 
       if (response.data.success) {
         setLoading(false);
         Alert.alert("Sucesso", "Senha alterada com sucesso!");

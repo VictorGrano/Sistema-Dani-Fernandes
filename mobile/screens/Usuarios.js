@@ -50,7 +50,7 @@ const UsuariosScreen = () => {
         setFilteredUsuarios(usuarios);
       });
     } catch (error) {
-      console.log(error);
+ 
     }
     setLoading(false);
   }, [usuarios]);
@@ -88,7 +88,7 @@ const UsuariosScreen = () => {
         setTipoUsuario(null);
       }
     } catch (error) {
-      console.log(error);
+ 
       Alert.alert(
         "Erro",
         "Ocorreu um erro ao registrar o usuário. Tente novamente mais tarde."
@@ -131,7 +131,7 @@ const UsuariosScreen = () => {
       }
     } catch (error) {
       setLoading(false);
-      console.log(error);
+ 
       Alert.alert(
         "Erro",
         "Ocorreu um erro ao atualizar o usuário. Tente novamente mais tarde."

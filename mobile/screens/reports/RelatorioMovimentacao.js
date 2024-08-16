@@ -48,7 +48,7 @@ const RelatorioMovimentacaoScreen = () => {
   });
 
   const fetchData = async () => {
-    console.log(filters);
+ 
     setLoading(true); // Inicia o loading
     try {
       const response = await axios.post(`${apiUrl}/usuarios/Historico`, filters);
@@ -254,7 +254,7 @@ const RelatorioMovimentacaoScreen = () => {
         fileName: `Relatorio_movimentacao_${new Date().toISOString().split("T")[0]}.pdf`,
       });
 
-      console.log("File has been saved to:", uri);
+ 
 
       Alert.alert(
         "PDF Gerado",

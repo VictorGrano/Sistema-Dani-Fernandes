@@ -127,7 +127,7 @@ const ProdutosScreen = () => {
       }
     } catch (error) {
       setLoading(false);
-      console.log(error);
+ 
       Alert.alert(
         "Erro",
         "Ocorreu um erro ao registrar o produto. Tente novamente mais tarde."
@@ -175,7 +175,7 @@ const ProdutosScreen = () => {
       }
     } catch (error) {
       setLoading(false);
-      console.log(error);
+ 
       Alert.alert(
         "Erro",
         "Ocorreu um erro ao atualizar o produto. Tente novamente mais tarde."
