@@ -111,6 +111,7 @@ const HistoricoScreen = () => {
     } finally {
       setLoading(false);  // Tirar o estado de loading ao fim do processo
     }
+    setLoading(false);
   };
 
   useEffect(() => {

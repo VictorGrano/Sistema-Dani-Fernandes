@@ -58,7 +58,7 @@ const SaidaInsumoScreen = ({ route }) => {
         console.error("Error fetching data:", error);
       }
     };
-
+    setLoading(false);
     fetchData();
   }, [apiUrl]);
 
@@ -99,6 +99,7 @@ const SaidaInsumoScreen = ({ route }) => {
         setLoading(false);
         console.error("Erro ao registrar saída:", error);
       });
+      setLoading(false);
   };
 
   if (loading) {

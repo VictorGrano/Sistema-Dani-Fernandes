@@ -60,6 +60,7 @@ const EntradaInsumoScreen = ({ route }) => {
       } finally {
         setLoading(false);
       }
+      setLoading(false);
     };
 
     fetchData();
@@ -111,6 +112,7 @@ const EntradaInsumoScreen = ({ route }) => {
       .finally(() => {
         setLoading(false);
       });
+    setLoading(false);
   };
 
   if (loading) {

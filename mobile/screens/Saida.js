@@ -62,7 +62,7 @@ const SaidaScreen = ({ route }) => {
     if (selectedProduct) {
       setLoading(true);
       axios
-        .get(`${apiUrl}/buscarlotes?produto_id=${selectedProduct}`)
+        .get(`${apiUrl}/produtos/Lotes?produto_id=${selectedProduct}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage("Não existem lotes para este produto.");
@@ -84,10 +84,12 @@ const SaidaScreen = ({ route }) => {
             setNoLotesMessage("Não existem lotes para este produto.");
             setLotes([]);
           } else {
+            setLoading(false);
             console.error("Error fetching lots:", error);
           }
         });
     }
+    setLoading(false);
   }, [selectedProduct]);
 
   const handleQuantidadeChange = (text) => {
@@ -119,7 +121,11 @@ const SaidaScreen = ({ route }) => {
       })
       .catch((error) => {
         setLoading(false);
-        console.error("Erro ao registrar saída:", error.response.data);
+        if (error.response.status === 400) {
+          Alert.alert("Erro!","Quantidade insuficiente no lote!");
+        } else {
+          Alert.alert("Erro", "Ocorreu um erro inesperado.");
+        }
       });
   };
 
@@ -159,7 +165,8 @@ const SaidaScreen = ({ route }) => {
           setLoading(false);
           console.log(error);
         });
-    }
+      }
+      setLoading(false);
   }, [route.params]);
 
   if (loading) {
@@ -172,7 +179,19 @@ const SaidaScreen = ({ route }) => {
         <>
           <Text style={styles.header}>Dados do Produto:</Text>
           <Text style={styles.subheader}>Nome do Produto:</Text>
-          <TextInput style={styles.input} value={String(nome)} editable={false} />
+          <TextInput style={[styles.input, styles.nonEditableInput]} value={String(nome)} editable={false} />
+          <Text style={styles.subheader}>Lote:</Text>
+          <TextInput
+            style={[styles.input, styles.nonEditableInput]}
+            value={String(selectedLote)}
+            editable={false}
+          />
+            <Text style={styles.subheader}>Quantidade total no Lote:</Text>
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              value={String(lotes.find((l) => l.label === selectedLote)?.quantidade || "0")}
+              editable={false}
+            />
           <Text style={styles.subheader}>Quantidade de caixas:</Text>
           <TextInput
             style={styles.input}
@@ -184,22 +203,10 @@ const SaidaScreen = ({ route }) => {
           />
           <Text style={styles.subheader}>Quantidade de produtos na Caixa:</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.nonEditableInput]}
             value={String(quantidade)}
             editable={false}
             onChangeText={handleQuantidadeChange}
-          />
-          <Text style={styles.subheader}>Lote:</Text>
-          <TextInput
-            style={styles.input}
-            value={String(selectedLote)}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Quantidade total no Lote:</Text>
-          <TextInput
-            style={styles.input}
-            value={String(lotes.find((l) => l.label === selectedLote)?.quantidade || "0")}
-            editable={false}
           />
           <TouchableOpacity style={styles.button} onPress={handleSaida}>
             <Text style={styles.buttonText}>Registrar Saída</Text>
@@ -242,7 +249,7 @@ const SaidaScreen = ({ route }) => {
           />
           <Text style={styles.subheader}>Quantidade total no Lote:</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.nonEditableInput]}
             value={String(lotes.find((l) => l.label === selectedLote)?.quantidade || "")}
             editable={false}
           />
@@ -287,6 +294,10 @@ const styles = StyleSheet.create({
     fontSize: 17,
     textAlign: "center",
     backgroundColor: '#FFFFFF',
+  },
+  nonEditableInput: {
+    backgroundColor: "#E0E0E0",
+    color: "#808080",
   },
   header: {
     fontSize: 24,

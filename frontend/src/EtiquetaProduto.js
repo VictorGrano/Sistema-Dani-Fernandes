@@ -363,8 +363,8 @@ function EtiquetaProduto() {
               <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
               <p>Mês de Fabricação: {format(new Date(dataFabricacao), 'MM/yyyy')}</p>
               <p>Validade: {`${mesValidade}/${anoValidade}`}</p>
-            </div>
             <QRCodeSVG value={qrValue} className='qrCode'/>
+            </div>
           </div>
         )}
         {etiquetas.length > 0 && (

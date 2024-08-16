@@ -78,6 +78,7 @@ const ListaPrateleiraScreen = () => {
     } finally {
       setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleAdicionar = async () => {
@@ -133,6 +134,7 @@ const ListaPrateleiraScreen = () => {
     } else {
       await adicionarProdutos(lotesUsados);
     }
+    setLoading(false);
   };
 
   const adicionarProdutos = async (lotesUsados) => {
@@ -157,6 +159,7 @@ const ListaPrateleiraScreen = () => {
     } finally {
       setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleExcluir = async (itemId) => {
@@ -164,12 +167,14 @@ const ListaPrateleiraScreen = () => {
     try {
       await axios.delete(`${apiUrl}/estoque/ListaPrateleira/${itemId}`);
       Alert.alert("Sucesso!", "Produto removido da lista!");
+      setLoading(false);
       fetchListaPrateleira(); // Refresh the list
     } catch (error) {
       console.error("Error deleting item from list:", error);
     } finally {
       setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleConfere = async (itemId) => {
@@ -179,12 +184,14 @@ const ListaPrateleiraScreen = () => {
         concluido: true,
       });
       Alert.alert("Sucesso!", "Produto marcado como concluído!");
+      setLoading(false);
       fetchListaPrateleira(); // Refresh the list
     } catch (error) {
       console.error("Error marking item as completed:", error);
     } finally {
       setLoading(false);
     }
+    setLoading(false);
   };
 
   if (loading) {

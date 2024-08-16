@@ -39,14 +39,17 @@ const TipoInsumosScreen = () => {
           value: tipo.id,
         }));
         setTipos(tiposData);
-        setInsumos(response.data); // Populando os insumos
+        setInsumos(response.data);
+        setLoading(false); // Populando os insumos
       })
       .catch((error) => {
+        setLoading(false);
         console.error("Error fetching insumos:", error);
       })
       .finally(() => {
         setLoading(false);
       });
+      setLoading(false);
   }, []);
 
   // Filtrar insumos com base na busca

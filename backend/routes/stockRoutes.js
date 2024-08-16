@@ -11,6 +11,7 @@ router.delete("/ListaPrateleira/:id", authMiddleware.verifyToken, stockControlle
 router.post("/AddPrateleira", authMiddleware.verifyToken, stockController.postPrateleira);
 router.post("/Entrada", authMiddleware.verifyToken, stockController.postEntrada);
 router.post("/EntradaInsumo", authMiddleware.verifyToken, stockController.postEntradaInsumo);
+router.post("/Saida", authMiddleware.verifyToken, stockController.postSaida);
 router.post("/SaidaInsumo", authMiddleware.verifyToken, stockController.postSaidaInsumo);
 
 module.exports = router;

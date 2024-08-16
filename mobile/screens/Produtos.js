@@ -133,6 +133,7 @@ const ProdutosScreen = () => {
         "Ocorreu um erro ao registrar o produto. Tente novamente mais tarde."
       );
     }
+    setLoading(false);
   };
 
 
@@ -181,6 +182,7 @@ const ProdutosScreen = () => {
         "Ocorreu um erro ao atualizar o produto. Tente novamente mais tarde."
       );
     }
+    setLoading(false);
   };
 
   const handleDelete = async (item) => {
@@ -202,6 +204,7 @@ const ProdutosScreen = () => {
         console.error("Error deleting produto:", error);
         Alert.alert("Erro!", "Erro ao deletar!");
       });
+      setLoading(false);
   };
 
   const abrirModalEdicao = (produto) => {

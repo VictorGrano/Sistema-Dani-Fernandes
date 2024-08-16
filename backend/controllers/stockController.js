@@ -43,11 +43,6 @@ function convertToValidDate(mmYYYY) {
   return `${year}-${month}-01`;
 }
 
-function validateDate(ddMMYYYY) {
-  const [day, month, year] = ddMMYYYY.split("-");
-  return `${year}-${month}-${day}`;
-}
-
 exports.getPrateleira = (req, res) => {
   const q = `
     SELECT 

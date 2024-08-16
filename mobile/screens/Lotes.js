@@ -26,6 +26,7 @@ const LotesScreen = ({ route }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const lotesResponse = await axios.get(`${apiUrl}/produtos/Lotes?produto_id=${id}`);
         setLotes(lotesResponse.data);
@@ -36,7 +37,7 @@ const LotesScreen = ({ route }) => {
           value: local.id,
         }));
         setDataL(locaisData);
-        setLoading(true);
+        setLoading(false);
       } catch (error) {
         if (error.response && error.response.status === 404) {
           setLoading(false);
@@ -45,6 +46,7 @@ const LotesScreen = ({ route }) => {
           console.error("Error fetching data:", error);
         }
       }
+      setLoading(false);
     };
 
     fetchData();

@@ -52,7 +52,7 @@ const VencimentoScreen = () => {
         }
       }
     };
-
+    setLoading(false);
     fetchData();
   }, [filtro]);
 
