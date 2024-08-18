@@ -28,6 +28,9 @@ const SaidaScreen = ({ route }) => {
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
   const [loading, setLoading] = useState(false);
+  const [quantidadeFracionada, setQuantidadeFracionada] = useState("");
+  const [fracionadas, setFracionadas] = useState([]);
+  const [subtotalProdutos, setSubtotalProdutos] = useState(0);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -105,7 +108,7 @@ const SaidaScreen = ({ route }) => {
     const saidaData = {
       id,
       quantidade: quantidadeTotal,
-      quantidade_caixas: quantidadeCaixas,
+      quantidade_caixas: parseInt(quantidadeCaixas) + fracionadas.length,
       lote: selectedLote,
       user: nomeUser,
       iduser: idUser,
@@ -169,6 +172,27 @@ const SaidaScreen = ({ route }) => {
       setLoading(false);
   }, [route.params]);
 
+  useEffect(() => {
+    // Calcula os subtotais sempre que a quantidade ou as fracionadas mudarem
+    const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
+    const totalCaixas = parseInt(quantidadeCaixas || 0);
+    const totalProdutos = (totalCaixas * parseInt(quantidade || 0)) + totalFracionadas;
+
+    setSubtotalProdutos(totalProdutos);
+  }, [quantidade, quantidadeCaixas, fracionadas]);
+
+  const handleAddFracionada = () => {
+    if (quantidadeFracionada) {
+      setFracionadas([...fracionadas, parseInt(quantidadeFracionada)]);
+      setQuantidadeFracionada("");
+    }
+  };
+
+  const handleRemoveFracionada = (index) => {
+    const newFracionadas = fracionadas.filter((_, i) => i !== index);
+    setFracionadas(newFracionadas);
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -177,7 +201,6 @@ const SaidaScreen = ({ route }) => {
     <ScrollView style={styles.container}>
       {route.params ? (
         <>
-          <Text style={styles.header}>Dados do Produto:</Text>
           <Text style={styles.subheader}>Nome do Produto:</Text>
           <TextInput style={[styles.input, styles.nonEditableInput]} value={String(nome)} editable={false} />
           <Text style={styles.subheader}>Lote:</Text>
@@ -208,7 +231,31 @@ const SaidaScreen = ({ route }) => {
             editable={false}
             onChangeText={handleQuantidadeChange}
           />
-          <TouchableOpacity style={styles.button} onPress={handleSaida}>
+           <Text style={styles.subheader}>Caixa Fracionada:</Text>
+          {fracionadas.map((item, index) => (
+            <View key={index} style={styles.fracionadaContainer}>
+              <Text>Caixa {index + 1}: {item} produtos</Text>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleRemoveFracionada(index)}
+              >
+                <Text style={styles.deleteButtonText}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+          <TextInput
+            style={styles.input}
+            placeholder="Quantidade fracionada"
+            keyboardType="numeric"
+            onChangeText={setQuantidadeFracionada}
+            value={quantidadeFracionada}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleAddFracionada}>
+            <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
+          </TouchableOpacity>
+          <Text style={styles.subheader}>Subtotal de produtos:</Text>
+          <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
+          <TouchableOpacity style={styles.buttonSaida} onPress={handleSaida}>
             <Text style={styles.buttonText}>Registrar Saída</Text>
           </TouchableOpacity>
         </>
@@ -271,7 +318,31 @@ const SaidaScreen = ({ route }) => {
             value={quantidade}
             onChangeText={handleQuantidadeChange}
           />
-          <TouchableOpacity style={styles.button} onPress={handleSaida}>
+          <Text style={styles.subheader}>Caixa Fracionada:</Text>
+          {fracionadas.map((item, index) => (
+            <View key={index} style={styles.fracionadaContainer}>
+              <Text>Caixa {index + 1}: {item} produtos</Text>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleRemoveFracionada(index)}
+              >
+                <Text style={styles.deleteButtonText}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+          <TextInput
+            style={styles.input}
+            placeholder="Quantidade fracionada"
+            keyboardType="numeric"
+            onChangeText={setQuantidadeFracionada}
+            value={quantidadeFracionada}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleAddFracionada}>
+            <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
+          </TouchableOpacity>
+          <Text style={styles.subheader}>Subtotal de produtos:</Text>
+          <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
+          <TouchableOpacity style={styles.buttonSaida} onPress={handleSaida}>
             <Text style={styles.buttonText}>Registrar Saída</Text>
           </TouchableOpacity>
         </>
@@ -338,9 +409,38 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
+  buttonSaida: {
+    backgroundColor: "#D8B4E2",
+    padding: 15,
+    marginVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 30,
+  },
   buttonText: {
     color: "white",
     fontSize: 15,
+  },
+  fracionadaContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginVertical: 5,
+    padding: 10,
+    backgroundColor: "#F8F8F8",
+    borderRadius: 8,
+  },
+  subheader: {
+    marginTop: 10,
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  subtotalText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 10,
   },
 });
 

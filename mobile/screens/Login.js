@@ -81,6 +81,7 @@ const LoginScreen = () => {
         alert("Ocorreu um erro ao fazer login. Por favor, tente novamente.");
       }
     }
+    setLoading(false);
   };
   
   const handlePassword = () => {

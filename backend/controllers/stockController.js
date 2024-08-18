@@ -38,9 +38,24 @@ const logChange = (
   });
 };
 
-function convertToValidDate(mmYYYY) {
-  const [month, year] = mmYYYY.split("-");
-  return `${year}-${month}-01`;
+function convertToValidDate(dateString) {
+  // Verifica se a data está no formato MM-yyyy
+  if (dateString.match(/^\d{2}-\d{4}$/)) {
+    const [month, year] = dateString.split("-");
+    return `${year}-${month}-01`; // Retorna no formato YYYY-MM-DD com o dia 01
+  }
+
+  // Verifica se a data está no formato YYYY-MM-DD
+  if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return dateString; // A data já está no formato correto
+  }
+
+  // Verifica se a data está no formato ISO 8601 (YYYY-MM-DDTHH:MM:SSZ)
+  if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/)) {
+    return dateString.split("T")[0]; // Retorna apenas a parte da data no formato YYYY-MM-DD
+  }
+
+  return null; // Retorna null se o formato não for reconhecido
 }
 
 exports.getPrateleira = (req, res) => {

@@ -92,8 +92,8 @@ const EntradaScreen = ({ route }) => {
               label: lote.nome_lote,
               value: lote.id,
               quantidade: lote.quantidade,
-              fabricacao: lote.fabricacao,
-              validade: lote.validade,
+              fabricacao: String(lote.data_fabricacao),
+              validade: String(lote.data_validade),
             }));
             setLotes(lotesData);
             setNoLotesMessage("");
@@ -114,6 +114,60 @@ const EntradaScreen = ({ route }) => {
         });
     }
   }, [selectedProduct, apiUrl]);
+
+  useEffect(() => {
+    if (route.params) {
+      const { id, quantidade, lote, validade, fabricacao } = route.params;
+      setID(id);
+      setQuantidade(quantidade);
+      setSelectedLote(lote);
+  
+      // Ajuste da validade e fabricação ao setar os valores
+      const formattedValidade = validade
+        ? validade.slice(0, 2) + "-" + validade.slice(3, 7)
+        : "";
+      const formattedFabricacao = fabricacao
+        ? new Date(fabricacao).toISOString().split("T")[0]
+        : "";
+  
+      setValidade(formattedValidade);
+      setFabricacao(formattedFabricacao);
+  
+      setLoading(true);
+      axios
+        .get(`${apiUrl}/produtos/InfoProduto?id=${id}`)
+        .then((response) => {
+          setNome(response.data.nome);
+        })
+        .catch((error) => {
+          console.error("Error fetching product data:", error);
+        });
+  
+      axios
+        .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
+        .then((response) => {
+          setLoading(false);
+          if (response.data.length === 0) {
+            setNoLotesMessage("Não existem lotes para este produto.");
+            setLotes([]);
+          } else {
+            const lotesData = response.data.map((lote) => ({
+              label: lote.nome_lote,
+              value: lote.id,
+              quantidade: lote.quantidade,
+              fabricacao: new Date(lote.data_fabricacao).toISOString().split("T")[0], // Formato YYYY-MM-DD
+              validade: lote.data_validade.slice(5, 7) + "-" + lote.data_validade.slice(0, 4), // Formato MM-yyyy
+            }));
+            setLotes(lotesData);
+            setNoLotesMessage("");
+          }
+        })
+        .catch((error) => {
+          setLoading(false);
+        });
+    }
+  }, [route.params]);
+  
 
   useEffect(() => {
     // Calcula os subtotais sempre que a quantidade ou as fracionadas mudarem
@@ -148,26 +202,30 @@ const EntradaScreen = ({ route }) => {
     // Soma as quantidades fracionadas ao valor principal de quantidade
     const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
     const quantidadeTotal = (quantidade * (quantidadeCaixas || 1)) + totalFracionadas;
-
+  
+    // Verifica se as datas de fabricação e validade foram passadas, senão pega do lote[0]
+    const loteSelecionado = lotes.find((lote) => lote.value === selectedLote);
+    const dataFabricacao = fabricacao || loteSelecionado?.fabricacao || lotes[0]?.data_fabricacao;
+    const dataValidade = validade || loteSelecionado?.validade || lotes[0]?.data_validade;
+  
     const entradaData = {
       id: id,
       quantidade: quantidadeTotal,
-      lote: isNewLote ? newLote : selectedLote,
-      validade: validade,
-      fabricacao: fabricacao,
+      lote: newLote || selectedLote,
+      validade: dataValidade,
+      fabricacao: dataFabricacao,
       localArmazenado: selectedLocal,
-      quantidade_caixas: quantidadeCaixas || 1,
-      fracionadas, // Adiciona o array das caixas fracionadas
+      quantidade_caixas: parseInt(quantidadeCaixas) + fracionadas.length || 1,
       coluna: coluna || "SEM COLUNA",
       user: nomeUser,
       iduser: idUser,
     };
-
+  
     setLoading(true);
     axios
       .post(`${apiUrl}/estoque/Entrada`, entradaData)
       .then((response) => {
- 
+        // Navega de volta à tela anterior
         navigation.goBack();
       })
       .catch((error) => {
@@ -177,7 +235,7 @@ const EntradaScreen = ({ route }) => {
         setLoading(false);
       });
   };
-
+  
   if (loading) {
     return <Loading />;
   }
@@ -186,7 +244,6 @@ const EntradaScreen = ({ route }) => {
     <ScrollView style={styles.container}>
       {route.params ? (
         <>
-          <Text style={styles.header}>Dados do Produto:</Text>
           <Text style={styles.subheader}>Nome do Produto:</Text>
           <TextInput
             style={[styles.input, styles.nonEditableInput]}
@@ -214,24 +271,30 @@ const EntradaScreen = ({ route }) => {
             value={String(quantidade)}
             editable={false}
           />
+          <Text style={styles.subheader}>Caixa Fracionada:</Text>
+          {fracionadas.map((item, index) => (
+            <View key={index} style={styles.fracionadaContainer}>
+              <Text>Caixa {index + 1}: {item} produtos</Text>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleRemoveFracionada(index)}
+              >
+                <Text style={styles.deleteButtonText}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+          <TextInput
+            style={styles.input}
+            placeholder="Quantidade fracionada"
+            keyboardType="numeric"
+            onChangeText={setQuantidadeFracionada}
+            value={quantidadeFracionada}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleAddFracionada}>
+            <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
+          </TouchableOpacity>
           <Text style={styles.subheader}>Subtotal de produtos:</Text>
           <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
-          <Text style={styles.subheader}>Data de Fabricação do Lote:</Text>
-          <TextInput
-            style={[styles.input, styles.nonEditableInput]}
-            placeholder="MM-YYYY"
-            keyboardType="numeric"
-            value={fabricacao}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Data de Validade:</Text>
-          <TextInput
-            style={[styles.input, styles.nonEditableInput]}
-            placeholder="MM-YYYY"
-            keyboardType="numeric"
-            value={validade}
-            editable={false}
-          />
           <Text style={styles.subheader}>Local Armazenado:</Text>
           <Dropdown
             style={styles.dropdown}
@@ -250,7 +313,7 @@ const EntradaScreen = ({ route }) => {
             onChangeText={setColuna}
             value={coluna}
           />
-          <TouchableOpacity style={styles.button} onPress={handleEntrar}>
+          <TouchableOpacity style={styles.buttonEntrada} onPress={handleEntrar}>
             <Text style={styles.buttonText}>Criar Entrada</Text>
           </TouchableOpacity>
         </>
@@ -301,6 +364,7 @@ const EntradaScreen = ({ route }) => {
                     setSelectedLote(item.value); // Corrigi para enviar o ID do lote
                     setFabricacao(item.fabricacao);
                     setValidade(item.validade);
+                    console.log(validade, fabricacao);
                   }}
                 />
                 <TouchableOpacity
@@ -311,6 +375,38 @@ const EntradaScreen = ({ route }) => {
                 </TouchableOpacity>
               </View>
             )}
+            {isNewLote && (
+            <>
+              <Text style={styles.subheader}>Data de Fabricação do Lote:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="MM-YYYY"
+                keyboardType="numeric"
+                value={fabricacao}
+                onChangeText={(text) => handleDateInput(text, setFabricacao)}
+                maxLength={7}
+              />
+              <Text style={styles.subheader}>Data de Validade do Lote:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="MM-YYYY"
+                keyboardType="numeric"
+                value={validade}
+                onChangeText={(text) => handleDateInput(text, setValidade)}
+                maxLength={7}
+              />
+              {lotes.length > 0 ? (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setIsNewLote(false)}
+                >
+                  <Text style={styles.buttonText}>
+                    Selecionar Lote Existente
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
+            </>
+          )}
           <Text style={styles.subheader}>Quantidade de caixas:</Text>
           <TextInput
             style={styles.input}
@@ -352,38 +448,6 @@ const EntradaScreen = ({ route }) => {
           </TouchableOpacity>
           <Text style={styles.subheader}>Subtotal de produtos:</Text>
           <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
-          {isNewLote && (
-            <>
-              <Text style={styles.subheader}>Data de Fabricação do Lote:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="MM-YYYY"
-                keyboardType="numeric"
-                value={fabricacao}
-                onChangeText={(text) => handleDateInput(text, setFabricacao)}
-                maxLength={7}
-              />
-              <Text style={styles.subheader}>Data de Validade:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="MM-YYYY"
-                keyboardType="numeric"
-                value={validade}
-                onChangeText={(text) => handleDateInput(text, setValidade)}
-                maxLength={7}
-              />
-              {lotes.length > 0 ? (
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => setIsNewLote(false)}
-                >
-                  <Text style={styles.buttonText}>
-                    Selecionar Lote Existente
-                  </Text>
-                </TouchableOpacity>
-              ) : null}
-            </>
-          )}
           <Text style={styles.subheader}>Local Armazenado:</Text>
           <Dropdown
             style={styles.dropdown}
