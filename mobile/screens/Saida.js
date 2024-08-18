@@ -110,13 +110,13 @@ const SaidaScreen = ({ route }) => {
       user: nomeUser,
       iduser: idUser,
     };
-    console.log(saidaData);
+ 
     setLoading(true);
     axios
       .post(`${apiUrl}/estoque/Saida`, saidaData)
       .then((response) => {
         setLoading(false);
-        console.log("Saída registrada com sucesso:", response.data);
+ 
         navigation.goBack();
       })
       .catch((error) => {
@@ -163,7 +163,7 @@ const SaidaScreen = ({ route }) => {
         })
         .catch((error) => {
           setLoading(false);
-          console.log(error);
+ 
         });
       }
       setLoading(false);

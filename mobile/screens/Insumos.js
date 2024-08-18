@@ -122,7 +122,7 @@ const InsumosScreen = () => {
         Alert.alert("Erro", response.data.message);
       }
     } catch (error) {
-      console.log(error);
+ 
       Alert.alert(
         "Erro",
         "Ocorreu um erro ao registrar o insumo. Tente novamente mais tarde."
@@ -165,7 +165,7 @@ const InsumosScreen = () => {
         Alert.alert("Erro", response.data.message);
       }
     } catch (error) {
-      console.log(error);
+ 
       Alert.alert(
         "Erro",
         "Ocorreu um erro ao atualizar o insumo. Tente novamente mais tarde."

@@ -103,7 +103,7 @@ const EntradaInsumoScreen = ({ route }) => {
     axios
       .post(`${apiUrl}/estoque/EntradaInsumo`, entradaData)
       .then((response) => {
-        console.log("Entrada criada com sucesso:", response.data);
+ 
         navigation.goBack();
       })
       .catch((error) => {

@@ -60,7 +60,7 @@ const RelatorioLotesScreen = () => {
       })
       .catch((error) => {
         if (error.response?.status === 404) {
-          console.log("Erro 404");
+ 
         }
       })
       .finally(() => {
@@ -134,7 +134,7 @@ const RelatorioLotesScreen = () => {
         fileName: `Relatorio_Estoque_${new Date().toISOString().split("T")[0]}.pdf`,
         OrientationType: "landscape",
       });
-      console.log("File has been saved to:", uri);
+ 
 
       Alert.alert("PDF Gerado", "O relatório de estoque foi gerado com sucesso!", [
         { text: "OK" },

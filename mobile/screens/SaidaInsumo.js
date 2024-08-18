@@ -92,7 +92,7 @@ const SaidaInsumoScreen = ({ route }) => {
       .post(`${apiUrl}/estoque/SaidaInsumo`, saidaData)
       .then((response) => {
         setLoading(false);
-        console.log("Saída registrada com sucesso:", response.data);
+ 
         navigation.goBack();
       })
       .catch((error) => {

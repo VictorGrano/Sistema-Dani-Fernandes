@@ -121,7 +121,7 @@ const RelatorioAromaScreen = () => {
           new Date().toISOString().split("T")[0]
         }.pdf`,
       });
-      console.log("File has been saved to:", uri);
+ 
 
       Alert.alert(
         "PDF Gerado",

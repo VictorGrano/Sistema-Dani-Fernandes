@@ -45,7 +45,6 @@ const VencimentoScreen = () => {
         }
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching data:", error);
         if (error.response && error.response.status === 404) {
           setLoading(false);
           setInfo(true);
