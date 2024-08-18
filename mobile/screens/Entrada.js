@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -35,6 +35,9 @@ const EntradaScreen = ({ route }) => {
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
   const [loading, setLoading] = useState(false);
+  const [quantidadeFracionada, setQuantidadeFracionada] = useState("");
+  const [fracionadas, setFracionadas] = useState([]);
+  const [subtotalProdutos, setSubtotalProdutos] = useState(0);
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -77,7 +80,7 @@ const EntradaScreen = ({ route }) => {
     if (selectedProduct) {
       setLoading(true);
       axios
-        .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
+        .get(`${apiUrl}/produtos/Lotes?produto_id=${selectedProduct}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage(
@@ -110,7 +113,16 @@ const EntradaScreen = ({ route }) => {
           setLoading(false);
         });
     }
-  }, [selectedProduct, id, apiUrl]);
+  }, [selectedProduct, apiUrl]);
+
+  useEffect(() => {
+    // Calcula os subtotais sempre que a quantidade ou as fracionadas mudarem
+    const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
+    const totalCaixas = parseInt(quantidadeCaixas || 0);
+    const totalProdutos = (totalCaixas * parseInt(quantidade || 0)) + totalFracionadas;
+
+    setSubtotalProdutos(totalProdutos);
+  }, [quantidade, quantidadeCaixas, fracionadas]);
 
   const handleDateInput = (input, setDate) => {
     let formattedInput = input.replace(/[^0-9]/g, "");
@@ -120,30 +132,37 @@ const EntradaScreen = ({ route }) => {
     setDate(formattedInput);
   };
 
-  const convertToMMYYYY = (dateString) => {
-    if (!dateString) return "";
-    const [year, month] = dateString.split("-");
-    return `${month}-${year}`;
+  const handleAddFracionada = () => {
+    if (quantidadeFracionada) {
+      setFracionadas([...fracionadas, parseInt(quantidadeFracionada)]);
+      setQuantidadeFracionada("");
+    }
   };
 
+  const handleRemoveFracionada = (index) => {
+    const newFracionadas = fracionadas.filter((_, i) => i !== index);
+    setFracionadas(newFracionadas);
+  };
 
   const handleEntrar = () => {
-    const quantidadeTotal = quantidade * (quantidadeCaixas || 1);
-    
-    // Convertemos as datas para o formato YYYY-MM-DD
+    // Soma as quantidades fracionadas ao valor principal de quantidade
+    const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
+    const quantidadeTotal = (quantidade * (quantidadeCaixas || 1)) + totalFracionadas;
+
     const entradaData = {
       id: id,
       quantidade: quantidadeTotal,
       lote: isNewLote ? newLote : selectedLote,
-      validade: validade, // Converte a validade
-      fabricacao: fabricacao, // Converte a data de fabricação
+      validade: validade,
+      fabricacao: fabricacao,
       localArmazenado: selectedLocal,
       quantidade_caixas: quantidadeCaixas || 1,
+      fracionadas, // Adiciona o array das caixas fracionadas
       coluna: coluna || "SEM COLUNA",
       user: nomeUser,
       iduser: idUser,
     };
-  
+
     setLoading(true);
     axios
       .post(`${apiUrl}/estoque/Entrada`, entradaData)
@@ -157,57 +176,7 @@ const EntradaScreen = ({ route }) => {
       .finally(() => {
         setLoading(false);
       });
-      setLoading(false);
   };
-  
-
-  useEffect(() => {
-    if (route.params) {
-      const { id, quantidade, lote, validade, fabricacao } = route.params;
-      setID(id);
-      setQuantidade(quantidade);
-      setSelectedLote(lote);
-      setValidade(validade);
-      setFabricacao(convertToMMYYYY(fabricacao));
-
-      setLoading(true);
-      axios
-        .get(`${apiUrl}/produtos/InfoProduto?id=${id}`)
-        .then((response) => {
-          setNome(response.data.nome);
-        })
-        .catch((error) => {
-          console.error("Error fetching product data:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-
-      axios
-        .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
-        .then((response) => {
-          if (response.data.length === 0) {
-            setNoLotesMessage(
-              "Não existem lotes para este produto. Adicione um com o campo abaixo."
-            );
-            setLotes([]);
-          } else {
-            const lotesData = response.data.map((lote) => ({
-              label: lote.nome_lote,
-              value: lote.id,
-              quantidade: lote.quantidade,
-              fabricacao: convertToMMYYYY(lote.fabricacao),
-              validade: lote.validade,
-            }));
-            setLotes(lotesData);
-            setNoLotesMessage("");
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching lots:", error);
-        });
-    }
-  }, [route.params, apiUrl]);
 
   if (loading) {
     return <Loading />;
@@ -245,6 +214,8 @@ const EntradaScreen = ({ route }) => {
             value={String(quantidade)}
             editable={false}
           />
+          <Text style={styles.subheader}>Subtotal de produtos:</Text>
+          <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
           <Text style={styles.subheader}>Data de Fabricação do Lote:</Text>
           <TextInput
             style={[styles.input, styles.nonEditableInput]}
@@ -252,8 +223,6 @@ const EntradaScreen = ({ route }) => {
             keyboardType="numeric"
             value={fabricacao}
             editable={false}
-            onChangeText={(text) => handleDateInput(text, setFabricacao)}
-            maxLength={7}
           />
           <Text style={styles.subheader}>Data de Validade:</Text>
           <TextInput
@@ -262,8 +231,6 @@ const EntradaScreen = ({ route }) => {
             keyboardType="numeric"
             value={validade}
             editable={false}
-            onChangeText={(text) => handleDateInput(text, setValidade)}
-            maxLength={7}
           />
           <Text style={styles.subheader}>Local Armazenado:</Text>
           <Dropdown
@@ -305,6 +272,45 @@ const EntradaScreen = ({ route }) => {
               setIsNewLote(false);
             }}
           />
+            <Text style={styles.subheader}>Lote:</Text>
+            {noLotesMessage ? (
+              <View style={styles.messageContainer}>
+                <Text style={styles.message}>{noLotesMessage}</Text>
+              </View>
+            ) : null}
+            {isNewLote ? (
+              <View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nome do Lote"
+                  value={newLote}
+                  onChangeText={setNewLote}
+                />
+              </View>
+            ) : (
+              <View>
+                <Dropdown
+                  style={styles.dropdown}
+                  data={lotes}
+                  search={true}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Selecione um lote"
+                  value={selectedLote}
+                  onChange={(item) => {
+                    setSelectedLote(item.value); // Corrigi para enviar o ID do lote
+                    setFabricacao(item.fabricacao);
+                    setValidade(item.validade);
+                  }}
+                />
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setIsNewLote(true)}
+                >
+                  <Text style={styles.buttonText}>Adicionar Novo Lote</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           <Text style={styles.subheader}>Quantidade de caixas:</Text>
           <TextInput
             style={styles.input}
@@ -322,45 +328,30 @@ const EntradaScreen = ({ route }) => {
             onChangeText={setQuantidade}
             value={quantidade}
           />
-          <Text style={styles.subheader}>Lote:</Text>
-          {noLotesMessage ? (
-            <View style={styles.messageContainer}>
-              <Text style={styles.message}>{noLotesMessage}</Text>
-            </View>
-          ) : null}
-          {isNewLote ? (
-            <View>
-              <TextInput
-                style={styles.input}
-                placeholder="Nome do Lote"
-                value={newLote}
-                onChangeText={setNewLote}
-              />
-            </View>
-          ) : (
-            <View>
-              <Dropdown
-                style={styles.dropdown}
-                data={lotes}
-                search={true}
-                labelField="label"
-                valueField="value"
-                placeholder="Selecione um lote"
-                value={selectedLote}
-                onChange={(item) => {
-                  setSelectedLote(item.label);
-                  setFabricacao(item.fabricacao);
-                  setValidade(item.validade);
-                }}
-              />
+          <Text style={styles.subheader}>Caixa Fracionada:</Text>
+          {fracionadas.map((item, index) => (
+            <View key={index} style={styles.fracionadaContainer}>
+              <Text>Caixa {index + 1}: {item} produtos</Text>
               <TouchableOpacity
-                style={styles.button}
-                onPress={() => setIsNewLote(true)}
+                style={styles.deleteButton}
+                onPress={() => handleRemoveFracionada(index)}
               >
-                <Text style={styles.buttonText}>Adicionar Novo Lote</Text>
+                <Text style={styles.deleteButtonText}>Excluir</Text>
               </TouchableOpacity>
             </View>
-          )}
+          ))}
+          <TextInput
+            style={styles.input}
+            placeholder="Quantidade fracionada"
+            keyboardType="numeric"
+            onChangeText={setQuantidadeFracionada}
+            value={quantidadeFracionada}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleAddFracionada}>
+            <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
+          </TouchableOpacity>
+          <Text style={styles.subheader}>Subtotal de produtos:</Text>
+          <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
           {isNewLote && (
             <>
               <Text style={styles.subheader}>Data de Fabricação do Lote:</Text>
@@ -381,7 +372,7 @@ const EntradaScreen = ({ route }) => {
                 onChangeText={(text) => handleDateInput(text, setValidade)}
                 maxLength={7}
               />
-                {lotes.length > 0 ? (
+              {lotes.length > 0 ? (
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() => setIsNewLote(false)}
@@ -451,6 +442,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
+  subtotalText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 10,
+  },
   dropdown: {
     marginVertical: 20,
     width: "100%",
@@ -489,6 +486,23 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 15,
+  },
+  fracionadaContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginVertical: 5,
+    padding: 10,
+    backgroundColor: "#F8F8F8",
+    borderRadius: 8,
+  },
+  deleteButton: {
+    backgroundColor: "#FF6347",
+    padding: 5,
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: "white",
   },
 });
 

@@ -2,7 +2,7 @@
   "expo": {
     "name": "DaniFernandes",
     "slug": "DaniFernandes",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -32,8 +32,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "cameraPermission": "Permita $(PRODUCT_NAME) acessar sua câmera",
+          "microphonePermission": "Permita $(PRODUCT_NAME) acessar seu microfone",
           "recordAudioAndroid": true
         }
       ],

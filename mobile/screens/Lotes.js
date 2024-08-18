@@ -48,7 +48,7 @@ const LotesScreen = ({ route }) => {
       }
       setLoading(false);
     };
-
+    setLoading(false);
     fetchData();
   }, [id]);
 
@@ -84,6 +84,7 @@ const LotesScreen = ({ route }) => {
       console.error("Error saving data:", error.response.data);
       Alert.alert("Erro", "Ocorreu um erro ao salvar a nova localização.");
     }
+    setLoading(false);
   };
 
   if (loading) {
