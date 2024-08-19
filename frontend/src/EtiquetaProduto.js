@@ -4,6 +4,7 @@ import Select from "react-select";
 import { format, parse, parseISO, addHours } from "date-fns";
 import "./styles/EtiquetaProduto.css";
 import { QRCodeSVG } from "qrcode.react";
+import {Helmet} from "react-helmet";
 
 function EtiquetaProduto() {
   const [products, setProducts] = useState([]);
@@ -238,6 +239,11 @@ function EtiquetaProduto() {
 
   return (
     <div className="App">
+      <Helmet>
+      <head>
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    </head>
+    </Helmet>
       <header className="App-header">
         <p className="Titulo">Criar etiquetas</p>
       </header>

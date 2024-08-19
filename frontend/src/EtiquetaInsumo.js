@@ -3,6 +3,7 @@ import axios from 'axios';
 import Select from 'react-select';
 import './styles/EtiquetaInsumo.css';
 import { QRCodeSVG } from 'qrcode.react';
+import {Helmet} from "react-helmet";
 
 function EtiquetaInsumo() {
   const [insumos, setInsumos] = useState([]);
@@ -125,6 +126,11 @@ function EtiquetaInsumo() {
 
   return (
     <div className="App">
+      <Helmet>
+      <head>
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    </head>
+    </Helmet>
       <header className="App-header">
         <p className="Titulo">
           Gerar Etiqueta de Insumos
