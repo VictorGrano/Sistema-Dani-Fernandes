@@ -60,6 +60,7 @@ const EntradaInsumoScreen = ({ route }) => {
       } finally {
         setLoading(false);
       }
+      setLoading(false);
     };
 
     fetchData();
@@ -111,6 +112,7 @@ const EntradaInsumoScreen = ({ route }) => {
       .finally(() => {
         setLoading(false);
       });
+    setLoading(false);
   };
 
   if (loading) {
@@ -267,14 +269,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
     alignItems: "center",
   },
   buttonEntrada: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,

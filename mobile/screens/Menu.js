@@ -243,13 +243,6 @@ const MenuScreen = ({ route }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("Vencimentos")}
-            >
-              <FontAwesome5 name="clock" size={24} color="white" />
-              <Text style={styles.buttonText}>Vencimentos</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
               onPress={() => handleEntradaSaida("entrada", "produto")}
             >
               <FontAwesome5 name="upload" size={24} color="white" />
@@ -261,6 +254,13 @@ const MenuScreen = ({ route }) => {
             >
               <FontAwesome5 name="download" size={24} color="white" />
               <Text style={styles.buttonText}>Saída</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Vencimentos")}
+            >
+              <FontAwesome5 name="clock" size={24} color="white" />
+              <Text style={styles.buttonText}>Vencimentos</Text>
             </TouchableOpacity>
           </ScrollView>
           <Text style={styles.cardTittle}>Insumos</Text>
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",

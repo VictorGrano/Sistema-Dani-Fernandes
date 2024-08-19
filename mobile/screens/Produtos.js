@@ -133,6 +133,7 @@ const ProdutosScreen = () => {
         "Ocorreu um erro ao registrar o produto. Tente novamente mais tarde."
       );
     }
+    setLoading(false);
   };
 
 
@@ -181,6 +182,7 @@ const ProdutosScreen = () => {
         "Ocorreu um erro ao atualizar o produto. Tente novamente mais tarde."
       );
     }
+    setLoading(false);
   };
 
   const handleDelete = async (item) => {
@@ -202,6 +204,7 @@ const ProdutosScreen = () => {
         console.error("Error deleting produto:", error);
         Alert.alert("Erro!", "Erro ao deletar!");
       });
+      setLoading(false);
   };
 
   const abrirModalEdicao = (produto) => {
@@ -517,7 +520,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
@@ -595,7 +598,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalButton: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",

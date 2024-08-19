@@ -81,6 +81,7 @@ const LoginScreen = () => {
         alert("Ocorreu um erro ao fazer login. Por favor, tente novamente.");
       }
     }
+    setLoading(false);
   };
   
   const handlePassword = () => {
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,

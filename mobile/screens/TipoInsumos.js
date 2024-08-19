@@ -39,14 +39,17 @@ const TipoInsumosScreen = () => {
           value: tipo.id,
         }));
         setTipos(tiposData);
-        setInsumos(response.data); // Populando os insumos
+        setInsumos(response.data);
+        setLoading(false); // Populando os insumos
       })
       .catch((error) => {
+        setLoading(false);
         console.error("Error fetching insumos:", error);
       })
       .finally(() => {
         setLoading(false);
       });
+      setLoading(false);
   }, []);
 
   // Filtrar insumos com base na busca
@@ -289,7 +292,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
@@ -360,7 +363,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalButton: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",

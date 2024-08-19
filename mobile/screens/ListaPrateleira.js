@@ -78,6 +78,7 @@ const ListaPrateleiraScreen = () => {
     } finally {
       setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleAdicionar = async () => {
@@ -133,6 +134,7 @@ const ListaPrateleiraScreen = () => {
     } else {
       await adicionarProdutos(lotesUsados);
     }
+    setLoading(false);
   };
 
   const adicionarProdutos = async (lotesUsados) => {
@@ -157,6 +159,7 @@ const ListaPrateleiraScreen = () => {
     } finally {
       setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleExcluir = async (itemId) => {
@@ -164,12 +167,14 @@ const ListaPrateleiraScreen = () => {
     try {
       await axios.delete(`${apiUrl}/estoque/ListaPrateleira/${itemId}`);
       Alert.alert("Sucesso!", "Produto removido da lista!");
+      setLoading(false);
       fetchListaPrateleira(); // Refresh the list
     } catch (error) {
       console.error("Error deleting item from list:", error);
     } finally {
       setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleConfere = async (itemId) => {
@@ -179,12 +184,14 @@ const ListaPrateleiraScreen = () => {
         concluido: true,
       });
       Alert.alert("Sucesso!", "Produto marcado como concluído!");
+      setLoading(false);
       fetchListaPrateleira(); // Refresh the list
     } catch (error) {
       console.error("Error marking item as completed:", error);
     } finally {
       setLoading(false);
     }
+    setLoading(false);
   };
 
   if (loading) {
@@ -336,7 +343,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
@@ -366,7 +373,7 @@ const styles = StyleSheet.create({
   tableHeader: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     textAlign: "center",
     padding: 10,
   },
@@ -401,7 +408,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   actionButton: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 5,
     marginHorizontal: 5,
     borderRadius: 4,

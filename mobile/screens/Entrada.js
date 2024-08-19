@@ -34,13 +34,16 @@ const EntradaScreen = ({ route }) => {
   const [isNewLote, setIsNewLote] = useState(false);
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
-  const [loading, setLoading] = useState(false); // Estado de loading
+  const [loading, setLoading] = useState(false);
+  const [quantidadeFracionada, setQuantidadeFracionada] = useState("");
+  const [fracionadas, setFracionadas] = useState([]);
+  const [subtotalProdutos, setSubtotalProdutos] = useState(0);
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // Inicia o loading
+      setLoading(true);
       try {
         const storedNome = await AsyncStorage.getItem("nome");
         const storedID = await AsyncStorage.getItem("id");
@@ -66,7 +69,7 @@ const EntradaScreen = ({ route }) => {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false); // Finaliza o loading
+        setLoading(false);
       }
     };
 
@@ -75,9 +78,9 @@ const EntradaScreen = ({ route }) => {
 
   useEffect(() => {
     if (selectedProduct) {
-      setLoading(true); // Inicia o loading
+      setLoading(true);
       axios
-        .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
+        .get(`${apiUrl}/produtos/Lotes?produto_id=${selectedProduct}`)
         .then((response) => {
           if (response.data.length === 0) {
             setNoLotesMessage(
@@ -89,6 +92,8 @@ const EntradaScreen = ({ route }) => {
               label: lote.nome_lote,
               value: lote.id,
               quantidade: lote.quantidade,
+              fabricacao: String(lote.data_fabricacao),
+              validade: String(lote.data_validade),
             }));
             setLotes(lotesData);
             setNoLotesMessage("");
@@ -105,40 +110,10 @@ const EntradaScreen = ({ route }) => {
           }
         })
         .finally(() => {
-          setLoading(false); // Finaliza o loading
+          setLoading(false);
         });
     }
-  }, [selectedProduct, id, apiUrl]);
-
-  const handleEntrar = () => {
-    const quantidadeTotal = quantidade * (quantidadeCaixas || 1);
-    const entradaData = {
-      id: id,
-      quantidade: quantidadeTotal,
-      lote: isNewLote ? newLote : selectedLote,
-      validade,
-      fabricacao,
-      localArmazenado: selectedLocal,
-      quantidade_caixas: quantidadeCaixas || 1,
-      coluna,
-      user: nomeUser,
-      iduser: idUser,
-    };
-
-    setLoading(true); // Inicia o loading
-    axios
-      .post(`${apiUrl}/estoque/Entrada`, entradaData)
-      .then((response) => {
- 
-        navigation.goBack();
-      })
-      .catch((error) => {
-        console.error("Erro ao criar entrada:", error);
-      })
-      .finally(() => {
-        setLoading(false); // Finaliza o loading
-      });
-  };
+  }, [selectedProduct, apiUrl]);
 
   useEffect(() => {
     if (route.params) {
@@ -146,10 +121,19 @@ const EntradaScreen = ({ route }) => {
       setID(id);
       setQuantidade(quantidade);
       setSelectedLote(lote);
-      setValidade(validade);
-      setFabricacao(fabricacao);
 
-      setLoading(true); // Inicia o loading
+      // Ajuste da validade e fabricação ao setar os valores
+      const formattedValidade = validade
+        ? validade.slice(0, 2) + "-" + validade.slice(3, 7)
+        : "";
+      const formattedFabricacao = fabricacao
+        ? new Date(fabricacao).toISOString().split("T")[0]
+        : "";
+
+      setValidade(formattedValidade);
+      setFabricacao(formattedFabricacao);
+
+      setLoading(true);
       axios
         .get(`${apiUrl}/produtos/InfoProduto?id=${id}`)
         .then((response) => {
@@ -157,241 +141,383 @@ const EntradaScreen = ({ route }) => {
         })
         .catch((error) => {
           console.error("Error fetching product data:", error);
-        })
-        .finally(() => {
-          setLoading(false); // Finaliza o loading
         });
 
       axios
         .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
+          setLoading(false);
           if (response.data.length === 0) {
-            setNoLotesMessage(
-              "Não existem lotes para este produto. Adicione um com o campo abaixo."
-            );
+            setNoLotesMessage("Não existem lotes para este produto.");
             setLotes([]);
           } else {
             const lotesData = response.data.map((lote) => ({
               label: lote.nome_lote,
               value: lote.id,
               quantidade: lote.quantidade,
+              fabricacao: new Date(lote.data_fabricacao)
+                .toISOString()
+                .split("T")[0], // Formato YYYY-MM-DD
+              validade:
+                lote.data_validade.slice(5, 7) +
+                "-" +
+                lote.data_validade.slice(0, 4), // Formato MM-yyyy
             }));
             setLotes(lotesData);
             setNoLotesMessage("");
           }
         })
         .catch((error) => {
-          console.error("Error fetching lots:", error);
+          setLoading(false);
         });
     }
-  }, [route.params, apiUrl]);
+  }, [route.params]);
+
+  useEffect(() => {
+    // Calcula os subtotais sempre que a quantidade ou as fracionadas mudarem
+    const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
+    const totalCaixas = parseInt(quantidadeCaixas || 0);
+    const totalProdutos =
+      totalCaixas * parseInt(quantidade || 0) + totalFracionadas;
+
+    setSubtotalProdutos(totalProdutos);
+  }, [quantidade, quantidadeCaixas, fracionadas]);
+
+  const handleDateInput = (input, setDate) => {
+    let formattedInput = input.replace(/[^0-9]/g, "");
+    if (formattedInput.length >= 2) {
+      formattedInput = `${formattedInput.slice(0, 2)}-${formattedInput.slice(
+        2,
+        6
+      )}`;
+    }
+    setDate(formattedInput);
+  };
+
+  const handleAddFracionada = () => {
+    if (quantidadeFracionada) {
+      setFracionadas([...fracionadas, parseInt(quantidadeFracionada)]);
+      setQuantidadeFracionada("");
+    }
+  };
+
+  const handleRemoveFracionada = (index) => {
+    const newFracionadas = fracionadas.filter((_, i) => i !== index);
+    setFracionadas(newFracionadas);
+  };
+
+  const handleEntrar = () => {
+    // Soma as quantidades fracionadas ao valor principal de quantidade
+    const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
+    const quantidadeTotal =
+      quantidade * (quantidadeCaixas || 1) + totalFracionadas;
+
+    // Verifica se as datas de fabricação e validade foram passadas, senão pega do lote[0]
+    const loteSelecionado = lotes.find((lote) => lote.value === selectedLote);
+    const dataFabricacao =
+      fabricacao || loteSelecionado?.fabricacao || lotes[0]?.data_fabricacao;
+    const dataValidade =
+      validade || loteSelecionado?.validade || lotes[0]?.data_validade;
+
+    const entradaData = {
+      id: id,
+      quantidade: quantidadeTotal,
+      lote: newLote || selectedLote,
+      validade: dataValidade,
+      fabricacao: dataFabricacao,
+      localArmazenado: selectedLocal,
+      quantidade_caixas: parseInt(quantidadeCaixas) + fracionadas.length || 1,
+      coluna: coluna || "SEM COLUNA",
+      user: nomeUser,
+      iduser: idUser,
+    };
+
+    setLoading(true);
+    axios
+      .post(`${apiUrl}/estoque/Entrada`, entradaData)
+      .then((response) => {
+        // Navega de volta à tela anterior
+        navigation.goBack();
+      })
+      .catch((error) => {
+        console.error("Erro ao criar entrada:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   if (loading) {
-    return <Loading />; // Exibe o componente Loading
+    return <Loading />;
   }
 
   return (
     <ScrollView style={styles.container}>
       {route.params ? (
         <>
-          <Text style={styles.header}>Dados do Produto:</Text>
-          <Text style={styles.subheader}>Nome do Produto:</Text>
-          <TextInput
-            style={styles.input}
-            value={String(nome)}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Quantidade de caixas:</Text>
-          <TextInput
-            style={styles.input}
-            editable={true}
-            keyboardType="numeric"
-            placeholder="Digite a quantidade de caixas aqui"
-            onChangeText={setQuantidadeCaixas}
-            value={quantidadeCaixas}
-          />
-          <Text style={styles.subheader}>Quantidade de produtos na Caixa:</Text>
-          <TextInput
-            style={styles.input}
-            value={String(quantidade)}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Lote:</Text>
-          <TextInput
-            style={styles.input}
-            value={String(selectedLote)}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Quantidade no Lote:</Text>
-          <TextInput
-            style={styles.input}
-            value={String(
-              lotes.find((l) => l.label === selectedLote)?.quantidade || "0"
-            )}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Data de Fabricação:</Text>
-          <TextInput
-            style={styles.input}
-            value={String(fabricacao)}
-            editable={false}
-            keyboardType="numeric"
-          />
-          <Text style={styles.subheader}>Data de Validade:</Text>
-          <TextInput
-            style={styles.input}
-            value={String(validade)}
-            editable={false}
-            keyboardType="numeric"
-          />
-          <Text style={styles.subheader}>Local Armazenado:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={locais}
-            search={true}
-            labelField="label"
-            valueField="value"
-            placeholder="Selecione um local para armazenar"
-            value={selectedLocal}
-            onChange={(item) => setSelectedLocal(item.value)}
-          />
-          <Text style={styles.subheader}>Coluna armazenada:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: A1"
-            onChangeText={setColuna}
-            value={coluna}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleEntrar}>
+          <Text style={styles.header}>Dados do produto:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Nome do Produto:</Text>
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              value={String(nome)}
+              editable={false}
+            />
+            <Text style={styles.subheader}>Lote:</Text>
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              value={String(selectedLote)}
+              editable={false}
+            />
+          </View>
+          <Text style={styles.header}>Dados do produto:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Quantidade de caixas:</Text>
+            <TextInput
+              style={styles.input}
+              editable={true}
+              keyboardType="numeric"
+              placeholder="Digite a quantidade de caixas aqui"
+              onChangeText={setQuantidadeCaixas}
+              value={quantidadeCaixas}
+            />
+            <Text style={styles.subheader}>
+              Quantidade de produtos na Caixa:
+            </Text>
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              value={String(quantidade)}
+              editable={false}
+            />
+            <Text style={styles.subheader}>Caixa Fracionada:</Text>
+            {fracionadas.map((item, index) => (
+              <View key={index} style={styles.fracionadaContainer}>
+                <Text>
+                  Caixa {index + 1}: {item} produtos
+                </Text>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleRemoveFracionada(index)}
+                >
+                  <Text style={styles.deleteButtonText}>Excluir</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+            <TextInput
+              style={styles.input}
+              placeholder="Quantidade fracionada"
+              keyboardType="numeric"
+              onChangeText={setQuantidadeFracionada}
+              value={quantidadeFracionada}
+            />
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleAddFracionada}
+            >
+              <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.header}>Local:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Local Armazenado:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={locais}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecione um local para armazenar"
+              value={selectedLocal}
+              onChange={(item) => setSelectedLocal(item.value)}
+            />
+            <Text style={styles.subheader}>Coluna armazenada (Opcional):</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: A1"
+              onChangeText={setColuna}
+              value={coluna}
+            />
+          </View>
+          <Text style={styles.header}>Revisão:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Total de caixas: {parseInt(quantidadeCaixas) + fracionadas.length}</Text>
+            <Text style={styles.subheader}>Total de produtos: {subtotalProdutos}</Text>
+          </View>
+          <TouchableOpacity style={styles.buttonEntrada} onPress={handleEntrar}>
             <Text style={styles.buttonText}>Criar Entrada</Text>
           </TouchableOpacity>
         </>
       ) : (
         <>
-          <Text style={styles.subheader}>Nome do Produto:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={produtos}
-            search={true}
-            labelField="label"
-            valueField="value"
-            placeholder="Selecione um produto"
-            value={selectedProduct}
-            onChange={(item) => {
-              setSelectedProduct(item.value);
-              setID(item.value);
-              setNoLotesMessage("");
-              setIsNewLote(false);
-            }}
-          />
-          <Text style={styles.subheader}>Quantidade de caixas:</Text>
-          <TextInput
-            style={styles.input}
-            editable={true}
-            keyboardType="numeric"
-            placeholder="Digite a quantidade de caixas aqui"
-            onChangeText={setQuantidadeCaixas}
-            value={quantidadeCaixas}
-          />
-          <Text style={styles.subheader}>Quantidade de produtos na Caixa:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Quantidade"
-            keyboardType="numeric"
-            onChangeText={setQuantidade}
-            value={quantidade}
-          />
-          <Text style={styles.subheader}>Lote:</Text>
-          {noLotesMessage ? (
-            <View style={styles.messageContainer}>
-              <Text style={styles.message}>{noLotesMessage}</Text>
-            </View>
-          ) : null}
-          {isNewLote ? (
-            <View>
-              <TextInput
-                style={styles.input}
-                placeholder="Nome do Lote"
-                value={newLote}
-                onChangeText={setNewLote}
-              />
-              {lotes.length > 0 ? (
+          <Text style={styles.header}>Dados do produto:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Nome do Produto:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={produtos}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecione um produto"
+              value={selectedProduct}
+              onChange={(item) => {
+                setSelectedProduct(item.value);
+                setID(item.value);
+                setNoLotesMessage("");
+                setIsNewLote(false);
+              }}
+            />
+            <Text style={styles.subheader}>Lote:</Text>
+            {noLotesMessage ? (
+              <View style={styles.messageContainer}>
+                <Text style={styles.message}>{noLotesMessage}</Text>
+              </View>
+            ) : null}
+            {isNewLote ? (
+              <View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nome do Lote"
+                  value={newLote}
+                  onChangeText={setNewLote}
+                />
+              </View>
+            ) : (
+              <View>
+                <Dropdown
+                  style={styles.dropdown}
+                  data={lotes}
+                  search={true}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Selecione um lote"
+                  value={selectedLote}
+                  onChange={(item) => {
+                    setSelectedLote(item.value); // Corrigi para enviar o ID do lote
+                    setFabricacao(item.fabricacao);
+                    setValidade(item.validade);
+                    console.log(validade, fabricacao);
+                  }}
+                />
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => setIsNewLote(false)}
+                  onPress={() => setIsNewLote(true)}
                 >
-                  <Text style={styles.buttonText}>
-                    Selecionar Lote Existente
-                  </Text>
+                  <Text style={styles.buttonText}>Criar Novo Lote</Text>
                 </TouchableOpacity>
-              ) : null}
-            </View>
-          ) : (
-            <View>
-              <Dropdown
-                style={styles.dropdown}
-                data={lotes}
-                search={true}
-                labelField="label"
-                valueField="value"
-                placeholder="Selecione um lote"
-                value={selectedLote}
-                onChange={(item) => setSelectedLote(item.label)}
-              />
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => setIsNewLote(true)}
-              >
-                <Text style={styles.buttonText}>Adicionar Novo Lote</Text>
-              </TouchableOpacity>
-              <Text style={styles.subheader}>
-                Quantidade Disponível no Lote:
-              </Text>
-              <TextInput
-                style={styles.input}
-                value={String(
-                  lotes.find((l) => l.label === selectedLote)?.quantidade || ""
-                )}
-                editable={false}
-              />
-            </View>
-          )}
-          <Text style={styles.subheader}>Data de Fabricação do Lote:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="MM-YYYY"
-            keyboardType="numeric"
-            value={fabricacao}
-            onChangeText={setFabricacao}
-            maxLength={7}
-          />
-          <Text style={styles.subheader}>Data de Validade:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="DD-MM-YYYY"
-            keyboardType="numeric"
-            value={validade}
-            onChangeText={setValidade}
-            maxLength={10}
-          />
-          <Text style={styles.subheader}>Local Armazenado:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={locais}
-            search={true}
-            labelField="label"
-            valueField="value"
-            placeholder="Selecione um local para armazenar"
-            value={selectedLocal}
-            onChange={(item) => setSelectedLocal(item.value)}
-          />
-          <Text style={styles.subheader}>Coluna armazenada:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: A1"
-            onChangeText={setColuna}
-            value={coluna}
-          />
+              </View>
+            )}
+            {isNewLote && (
+              <>
+                <Text style={styles.subheader}>
+                  Data de Fabricação do Lote:
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM-YYYY"
+                  keyboardType="numeric"
+                  value={fabricacao}
+                  onChangeText={(text) => handleDateInput(text, setFabricacao)}
+                  maxLength={7}
+                />
+                <Text style={styles.subheader}>Data de Validade do Lote:</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM-YYYY"
+                  keyboardType="numeric"
+                  value={validade}
+                  onChangeText={(text) => handleDateInput(text, setValidade)}
+                  maxLength={7}
+                />
+                {lotes.length > 0 ? (
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setIsNewLote(false)}
+                  >
+                    <Text style={styles.buttonText}>
+                      Selecionar Lote Existente
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
+              </>
+            )}
+          </View>
+          <Text style={styles.header}>Caixas:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Número de caixas:</Text>
+            <TextInput
+              style={styles.input}
+              editable={true}
+              keyboardType="numeric"
+              placeholder="Digite a quantidade de caixas aqui"
+              onChangeText={setQuantidadeCaixas}
+              value={quantidadeCaixas}
+            />
+            <Text style={styles.subheader}>Quantidade de produtos: </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Quantidade"
+              keyboardType="numeric"
+              onChangeText={setQuantidade}
+              value={quantidade}
+            />
+            <Text style={styles.subheader}>Caixa Fracionada:</Text>
+            {fracionadas.map((item, index) => (
+              <View key={index} style={styles.fracionadaContainer}>
+                <Text>
+                  Caixa {index + 1}: {item} produtos
+                </Text>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleRemoveFracionada(index)}
+                >
+                  <Text style={styles.deleteButtonText}>Excluir</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+            <TextInput
+              style={styles.input}
+              placeholder="Quantidade fracionada"
+              keyboardType="numeric"
+              onChangeText={setQuantidadeFracionada}
+              value={quantidadeFracionada}
+            />
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleAddFracionada}
+            >
+              <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.header}>Armazenamento:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Local Armazenado:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={locais}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecione um local para armazenar"
+              value={selectedLocal}
+              onChange={(item) => setSelectedLocal(item.value)}
+            />
+            <Text style={styles.subheader}>Coluna armazenada (Opcional):</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: A1"
+              onChangeText={setColuna}
+              value={coluna}
+            />
+          </View>
+          <Text style={styles.header}>Revisão:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>
+              Quantidade de caixas:{" "}
+              {parseInt(quantidadeCaixas) + fracionadas.length}
+            </Text>
+            <Text style={styles.subheader}>Total: {subtotalProdutos}</Text>
+          </View>
           <TouchableOpacity style={styles.buttonEntrada} onPress={handleEntrar}>
             <Text style={styles.buttonText}>Criar Entrada</Text>
           </TouchableOpacity>
@@ -406,19 +532,31 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 40,
+    borderRadius: 20,
+    marginBottom: 15,
+    flex: 1,
+  },
   input: {
     height: 40,
     margin: 12,
     borderWidth: 1,
+    borderRadius: 10,
     padding: 10,
     color: "#222222",
     backgroundColor: "#FFFFFF",
     fontSize: 17,
     textAlign: "center",
   },
+  nonEditableInput: {
+    backgroundColor: "#E0E0E0",
+    color: "#808080",
+  },
   header: {
     fontSize: 24,
-    marginVertical: 20,
+    marginBottom: 10,
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -427,6 +565,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  subtotalText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 10,
   },
   dropdown: {
     marginVertical: 20,
@@ -449,14 +593,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
     alignItems: "center",
   },
   buttonEntrada: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
@@ -466,6 +610,23 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 15,
+  },
+  fracionadaContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginVertical: 5,
+    padding: 10,
+    backgroundColor: "#F8F8F8",
+    borderRadius: 8,
+  },
+  deleteButton: {
+    backgroundColor: "#FF6347",
+    padding: 5,
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: "white",
   },
 });
 

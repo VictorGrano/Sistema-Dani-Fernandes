@@ -26,6 +26,7 @@ const LotesScreen = ({ route }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const lotesResponse = await axios.get(`${apiUrl}/produtos/Lotes?produto_id=${id}`);
         setLotes(lotesResponse.data);
@@ -36,7 +37,7 @@ const LotesScreen = ({ route }) => {
           value: local.id,
         }));
         setDataL(locaisData);
-        setLoading(true);
+        setLoading(false);
       } catch (error) {
         if (error.response && error.response.status === 404) {
           setLoading(false);
@@ -45,8 +46,9 @@ const LotesScreen = ({ route }) => {
           console.error("Error fetching data:", error);
         }
       }
+      setLoading(false);
     };
-
+    setLoading(false);
     fetchData();
   }, [id]);
 
@@ -82,6 +84,7 @@ const LotesScreen = ({ route }) => {
       console.error("Error saving data:", error.response.data);
       Alert.alert("Erro", "Ocorreu um erro ao salvar a nova localização.");
     }
+    setLoading(false);
   };
 
   if (loading) {
@@ -199,7 +202,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
