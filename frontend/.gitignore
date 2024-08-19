@@ -11,3 +11,6 @@ build/
 # Logs
 logs/
 *.log
+
+#ENv
+.env

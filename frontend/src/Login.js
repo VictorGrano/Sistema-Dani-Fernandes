@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./styles/Login.css";
 import { useNavigate } from "react-router-dom"; 
+import {Helmet} from "react-helmet";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -50,6 +51,11 @@ function Login() {
 
   return (
     <body className="loginBody">
+      <Helmet>
+      <head>
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    </head>
+    </Helmet>
     <div className="login-container">
       <header className="login-header">
         <h1>Login</h1>

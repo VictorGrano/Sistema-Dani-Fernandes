@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import "./styles/Dashboard.css"
 import { useNavigate } from "react-router-dom";
+import {Helmet} from "react-helmet";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -29,6 +30,11 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
+      <Helmet>
+      <head>
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    </head>
+    </Helmet>
       <h1>Bem-vindo ao Dashboard!</h1>
       <p>Escolha a rota que deseja acessar:</p>
 
