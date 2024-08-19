@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   tableHeader: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     textAlign: "center",
     padding: 10,
   },
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   actionButton: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 5,
     marginHorizontal: 5,
     borderRadius: 4,

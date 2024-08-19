@@ -121,7 +121,7 @@ const EntradaScreen = ({ route }) => {
       setID(id);
       setQuantidade(quantidade);
       setSelectedLote(lote);
-  
+
       // Ajuste da validade e fabricação ao setar os valores
       const formattedValidade = validade
         ? validade.slice(0, 2) + "-" + validade.slice(3, 7)
@@ -129,10 +129,10 @@ const EntradaScreen = ({ route }) => {
       const formattedFabricacao = fabricacao
         ? new Date(fabricacao).toISOString().split("T")[0]
         : "";
-  
+
       setValidade(formattedValidade);
       setFabricacao(formattedFabricacao);
-  
+
       setLoading(true);
       axios
         .get(`${apiUrl}/produtos/InfoProduto?id=${id}`)
@@ -142,7 +142,7 @@ const EntradaScreen = ({ route }) => {
         .catch((error) => {
           console.error("Error fetching product data:", error);
         });
-  
+
       axios
         .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
@@ -155,8 +155,13 @@ const EntradaScreen = ({ route }) => {
               label: lote.nome_lote,
               value: lote.id,
               quantidade: lote.quantidade,
-              fabricacao: new Date(lote.data_fabricacao).toISOString().split("T")[0], // Formato YYYY-MM-DD
-              validade: lote.data_validade.slice(5, 7) + "-" + lote.data_validade.slice(0, 4), // Formato MM-yyyy
+              fabricacao: new Date(lote.data_fabricacao)
+                .toISOString()
+                .split("T")[0], // Formato YYYY-MM-DD
+              validade:
+                lote.data_validade.slice(5, 7) +
+                "-" +
+                lote.data_validade.slice(0, 4), // Formato MM-yyyy
             }));
             setLotes(lotesData);
             setNoLotesMessage("");
@@ -167,13 +172,13 @@ const EntradaScreen = ({ route }) => {
         });
     }
   }, [route.params]);
-  
 
   useEffect(() => {
     // Calcula os subtotais sempre que a quantidade ou as fracionadas mudarem
     const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
     const totalCaixas = parseInt(quantidadeCaixas || 0);
-    const totalProdutos = (totalCaixas * parseInt(quantidade || 0)) + totalFracionadas;
+    const totalProdutos =
+      totalCaixas * parseInt(quantidade || 0) + totalFracionadas;
 
     setSubtotalProdutos(totalProdutos);
   }, [quantidade, quantidadeCaixas, fracionadas]);
@@ -181,7 +186,10 @@ const EntradaScreen = ({ route }) => {
   const handleDateInput = (input, setDate) => {
     let formattedInput = input.replace(/[^0-9]/g, "");
     if (formattedInput.length >= 2) {
-      formattedInput = `${formattedInput.slice(0, 2)}-${formattedInput.slice(2, 6)}`;
+      formattedInput = `${formattedInput.slice(0, 2)}-${formattedInput.slice(
+        2,
+        6
+      )}`;
     }
     setDate(formattedInput);
   };
@@ -201,13 +209,16 @@ const EntradaScreen = ({ route }) => {
   const handleEntrar = () => {
     // Soma as quantidades fracionadas ao valor principal de quantidade
     const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
-    const quantidadeTotal = (quantidade * (quantidadeCaixas || 1)) + totalFracionadas;
-  
+    const quantidadeTotal =
+      quantidade * (quantidadeCaixas || 1) + totalFracionadas;
+
     // Verifica se as datas de fabricação e validade foram passadas, senão pega do lote[0]
     const loteSelecionado = lotes.find((lote) => lote.value === selectedLote);
-    const dataFabricacao = fabricacao || loteSelecionado?.fabricacao || lotes[0]?.data_fabricacao;
-    const dataValidade = validade || loteSelecionado?.validade || lotes[0]?.data_validade;
-  
+    const dataFabricacao =
+      fabricacao || loteSelecionado?.fabricacao || lotes[0]?.data_fabricacao;
+    const dataValidade =
+      validade || loteSelecionado?.validade || lotes[0]?.data_validade;
+
     const entradaData = {
       id: id,
       quantidade: quantidadeTotal,
@@ -220,7 +231,7 @@ const EntradaScreen = ({ route }) => {
       user: nomeUser,
       iduser: idUser,
     };
-  
+
     setLoading(true);
     axios
       .post(`${apiUrl}/estoque/Entrada`, entradaData)
@@ -235,7 +246,7 @@ const EntradaScreen = ({ route }) => {
         setLoading(false);
       });
   };
-  
+
   if (loading) {
     return <Loading />;
   }
@@ -244,97 +255,118 @@ const EntradaScreen = ({ route }) => {
     <ScrollView style={styles.container}>
       {route.params ? (
         <>
-          <Text style={styles.subheader}>Nome do Produto:</Text>
-          <TextInput
-            style={[styles.input, styles.nonEditableInput]}
-            value={String(nome)}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Lote:</Text>
-          <TextInput
-            style={[styles.input, styles.nonEditableInput]}
-            value={String(selectedLote)}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Quantidade de caixas:</Text>
-          <TextInput
-            style={styles.input}
-            editable={true}
-            keyboardType="numeric"
-            placeholder="Digite a quantidade de caixas aqui"
-            onChangeText={setQuantidadeCaixas}
-            value={quantidadeCaixas}
-          />
-          <Text style={styles.subheader}>Quantidade de produtos na Caixa:</Text>
-          <TextInput
-            style={[styles.input, styles.nonEditableInput]}
-            value={String(quantidade)}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Caixa Fracionada:</Text>
-          {fracionadas.map((item, index) => (
-            <View key={index} style={styles.fracionadaContainer}>
-              <Text>Caixa {index + 1}: {item} produtos</Text>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleRemoveFracionada(index)}
-              >
-                <Text style={styles.deleteButtonText}>Excluir</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-          <TextInput
-            style={styles.input}
-            placeholder="Quantidade fracionada"
-            keyboardType="numeric"
-            onChangeText={setQuantidadeFracionada}
-            value={quantidadeFracionada}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleAddFracionada}>
-            <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
-          </TouchableOpacity>
-          <Text style={styles.subheader}>Subtotal de produtos:</Text>
-          <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
-          <Text style={styles.subheader}>Local Armazenado:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={locais}
-            search={true}
-            labelField="label"
-            valueField="value"
-            placeholder="Selecione um local para armazenar"
-            value={selectedLocal}
-            onChange={(item) => setSelectedLocal(item.value)}
-          />
-          <Text style={styles.subheader}>Coluna armazenada (Opcional):</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: A1"
-            onChangeText={setColuna}
-            value={coluna}
-          />
+          <Text style={styles.header}>Dados do produto:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Nome do Produto:</Text>
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              value={String(nome)}
+              editable={false}
+            />
+            <Text style={styles.subheader}>Lote:</Text>
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              value={String(selectedLote)}
+              editable={false}
+            />
+          </View>
+          <Text style={styles.header}>Dados do produto:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Quantidade de caixas:</Text>
+            <TextInput
+              style={styles.input}
+              editable={true}
+              keyboardType="numeric"
+              placeholder="Digite a quantidade de caixas aqui"
+              onChangeText={setQuantidadeCaixas}
+              value={quantidadeCaixas}
+            />
+            <Text style={styles.subheader}>
+              Quantidade de produtos na Caixa:
+            </Text>
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              value={String(quantidade)}
+              editable={false}
+            />
+            <Text style={styles.subheader}>Caixa Fracionada:</Text>
+            {fracionadas.map((item, index) => (
+              <View key={index} style={styles.fracionadaContainer}>
+                <Text>
+                  Caixa {index + 1}: {item} produtos
+                </Text>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleRemoveFracionada(index)}
+                >
+                  <Text style={styles.deleteButtonText}>Excluir</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+            <TextInput
+              style={styles.input}
+              placeholder="Quantidade fracionada"
+              keyboardType="numeric"
+              onChangeText={setQuantidadeFracionada}
+              value={quantidadeFracionada}
+            />
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleAddFracionada}
+            >
+              <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.header}>Local:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Local Armazenado:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={locais}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecione um local para armazenar"
+              value={selectedLocal}
+              onChange={(item) => setSelectedLocal(item.value)}
+            />
+            <Text style={styles.subheader}>Coluna armazenada (Opcional):</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: A1"
+              onChangeText={setColuna}
+              value={coluna}
+            />
+          </View>
+          <Text style={styles.header}>Revisão:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Total de caixas: {parseInt(quantidadeCaixas) + fracionadas.length}</Text>
+            <Text style={styles.subheader}>Total de produtos: {subtotalProdutos}</Text>
+          </View>
           <TouchableOpacity style={styles.buttonEntrada} onPress={handleEntrar}>
             <Text style={styles.buttonText}>Criar Entrada</Text>
           </TouchableOpacity>
         </>
       ) : (
         <>
-          <Text style={styles.subheader}>Nome do Produto:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={produtos}
-            search={true}
-            labelField="label"
-            valueField="value"
-            placeholder="Selecione um produto"
-            value={selectedProduct}
-            onChange={(item) => {
-              setSelectedProduct(item.value);
-              setID(item.value);
-              setNoLotesMessage("");
-              setIsNewLote(false);
-            }}
-          />
+          <Text style={styles.header}>Dados do produto:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Nome do Produto:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={produtos}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecione um produto"
+              value={selectedProduct}
+              onChange={(item) => {
+                setSelectedProduct(item.value);
+                setID(item.value);
+                setNoLotesMessage("");
+                setIsNewLote(false);
+              }}
+            />
             <Text style={styles.subheader}>Lote:</Text>
             {noLotesMessage ? (
               <View style={styles.messageContainer}>
@@ -371,101 +403,121 @@ const EntradaScreen = ({ route }) => {
                   style={styles.button}
                   onPress={() => setIsNewLote(true)}
                 >
-                  <Text style={styles.buttonText}>Adicionar Novo Lote</Text>
+                  <Text style={styles.buttonText}>Criar Novo Lote</Text>
                 </TouchableOpacity>
               </View>
             )}
             {isNewLote && (
-            <>
-              <Text style={styles.subheader}>Data de Fabricação do Lote:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="MM-YYYY"
-                keyboardType="numeric"
-                value={fabricacao}
-                onChangeText={(text) => handleDateInput(text, setFabricacao)}
-                maxLength={7}
-              />
-              <Text style={styles.subheader}>Data de Validade do Lote:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="MM-YYYY"
-                keyboardType="numeric"
-                value={validade}
-                onChangeText={(text) => handleDateInput(text, setValidade)}
-                maxLength={7}
-              />
-              {lotes.length > 0 ? (
+              <>
+                <Text style={styles.subheader}>
+                  Data de Fabricação do Lote:
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM-YYYY"
+                  keyboardType="numeric"
+                  value={fabricacao}
+                  onChangeText={(text) => handleDateInput(text, setFabricacao)}
+                  maxLength={7}
+                />
+                <Text style={styles.subheader}>Data de Validade do Lote:</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM-YYYY"
+                  keyboardType="numeric"
+                  value={validade}
+                  onChangeText={(text) => handleDateInput(text, setValidade)}
+                  maxLength={7}
+                />
+                {lotes.length > 0 ? (
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setIsNewLote(false)}
+                  >
+                    <Text style={styles.buttonText}>
+                      Selecionar Lote Existente
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
+              </>
+            )}
+          </View>
+          <Text style={styles.header}>Caixas:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Número de caixas:</Text>
+            <TextInput
+              style={styles.input}
+              editable={true}
+              keyboardType="numeric"
+              placeholder="Digite a quantidade de caixas aqui"
+              onChangeText={setQuantidadeCaixas}
+              value={quantidadeCaixas}
+            />
+            <Text style={styles.subheader}>Quantidade de produtos: </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Quantidade"
+              keyboardType="numeric"
+              onChangeText={setQuantidade}
+              value={quantidade}
+            />
+            <Text style={styles.subheader}>Caixa Fracionada:</Text>
+            {fracionadas.map((item, index) => (
+              <View key={index} style={styles.fracionadaContainer}>
+                <Text>
+                  Caixa {index + 1}: {item} produtos
+                </Text>
                 <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => setIsNewLote(false)}
+                  style={styles.deleteButton}
+                  onPress={() => handleRemoveFracionada(index)}
                 >
-                  <Text style={styles.buttonText}>
-                    Selecionar Lote Existente
-                  </Text>
+                  <Text style={styles.deleteButtonText}>Excluir</Text>
                 </TouchableOpacity>
-              ) : null}
-            </>
-          )}
-          <Text style={styles.subheader}>Quantidade de caixas:</Text>
-          <TextInput
-            style={styles.input}
-            editable={true}
-            keyboardType="numeric"
-            placeholder="Digite a quantidade de caixas aqui"
-            onChangeText={setQuantidadeCaixas}
-            value={quantidadeCaixas}
-          />
-          <Text style={styles.subheader}>Quantidade de produtos na Caixa:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Quantidade"
-            keyboardType="numeric"
-            onChangeText={setQuantidade}
-            value={quantidade}
-          />
-          <Text style={styles.subheader}>Caixa Fracionada:</Text>
-          {fracionadas.map((item, index) => (
-            <View key={index} style={styles.fracionadaContainer}>
-              <Text>Caixa {index + 1}: {item} produtos</Text>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleRemoveFracionada(index)}
-              >
-                <Text style={styles.deleteButtonText}>Excluir</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-          <TextInput
-            style={styles.input}
-            placeholder="Quantidade fracionada"
-            keyboardType="numeric"
-            onChangeText={setQuantidadeFracionada}
-            value={quantidadeFracionada}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleAddFracionada}>
-            <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
-          </TouchableOpacity>
-          <Text style={styles.subheader}>Subtotal de produtos:</Text>
-          <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
-          <Text style={styles.subheader}>Local Armazenado:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={locais}
-            search={true}
-            labelField="label"
-            valueField="value"
-            placeholder="Selecione um local para armazenar"
-            value={selectedLocal}
-            onChange={(item) => setSelectedLocal(item.value)}
-          />
-          <Text style={styles.subheader}>Coluna armazenada (Opcional):</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: A1"
-            onChangeText={setColuna}
-            value={coluna}
-          />
+              </View>
+            ))}
+            <TextInput
+              style={styles.input}
+              placeholder="Quantidade fracionada"
+              keyboardType="numeric"
+              onChangeText={setQuantidadeFracionada}
+              value={quantidadeFracionada}
+            />
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleAddFracionada}
+            >
+              <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.header}>Armazenamento:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Local Armazenado:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={locais}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecione um local para armazenar"
+              value={selectedLocal}
+              onChange={(item) => setSelectedLocal(item.value)}
+            />
+            <Text style={styles.subheader}>Coluna armazenada (Opcional):</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: A1"
+              onChangeText={setColuna}
+              value={coluna}
+            />
+          </View>
+          <Text style={styles.header}>Revisão:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>
+              Quantidade de caixas:{" "}
+              {parseInt(quantidadeCaixas) + fracionadas.length}
+            </Text>
+            <Text style={styles.subheader}>Total: {subtotalProdutos}</Text>
+          </View>
           <TouchableOpacity style={styles.buttonEntrada} onPress={handleEntrar}>
             <Text style={styles.buttonText}>Criar Entrada</Text>
           </TouchableOpacity>
@@ -480,10 +532,18 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 40,
+    borderRadius: 20,
+    marginBottom: 15,
+    flex: 1,
+  },
   input: {
     height: 40,
     margin: 12,
     borderWidth: 1,
+    borderRadius: 10,
     padding: 10,
     color: "#222222",
     backgroundColor: "#FFFFFF",
@@ -496,7 +556,7 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    marginVertical: 20,
+    marginBottom: 10,
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -533,14 +593,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
     alignItems: "center",
   },
   buttonEntrada: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,

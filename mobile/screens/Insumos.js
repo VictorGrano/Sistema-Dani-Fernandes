@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalButton: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",

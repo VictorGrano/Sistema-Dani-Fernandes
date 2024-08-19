@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",

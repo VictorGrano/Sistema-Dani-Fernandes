@@ -104,7 +104,9 @@ const SaidaScreen = ({ route }) => {
   };
 
   const handleSaida = () => {
-    const quantidadeTotal = quantidade * (quantidadeCaixas || 1);
+    const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
+    const quantidadeTotal = (quantidade * (quantidadeCaixas || 1)) + totalFracionadas;
+    
     const saidaData = {
       id,
       quantidade: quantidadeTotal,
@@ -201,6 +203,8 @@ const SaidaScreen = ({ route }) => {
     <ScrollView style={styles.container}>
       {route.params ? (
         <>
+        <Text style={styles.header}>Dados do produto:</Text>
+        <View style={styles.card}>
           <Text style={styles.subheader}>Nome do Produto:</Text>
           <TextInput style={[styles.input, styles.nonEditableInput]} value={String(nome)} editable={false} />
           <Text style={styles.subheader}>Lote:</Text>
@@ -215,7 +219,10 @@ const SaidaScreen = ({ route }) => {
               value={String(lotes.find((l) => l.label === selectedLote)?.quantidade || "0")}
               editable={false}
             />
-          <Text style={styles.subheader}>Quantidade de caixas:</Text>
+            </View>
+            <Text style={styles.header}>Caixas:</Text>
+          <View style={styles.card}>
+          <Text style={styles.subheader}>Número de caixas:</Text>
           <TextInput
             style={styles.input}
             editable={true}
@@ -253,14 +260,20 @@ const SaidaScreen = ({ route }) => {
           <TouchableOpacity style={styles.button} onPress={handleAddFracionada}>
             <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
           </TouchableOpacity>
-          <Text style={styles.subheader}>Subtotal de produtos:</Text>
-          <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
+          </View>
+          <Text style={styles.header}>Revisão:</Text>
+          <View style={styles.card}>
+          <Text style={styles.subheader}>Total de caixas: {parseInt(quantidadeCaixas) + fracionadas.length}</Text>
+          <Text style={styles.subheader}>Total de produtos: {subtotalProdutos}</Text>
+          </View>
           <TouchableOpacity style={styles.buttonSaida} onPress={handleSaida}>
             <Text style={styles.buttonText}>Registrar Saída</Text>
           </TouchableOpacity>
         </>
       ) : (
         <>
+        <Text style={styles.header}>Dados do produto:</Text>
+        <View style={styles.card}>
           <Text style={styles.subheader}>Nome do Produto:</Text>
           <Dropdown
             style={styles.dropdown}
@@ -300,7 +313,10 @@ const SaidaScreen = ({ route }) => {
             value={String(lotes.find((l) => l.label === selectedLote)?.quantidade || "")}
             editable={false}
           />
-          <Text style={styles.subheader}>Quantidade de caixas:</Text>
+          </View>
+          <Text style={styles.header}>Caixas:</Text>
+          <View style={styles.card}>
+          <Text style={styles.subheader}>Número de caixas:</Text>
           <TextInput
             style={styles.input}
             editable={true}
@@ -340,8 +356,12 @@ const SaidaScreen = ({ route }) => {
           <TouchableOpacity style={styles.button} onPress={handleAddFracionada}>
             <Text style={styles.buttonText}>Adicionar Caixa Fracionada</Text>
           </TouchableOpacity>
-          <Text style={styles.subheader}>Subtotal de produtos:</Text>
-          <Text style={styles.subtotalText}>{subtotalProdutos}</Text>
+          </View>
+          <Text style={styles.header}>Revisão:</Text>
+          <View style={styles.card}>
+          <Text style={styles.subheader}>Total de caixas: {parseInt(quantidadeCaixas) + fracionadas.length}</Text>
+          <Text style={styles.subheader}>Total de produtos: {subtotalProdutos}</Text>
+          </View>
           <TouchableOpacity style={styles.buttonSaida} onPress={handleSaida}>
             <Text style={styles.buttonText}>Registrar Saída</Text>
           </TouchableOpacity>
@@ -356,10 +376,18 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 40,
+    borderRadius: 20,
+    marginBottom: 15,
+    flex: 1,
+  },
   input: {
     height: 40,
     margin: 12,
     borderWidth: 1,
+    borderRadius: 10,
     padding: 10,
     color: "#222222",
     fontSize: 17,
@@ -403,14 +431,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
     alignItems: "center",
   },
   buttonSaida: {
-    backgroundColor: "#D8B4E2",
+    backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
@@ -441,6 +469,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginVertical: 10,
+  },
+  deleteButton: {
+    backgroundColor: "#FF6347",
+    padding: 5,
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: "white",
   },
 });
 
