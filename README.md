@@ -72,5 +72,5 @@ Depois de executar os comandos acima, você pode acessar o app mobile utilizando
 ## **Documentação**
 Para uma documentação completa do projeto, incluindo a API, instalação detalhada, e uso do frontend e backend, visite o **site da documentação**:
    
-👉 **[Documentação Completa]((https://victors-organization-31.gitbook.io/dani-fernandes))**
+👉 **[Documentação Completa](https://victors-organization-31.gitbook.io/dani-fernandes)**
 
