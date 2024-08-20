@@ -1,0 +1,1176 @@
+swagger: '2.0'
+info:
+  version: 2.0.0
+  title: API DANI FERNANDES
+  description: ''
+host: servidor
+basePath: /
+schemes:
+  - http
+tags:
+  - name: Produtos
+    description: APIs relacionadas a produtos.
+  - name: Estoque
+    description: APIs relacionadas ao estoque.
+  - name: Usuários
+    description: APIs relacionadas a usuários.
+  - name: Insumos
+    description: APIs relacionadas a insumos.
+paths:
+  /produtos/:
+    get:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /produtos/InfoProduto:
+    get:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: id
+          in: query
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /produtos/Cadastrar:
+    post:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "123"
+              nome:
+                type: string
+                example: "Produto A"
+              descricao:
+                type: string
+                example: "Descrição do produto"
+              estoque_total:
+                type: integer
+                example: 100
+              preco:
+                type: number
+                format: float
+                example: 29.99
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /produtos/Atualizar:
+    put:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "123"
+              nome:
+                type: string
+                example: "Produto A"
+              descricao:
+                type: string
+                example: "Descrição do produto"
+              estoque_total:
+                type: integer
+                example: 100
+              preco:
+                type: number
+                format: float
+                example: 29.99
+              unidade:
+                type: string
+                example: "unidade"
+              tipo:
+                type: string
+                example: "Tipo X"
+              cod_aroma:
+                type: string
+                example: "Aroma123"
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict
+        '500':
+          description: Internal Server Error
+  /produtos/AtualizarLote:
+    post:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              lote_id:
+                type: string
+                example: "Lote123"
+              local_armazenado_id:
+                type: string
+                example: "Local123"
+              coluna:
+                type: string
+                example: "Coluna1"
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /produtos/{id}:
+    delete:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /produtos/Tipo:
+    get:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /produtos/Lotes:
+    get:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: produto_id
+          in: query
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /produtos/AllLotes:
+    get:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: produto_id
+          in: query
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /produtos/Aromas:
+    get:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /produtos/InfoAromas:
+    get:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: cod_aroma
+          in: query
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /produtos/RelatorioProdutos:
+    post:
+      tags:
+        - Produtos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "123"
+              categoria_id:
+                type: string
+                example: "Categoria123"
+              cod_aroma:
+                type: string
+                example: "Aroma123"
+              preco:
+                type: number
+                format: float
+                example: 29.99
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /estoque/QuantidadeEstoque:
+    get:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: id
+          in: query
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /estoque/Locais:
+    get:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /estoque/ListaPrateleira:
+    get:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /estoque/ListaPrateleira/Concluido/{id}:
+    put:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /estoque/ListaPrateleira/{id}:
+    delete:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /estoque/AddPrateleira:
+    post:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              produto_id:
+                type: string
+                example: "123"
+              lote_id:
+                type: string
+                example: "Lote123"
+              quantidade:
+                type: integer
+                example: 100
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /estoque/Entrada:
+    post:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "123"
+              quantidade:
+                type: integer
+                example: 50
+              lote:
+                type: string
+                example: "Lote123"
+              validade:
+                type: string
+                format: date
+                example: "2024-12-01"
+              fabricacao:
+                type: string
+                format: date
+                example: "2023-12-01"
+              localArmazenado:
+                type: string
+                example: "Local123"
+              coluna:
+                type: string
+                example: "Coluna1"
+              quantidade_caixas:
+                type: integer
+                example: 10
+              user:
+                type: string
+                example: "user123"
+              iduser:
+                type: string
+                example: "iduser123"
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /estoque/EntradaInsumo:
+    post:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "123"
+              quantidade:
+                type: integer
+                example: 100
+              quantidade_caixas:
+                type: integer
+                example: 10
+              localArmazenado:
+                type: string
+                example: "Local123"
+              coluna:
+                type: string
+                example: "Coluna1"
+              user:
+                type: string
+                example: "user123"
+              iduser:
+                type: string
+                example: "iduser123"
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /estoque/Saida:
+    post:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "123"
+              quantidade:
+                type: integer
+                example: 50
+              lote:
+                type: string
+                example: "Lote123"
+              quantidade_caixas:
+                type: integer
+                example: 5
+              user:
+                type: string
+                example: "user123"
+              iduser:
+                type: string
+                example: "iduser123"
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /estoque/SaidaInsumo:
+    post:
+      tags:
+        - Estoque
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "123"
+              quantidade:
+                type: integer
+                example: 50
+              quantidade_caixas:
+                type: integer
+                example: 5
+              user:
+                type: string
+                example: "user123"
+              iduser:
+                type: string
+                example: "iduser123"
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /usuarios/:
+    get:
+      tags:
+        - Usuários
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /usuarios/Login:
+    post:
+      tags:
+        - Usuários
+      description: ''
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              user:
+                type: string
+                example: "user123"
+              senha:
+                type: string
+                example: "senha123"
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /usuarios/Historico:
+    post:
+      tags:
+        - Usuários
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              idusuario:
+                type: string
+                example: "user123"
+              dataInicio:
+                type: string
+                format: date
+                example: "2023-01-01"
+              dataFim:
+                type: string
+                format: date
+                example: "2024-01-01"
+              produtoid:
+                type: string
+                example: "produto123"
+              lote:
+                type: string
+                example: "Lote123"
+              local_armazenado:
+                type: string
+                example: "Local123"
+              tipo_mudanca:
+                type: string
+                example: "entrada"
+              ordenar:
+                type: string
+                example: "asc"
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /usuarios/Cadastro:
+    post:
+      tags:
+        - Usuários
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              nome:
+                type: string
+                example: "Nome"
+              login:
+                type: string
+                example: "login123"
+              tipo:
+                type: string
+                example: "admin"
+              senha:
+                type: string
+                example: "senha123"
+      responses:
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict
+        '500':
+          description: Internal Server Error
+  /usuarios/Atualizar:
+    put:
+      tags:
+        - Usuários
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              nome:
+                type: string
+                example: "Nome"
+              login:
+                type: string
+                example: "login123"
+              tipo:
+                type: string
+                example: "admin"
+              id:
+                type: string
+                example: "user123"
+              senha:
+                type: string
+                example: "senha123"
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict
+        '500':
+          description: Internal Server Error
+  /usuarios/{id}:
+    delete:
+      tags:
+        - Usuários
+      description: ''
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /usuarios/NovaSenha:
+    post:
+      tags:
+        - Usuários
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "user123"
+              senha:
+                type: string
+                example: "novaSenha123"
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /insumos/:
+    get:
+      tags:
+        - Insumos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /insumos/TiposInsumos:
+    get:
+      tags:
+        - Insumos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /insumos/Atualizar:
+    put:
+      tags:
+        - Insumos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "123"
+              nome:
+                type: string
+                example: "Insumo A"
+              descricao:
+                type: string
+                example: "Descrição do insumo"
+              estoque:
+                type: integer
+                example: 100
+              preco:
+                type: number
+                format: float
+                example: 19.99
+              tipo_id:
+                type: string
+                example: "Tipo123"
+              local_armazenado:
+                type: string
+                example: "Local123"
+              coluna:
+                type: string
+                example: "Coluna1"
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict
+        '500':
+          description: Internal Server Error
+  /insumos/AtualizarTipoInsumo:
+    put:
+      tags:
+        - Insumos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "Tipo123"
+              nome:
+                type: string
+                example: "Tipo A"
+              descricao:
+                type: string
+                example: "Descrição do tipo de insumo"
+              estoque:
+                type: integer
+                example: 100
+              preco:
+                type: number
+                format: float
+                example: 19.99
+              tipo_id:
+                type: string
+                example: "Tipo123"
+              local_armazenado:
+                type: string
+                example: "Local123"
+              coluna:
+                type: string
+                example: "Coluna1"
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict
+        '500':
+          description: Internal Server Error
+  /insumos/{id}:
+    delete:
+      tags:
+        - Insumos
+      description: ''
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /insumos/CadastroTipoInsumo:
+    post:
+      tags:
+        - Insumos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              nome:
+                type: string
+                example: "Tipo A"
+      responses:
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+  /insumos/TipoInsumo/{id}:
+    delete:
+      tags:
+        - Insumos
+      description: ''
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: x-access-token
+          in: header
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /insumos/InfoInsumo:
+    get:
+      tags:
+        - Insumos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: id
+          in: query
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /insumos/CadastroInsumo:
+    post:
+      tags:
+        - Insumos
+      description: ''
+      parameters:
+        - name: x-access-token
+          in: header
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              nome:
+                type: string
+                example: "Insumo A"
+              descricao:
+                type: string
+                example: "Descrição do insumo"
+              estoque:
+                type: integer
+                example: 100
+              preco:
+                type: number
+                format: float
+                example: 19.99
+              tipo_id:
+                type: string
+                example: "Tipo123"
+              local_armazenado:
+                type: string
+                example: "Local123"
+              coluna:
+                type: string
+                example: "Coluna1"
+      responses:
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error

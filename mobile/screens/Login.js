@@ -25,6 +25,7 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
+  // Ação ao apertar o botão de login
   const handleLogin = async () => {
     const loginData = {
       user: user,

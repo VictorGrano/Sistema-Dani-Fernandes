@@ -7,3 +7,6 @@ npm-debug.log
 # Logs
 logs/
 *.log
+
+#env
+.env

@@ -239,11 +239,6 @@ function EtiquetaProduto() {
 
   return (
     <div className="App">
-      <Helmet>
-      <head>
-      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
-    </head>
-    </Helmet>
       <header className="App-header">
         <p className="Titulo">Criar etiquetas</p>
       </header>
@@ -305,6 +300,16 @@ function EtiquetaProduto() {
             </div>
           )}
           <br />
+          <label>Número de caixas:</label>
+          <br />
+          <input
+            type="number"
+            min="1"
+            value={quantidadeCaixas}
+            onChange={handleQuantidadeCaixas}
+            onKeyDown={preventNonNumericInput}
+            required
+          />
           <br />
           <label>Digite a quantidade na caixa:</label>
           <br />
@@ -317,16 +322,6 @@ function EtiquetaProduto() {
             required
           />
           <br />
-          <label>Digite a quantidade de caixas:</label>
-          <br />
-          <input
-            type="number"
-            min="1"
-            value={quantidadeCaixas}
-            onChange={handleQuantidadeCaixas}
-            onKeyDown={preventNonNumericInput}
-            required
-          />
           <br />
           <label>Digite o mês de validade:</label>
           <br />
@@ -364,7 +359,7 @@ function EtiquetaProduto() {
         {showQRCode && (
           <div className="etiqueta">
             <div>
-              <p>Produto: {productName}</p>
+              <p>{productName}</p>
               <p>Quantidade: {quantidade}</p>
               <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
               <p>Mês de Fabricação: {format(new Date(dataFabricacao), 'MM/yyyy')}</p>

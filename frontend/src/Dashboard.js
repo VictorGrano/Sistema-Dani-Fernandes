@@ -30,11 +30,6 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      <Helmet>
-      <head>
-      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
-    </head>
-    </Helmet>
       <h1>Bem-vindo ao Dashboard!</h1>
       <p>Escolha a rota que deseja acessar:</p>
 

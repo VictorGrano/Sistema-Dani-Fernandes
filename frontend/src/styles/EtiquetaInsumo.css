@@ -68,12 +68,12 @@ button:hover {
   width: 9cm; /* Largura da etiqueta */
   height: 5cm; /* Altura da etiqueta */
   page-break-after: always; /* Garante que cada etiqueta esteja em uma página separada */
-  text-align: left;
+  text-align: center;
   margin: auto; /* Centraliza horizontalmente */
 }
 
 .etiqueta div {
-  text-align: left; 
+  text-align: center; 
   align-items: center;
   justify-content: center;
 }
