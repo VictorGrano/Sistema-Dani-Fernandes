@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import "./styles/Dashboard.css"
 import { useNavigate } from "react-router-dom";
-import {Helmet} from "react-helmet";
 
 function Dashboard() {
   const navigate = useNavigate();
