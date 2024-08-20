@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Dashboard from './Dashboard';
-import EtiquetaInsumo from './EtiquetaInsumo';
-import EtiquetaProduto from './EtiquetaProduto';
-import Login from './Login';
+import Dashboard from '../src/Dashboard';
+import EtiquetaInsumo from '../src/EtiquetaInsumo';
+import EtiquetaProduto from '../src/EtiquetaProduto';
+import Login from '../src/Login';
 
 // Função para verificar se o usuário está autenticado
 function PrivateRoute({ element: Element }) {
