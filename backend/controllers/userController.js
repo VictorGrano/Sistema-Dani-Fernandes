@@ -79,8 +79,6 @@ exports.login = async (req, res) => {
   }
 };
 
-
-
 exports.historico = (req, res) => {
   const {
     idusuario,

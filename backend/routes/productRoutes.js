@@ -5,7 +5,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 router.get("/", authMiddleware.verifyToken, productController.getAllProducts);
 router.get("/InfoProduto", authMiddleware.verifyToken, productController.getInfoProduto);
-router.post("/Cadastrar", authMiddleware.verifyToken, productController.getInfoProduto);
+router.post("/CadastroProduto", authMiddleware.verifyToken, productController.createProduct);
 router.put("/Atualizar", authMiddleware.verifyToken, productController.updateProduct);
 router.post("/AtualizarLote", authMiddleware.verifyToken, productController.updateLote);
 router.delete("/:id", authMiddleware.verifyToken, productController.deleteProduct);
