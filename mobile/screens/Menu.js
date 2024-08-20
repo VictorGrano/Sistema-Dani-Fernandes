@@ -24,7 +24,6 @@ const MenuScreen = ({ route }) => {
   const [local, setLocal] = useState("");
   const [total, setTotal] = useState();
   const [loading, setLoading] = useState(false);
-  const [modalEntradaSaida, setModalEntradaSaida] = useState(false);
   const { primeiro_login } = route.params;
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -119,7 +118,6 @@ const MenuScreen = ({ route }) => {
   };
 
   const handleEntradaSaida = (tipoMovimento, tipoItem) => {
-    setModalEntradaSaida(false);
     navigation.navigate("Escanear", { tipo: tipoMovimento, item: tipoItem });
   };
 

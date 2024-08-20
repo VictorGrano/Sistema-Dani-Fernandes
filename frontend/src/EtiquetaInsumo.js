@@ -126,11 +126,6 @@ function EtiquetaInsumo() {
 
   return (
     <div className="App">
-      <Helmet>
-      <head>
-      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
-    </head>
-    </Helmet>
       <header className="App-header">
         <p className="Titulo">
           Gerar Etiqueta de Insumos

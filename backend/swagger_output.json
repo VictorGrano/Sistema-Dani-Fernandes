@@ -10,21 +10,59 @@
   "schemes": [
     "http"
   ],
+  "tags": [
+    {
+      "name": "Produtos",
+      "description": "APIs relacionadas a produtos."
+    },
+    {
+      "name": "Estoque",
+      "description": "APIs relacionadas ao estoque."
+    },
+    {
+      "name": "Usuários",
+      "description": "APIs relacionadas a usuários."
+    },
+    {
+      "name": "Insumos",
+      "description": "APIs relacionadas a insumos."
+    }
+  ],
   "paths": {
     "/produtos/": {
       "get": {
+        "tags": ["Produtos"],
         "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
     },
     "/produtos/InfoProduto": {
       "get": {
+        "tags": ["Produtos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -34,6 +72,12 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -43,8 +87,14 @@
     },
     "/produtos/Cadastrar": {
       "post": {
+        "tags": ["Produtos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -55,6 +105,12 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
           }
@@ -63,8 +119,14 @@
     },
     "/produtos/Atualizar": {
       "put": {
+        "tags": ["Produtos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -103,6 +165,12 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "409": {
             "description": "Conflict"
           },
@@ -114,8 +182,14 @@
     },
     "/produtos/AtualizarLote": {
       "post": {
+        "tags": ["Produtos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -139,6 +213,12 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -150,6 +230,7 @@
     },
     "/produtos/{id}": {
       "delete": {
+        "tags": ["Produtos"],
         "description": "",
         "parameters": [
           {
@@ -157,11 +238,22 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -174,18 +266,38 @@
     },
     "/produtos/Tipo": {
       "get": {
+        "tags": ["Produtos"],
         "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
     },
     "/produtos/Lotes": {
       "get": {
+        "tags": ["Produtos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "produto_id",
             "in": "query",
@@ -195,6 +307,47 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/produtos/AllLotes": {
+      "get": {
+        "tags": ["Produtos"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "produto_id",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -207,18 +360,38 @@
     },
     "/produtos/Aromas": {
       "get": {
+        "tags": ["Produtos"],
         "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
     },
     "/produtos/InfoAromas": {
       "get": {
+        "tags": ["Produtos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "cod_aroma",
             "in": "query",
@@ -229,6 +402,12 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -237,8 +416,14 @@
     },
     "/produtos/RelatorioProdutos": {
       "post": {
+        "tags": ["Produtos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -265,6 +450,12 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -272,9 +463,15 @@
       }
     },
     "/estoque/QuantidadeEstoque": {
+      "tags": ["Estoque"],
       "get": {
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -285,6 +482,12 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -293,20 +496,48 @@
     },
     "/estoque/Locais": {
       "get": {
+        "tags": ["Estoque"],
         "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
     },
     "/estoque/ListaPrateleira": {
       "get": {
+        "tags": ["Estoque"],
         "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -316,6 +547,7 @@
     },
     "/estoque/ListaPrateleira/Concluido/{id}": {
       "put": {
+        "tags": ["Estoque"],
         "description": "",
         "parameters": [
           {
@@ -323,11 +555,22 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -337,6 +580,7 @@
     },
     "/estoque/ListaPrateleira/{id}": {
       "delete": {
+        "tags": ["Estoque"],
         "description": "",
         "parameters": [
           {
@@ -344,11 +588,22 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -358,8 +613,14 @@
     },
     "/estoque/AddPrateleira": {
       "post": {
+        "tags": ["Estoque"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -386,6 +647,12 @@
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -394,8 +661,14 @@
     },
     "/estoque/Entrada": {
       "post": {
+        "tags": ["Estoque"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -443,6 +716,72 @@
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/estoque/EntradaInsumo": {
+      "post": {
+        "tags": ["Estoque"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                },
+                "quantidade": {
+                  "example": "any"
+                },
+                "quantidade_caixas": {
+                  "example": "any"
+                },
+                "localArmazenado": {
+                  "example": "any"
+                },
+                "coluna": {
+                  "example": "any"
+                },
+                "user": {
+                  "example": "any"
+                },
+                "iduser": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -451,8 +790,14 @@
     },
     "/estoque/Saida": {
       "post": {
+        "tags": ["Estoque"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -488,6 +833,69 @@
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/estoque/SaidaInsumo": {
+      "post": {
+        "tags": ["Estoque"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                },
+                "quantidade": {
+                  "example": "any"
+                },
+                "quantidade_caixas": {
+                  "example": "any"
+                },
+                "user": {
+                  "example": "any"
+                },
+                "iduser": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -499,10 +907,24 @@
     },
     "/usuarios/": {
       "get": {
+        "tags": ["Usuários"],
         "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -515,6 +937,7 @@
     },
     "/usuarios/Login": {
       "post": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
           {
@@ -537,6 +960,15 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -548,8 +980,14 @@
     },
     "/usuarios/Historico": {
       "post": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -588,6 +1026,12 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -599,8 +1043,14 @@
     },
     "/usuarios/Cadastro": {
       "post": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -626,6 +1076,12 @@
         "responses": {
           "201": {
             "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "409": {
             "description": "Conflict"
@@ -638,8 +1094,14 @@
     },
     "/usuarios/Atualizar": {
       "put": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -669,6 +1131,12 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "409": {
             "description": "Conflict"
           },
@@ -680,6 +1148,7 @@
     },
     "/usuarios/{id}": {
       "delete": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
           {
@@ -687,11 +1156,22 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -704,8 +1184,14 @@
     },
     "/usuarios/NovaSenha": {
       "post": {
+        "tags": ["Usuários"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -726,6 +1212,12 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -737,10 +1229,24 @@
     },
     "/insumos/": {
       "get": {
+        "tags": ["Insumos"],
         "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -753,10 +1259,24 @@
     },
     "/insumos/TiposInsumos": {
       "get": {
+        "tags": ["Insumos"],
         "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -769,8 +1289,14 @@
     },
     "/insumos/Atualizar": {
       "put": {
+        "tags": ["Insumos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -809,6 +1335,75 @@
           "200": {
             "description": "OK"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/insumos/AtualizarTipoInsumo": {
+      "put": {
+        "tags": ["Insumos"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                },
+                "nome": {
+                  "example": "any"
+                },
+                "descricao": {
+                  "example": "any"
+                },
+                "estoque": {
+                  "example": "any"
+                },
+                "preco": {
+                  "example": "any"
+                },
+                "tipo_id": {
+                  "example": "any"
+                },
+                "local_armazenado": {
+                  "example": "any"
+                },
+                "coluna": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "409": {
             "description": "Conflict"
           },
@@ -820,6 +1415,7 @@
     },
     "/insumos/{id}": {
       "delete": {
+        "tags": ["Insumos"],
         "description": "",
         "parameters": [
           {
@@ -827,11 +1423,97 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/insumos/CadastroTipoInsumo": {
+      "post": {
+        "tags": ["Insumos"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/insumos/TipoInsumo/{id}": {
+      "delete": {
+        "tags": ["Insumos"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -844,8 +1526,14 @@
     },
     "/insumos/InfoInsumo": {
       "get": {
+        "tags": ["Insumos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "query",
@@ -855,6 +1543,12 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -867,8 +1561,14 @@
     },
     "/insumos/CadastroInsumo": {
       "post": {
+        "tags": ["Insumos"],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -903,6 +1603,12 @@
         "responses": {
           "201": {
             "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
