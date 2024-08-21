@@ -72,6 +72,38 @@ exports.getInfoProduto = (req, res) => {
   });
 };
 
+exports.createProduct = (req, res) => {
+  const { nome, descricao, estoque_total, preco, unidade, tipo, cod_aroma } = req.body;
+
+  // Verifica se o nome do produto já existe
+  const checkQuery = "SELECT * FROM produtos WHERE nome = ?";
+  connection.query(checkQuery, [nome], (error, results) => {
+    if (error) {
+      console.error("Erro no servidor:", error);
+      res.status(500).json({ error: "Erro no servidor" });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.status(409).json({ message: "Já existe um produto com este nome no sistema!" });
+    } else {
+      // Insere o novo produto no banco de dados
+      const insertQuery = "INSERT INTO produtos (nome, descricao, categoria_id, estoque_total, preco, unidade, cod_aroma) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      const params = [nome, descricao, tipo, estoque_total, preco, unidade, cod_aroma];
+
+      connection.query(insertQuery, params, (error, results) => {
+        if (error) {
+          console.error("Erro no servidor:", error);
+          res.status(500).json({ error: "Erro no servidor" });
+          return;
+        }
+
+        res.status(201).json({ message: "Produto cadastrado com sucesso!", productId: results.insertId });
+      });
+    }
+  });
+};
+
 exports.updateProduct = async (req, res) => {
   const { id, nome, descricao, estoque_total, preco, unidade, tipo, cod_aroma } = req.body;
 
@@ -198,7 +230,6 @@ exports.getAllLotes = (req, res) => {
     }
   });
 };
-
 
 exports.updateLote = (req, res) => {
   const { lote_id, local_armazenado_id, coluna } = req.body;

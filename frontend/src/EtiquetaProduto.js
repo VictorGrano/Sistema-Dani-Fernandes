@@ -4,7 +4,6 @@ import Select from "react-select";
 import { format, parse, parseISO, addHours } from "date-fns";
 import "./styles/EtiquetaProduto.css";
 import { QRCodeSVG } from "qrcode.react";
-import {Helmet} from "react-helmet";
 
 function EtiquetaProduto() {
   const [products, setProducts] = useState([]);

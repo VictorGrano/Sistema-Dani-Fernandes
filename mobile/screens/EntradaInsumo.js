@@ -123,16 +123,21 @@ const EntradaInsumoScreen = ({ route }) => {
     <ScrollView style={styles.container}>
       {route.params ? (
         <>
+        <Text style={styles.header}>Dados do Insumo:</Text>
+        <View style={styles.card}>
           <Text style={styles.header}>Dados do Insumo:</Text>
           <Text style={styles.subheader}>Nome do Insumo:</Text>
           <TextInput
-            style={styles.input}
+            style={styles.nonEditableInput}
             value={String(nome)}
             editable={false}
           />
+          </View>
+          <Text style={styles.header}>Caixas:</Text>
+        <View style={styles.card}>
           <Text style={styles.subheader}>Quantidade de insumos na Caixa:</Text>
           <TextInput
-            style={styles.input}
+            style={styles.nonEditableInput}
             value={String(quantidade)}
             editable={false}
           />
@@ -145,6 +150,9 @@ const EntradaInsumoScreen = ({ route }) => {
             onChangeText={setQuantidadeCaixas}
             value={quantidadeCaixas}
           />
+          </View>
+          <Text style={styles.header}>Local:</Text>
+        <View style={styles.card}>
           <Text style={styles.subheader}>Local Armazenado:</Text>
           <Dropdown
             style={styles.dropdown}
@@ -165,12 +173,15 @@ const EntradaInsumoScreen = ({ route }) => {
             onChangeText={setColuna}
             value={coluna}
           />
+          </View>
           <TouchableOpacity style={styles.button} onPress={handleEntrar}>
             <Text style={styles.buttonText}>Criar Entrada</Text>
           </TouchableOpacity>
         </>
       ) : (
         <>
+        <Text style={styles.header}>Dados do Insumo:</Text>
+        <View style={styles.card}>
           <Text style={styles.subheader}>Nome do Insumo:</Text>
           <Dropdown
             style={styles.dropdown}
@@ -185,6 +196,9 @@ const EntradaInsumoScreen = ({ route }) => {
               setID(item.value);
             }}
           />
+          </View>
+          <Text style={styles.header}>Caixas:</Text>
+        <View style={styles.card}>
           <Text style={styles.subheader}>Quantidade de caixas:</Text>
           <TextInput
             style={styles.input}
@@ -202,6 +216,9 @@ const EntradaInsumoScreen = ({ route }) => {
             onChangeText={setQuantidade}
             value={quantidade}
           />
+          </View>
+          <Text style={styles.header}>Local:</Text>
+          <View style={styles.card}>
           <Text style={styles.subheader}>Local Armazenado:</Text>
           <Dropdown
             style={styles.dropdown}
@@ -222,6 +239,7 @@ const EntradaInsumoScreen = ({ route }) => {
             onChangeText={setColuna}
             value={coluna}
           />
+          </View>
           <TouchableOpacity style={styles.buttonEntrada} onPress={handleEntrar}>
             <Text style={styles.buttonText}>Criar Entrada</Text>
           </TouchableOpacity>
@@ -236,15 +254,27 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 40,
+    borderRadius: 20,
+    marginBottom: 15,
+    flex: 1,
+  },
   input: {
     height: 40,
     margin: 12,
     borderWidth: 1,
+    borderRadius: 10,
     padding: 10,
     color: "#222222",
     backgroundColor: "#FFFFFF",
     fontSize: 17,
     textAlign: "center",
+  },
+  nonEditableInput: {
+    backgroundColor: "#E0E0E0",
+    color: "#808080",
   },
   header: {
     fontSize: 24,

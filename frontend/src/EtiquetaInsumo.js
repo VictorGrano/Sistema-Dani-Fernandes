@@ -3,7 +3,6 @@ import axios from 'axios';
 import Select from 'react-select';
 import './styles/EtiquetaInsumo.css';
 import { QRCodeSVG } from 'qrcode.react';
-import {Helmet} from "react-helmet";
 
 function EtiquetaInsumo() {
   const [insumos, setInsumos] = useState([]);

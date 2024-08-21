@@ -215,6 +215,7 @@ exports.postCadastroTipoInsumo = async (req, res) => {
     res.status(500).json({ error: "Erro no servidor" });
   }
 };
+
 exports.postCadastroInsumo = async (req, res) => {
   const { nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna } = req.body;
   const q = "INSERT INTO insumos (nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna) VALUES (?, ?, ?, ?, ?, ?, ?)";

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./styles/Login.css";
 import { useNavigate } from "react-router-dom"; 
-import {Helmet} from "react-helmet";
 
 function Login() {
   const [username, setUsername] = useState("");
