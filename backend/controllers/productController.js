@@ -104,7 +104,6 @@ exports.createProduct = (req, res) => {
   });
 };
 
-
 exports.updateProduct = async (req, res) => {
   const { id, nome, descricao, estoque_total, preco, unidade, tipo, cod_aroma } = req.body;
 
