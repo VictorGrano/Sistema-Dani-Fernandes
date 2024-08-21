@@ -10,11 +10,7 @@ const insumoRoutes = require('./routes/insumoRoutes');
 const app = express();
 app.use(bodyParser.json());
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors());
 
 // Rotas principais
 app.use('/produtos', authMiddleware.verifyToken, productRoutes);
