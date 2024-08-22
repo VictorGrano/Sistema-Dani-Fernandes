@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
 import './styles/EtiquetaInsumo.css';
+import { useNavigate } from 'react-router-dom';
+import { CgChevronLeft } from "react-icons/cg";
 import { QRCodeSVG } from 'qrcode.react';
 
 function EtiquetaInsumo() {
@@ -13,8 +15,12 @@ function EtiquetaInsumo() {
   const [insumoId, setInsumoId] = useState('');
   const [showQRCode, setShowQRCode] = useState(false);
   const [etiquetas, setEtiquetas] = useState([]);
+  const [subtotalProdutos, setSubtotalProdutos] = useState(0);
+  const totalCaixas = parseInt(quantidadeCaixas)
 
   const apiUrl = process.env.REACT_APP_API_URL;
+
+  const navigate = useNavigate(); // Defina o hook useNavigate
 
   useEffect(() => {
     axios.get(`${apiUrl}/insumos/`)
@@ -26,6 +32,18 @@ function EtiquetaInsumo() {
         console.error('Error fetching insumos:', error);
       });
   }, []);
+
+  useEffect(() => {
+    const totalCaixas = parseInt(quantidadeCaixas || 0);
+    const totalProdutos =
+      totalCaixas * parseInt(quantidade || 0)
+
+    setSubtotalProdutos(totalProdutos);
+  }, [quantidade, quantidadeCaixas]);
+
+  const handleBack = () => {
+    navigate("/");
+  }
 
   const handleProduto = (selectedOption) => {
     const insumoId = selectedOption ? selectedOption.value : '';
@@ -63,7 +81,7 @@ function EtiquetaInsumo() {
 
  const handlePrint = () => {
   if (!showQRCode) {
-    alert('Gere o QR Code antes de imprimir.');
+    alert('Gere o Resumo antes de imprimir.');
     return;
   }
 
@@ -73,6 +91,7 @@ function EtiquetaInsumo() {
       <div className="etiqueta-impressa" key={i}>
         <div>
           <p>{insumoName}</p>
+          <p>Número de caixas: {totalCaixas}</p>
           <p>Quantidade: {quantidade}</p>
           <p>Número da caixa: {i + 1}/{quantidadeCaixas}</p>
         </div>
@@ -125,13 +144,16 @@ function EtiquetaInsumo() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <p className="Titulo">
-          Gerar Etiqueta de Insumos
-        </p>
+            <header className="header">
+        <CgChevronLeft size="50px" color="white" className="iconHeader" onClick={handleBack}> 
+        </CgChevronLeft>
+        <div className="headerTextContainer">
+        <span className="headerSpan">Etiqueta de Insumo</span>
+        </div>
       </header>
       <main>
         <form>
+        <div className="card">
           <label htmlFor="product-select">
             Escolha o insumo:
           </label>
@@ -149,21 +171,11 @@ function EtiquetaInsumo() {
             />
           </div>
           <br/>
+        </div>
+        <br />
+        <div className="card">
           <label>
-            Digite a quantidade de unidades por caixa:
-          </label>
-          <br />
-          <input 
-            type="number" 
-            min='1' 
-            value={quantidade} 
-            onChange={handleQuantidade} 
-            onKeyDown={preventNonNumericInput}
-            required 
-          />
-          <br/>
-          <label>
-            Digite a quantidade de caixas:
+            Número de caixas:
           </label>
           <br />
           <input 
@@ -175,24 +187,44 @@ function EtiquetaInsumo() {
             required 
           />
           <br />
+          <label>
+            Unidades por caixa:
+          </label>
+          <br />
+          <input 
+            type="number" 
+            min='1' 
+            value={quantidade} 
+            onChange={handleQuantidade} 
+            onKeyDown={preventNonNumericInput}
+            required 
+          />
+          <br/>
+          </div>
+          <br />
+          <div className="card">
           <button type="button" onClick={handleGenerateQRCode}>
-            Gerar QR Code
+            Gerar resumo
           </button>
           <button type="button" onClick={handlePrint}>
-            Imprimir
+            Imprimir etiquetas
           </button>
           <button type="button" onClick={handleClearInputs}>
-            Limpar
+            Limpar dados
           </button>
+          </div>
         </form>
+        <br />
         {showQRCode && (
+        <div className="card">
           <div className="etiqueta">
             <div>
-              <p>Produto: {insumoName}</p>
-              <p>Quantidade: {quantidade}</p>
+              <p>{insumoName}</p>
               <p>Quantidade de caixas: {quantidadeCaixas}</p>
+              <p>Número total do insumo: {subtotalProdutos}</p>
             </div>
               <QRCodeSVG value={qrValue} className='qrCode'/>
+          </div>
           </div>
         )}
         {etiquetas.length > 0 && (

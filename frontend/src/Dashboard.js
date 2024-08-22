@@ -24,20 +24,21 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("token"); // Remove o token do localStorage
-    navigate("/"); // Redireciona para a página de login
+    navigate("/Login"); // Redireciona para a página de login
   };
 
   return (
     <div className="dashboard-container">
+      <div className="card">
       <h1>Bem-vindo ao Dashboard!</h1>
-      <p>Escolha a rota que deseja acessar:</p>
-
+      <p>Escolha o que deseja acessar:</p>
+  
       <div className="button-container">
         <button onClick={() => navigate("/etiquetaProduto")} className="dashboard-button">
-          Ir para Etiqueta Produto
+          Gerar etiqueta de produto
         </button>
         <button onClick={() => navigate("/etiquetaInsumo")} className="dashboard-button">
-          Ir para Etiqueta Insumo
+          Gerar etiqueta de insumo
         </button>
       </div>
 
@@ -45,6 +46,7 @@ function Dashboard() {
         <button onClick={handleLogout} className="logout-button">
           Logout
         </button>
+        </div>
       </div>
     </div>
   );

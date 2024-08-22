@@ -1,24 +1,48 @@
 .App {
   text-align: center;
-}
-
-.App-header {
-  background-color: rgb(71, 56, 158);
+  background-color: #fc97a7;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: rgb(255, 255, 255);
+  flex-direction: column;
 }
 
-.Titulo {
-  font-size: 24px;
-  font-weight: bold;
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  background-color: #ee5e76;
+  width: 100%;
+  height: 100px;
+}
+
+.iconHeader {
+  cursor: pointer;
+}
+
+.headerTextContainer {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+.headerSpan {
+  color: white;
+  font-size: 30px;
+  margin-left: -30px;
 }
 
 form {
   margin-top: 20px;
+}
+
+.card {
+display: flex;
+justify-content: center;
+align-items: center;
+width: 400px;
 }
 
 .select-div {
@@ -34,10 +58,13 @@ form {
 }
 
 input {
-  padding: 10px;
-  font-size: 16px;
-  text-align: center;
-  width: 15%;
+  width: 30%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #000000;
+  border-radius: 20px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
 }
 
 label {
@@ -48,16 +75,43 @@ label {
 }
 
 button {
-  background-color: rgb(71, 56, 158);
+  background-color: #ee5e76;
   color: white;
-  border-radius: 10px;
   padding: 15px 12px;
-  margin-top: 40px;
+  border-width: 0;
+  border-radius: 20px;
+  margin-top: 20px;
   cursor: pointer;
 }
 
-button:hover {
-  background-color: rgb(59, 46, 135);
+span {
+  color: rgb(0, 0, 0);
+  font-weight: bold;
+}
+.spanLote {
+  color: rgb(0, 0, 0);
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.fracionada-container {
+  background-color: #ccccccd2;
+  padding: 10px;
+  width: 75%;
+  margin: 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.removeButton {
+margin-left: 25px;
+cursor: pointer;
+}
+
+.inputDate {
+  width: 100%;
 }
 
 .etiqueta, .etiqueta-impressa {
@@ -114,6 +168,9 @@ button:hover {
       margin: 0;    
   }
 
+  .card {
+    display: none;
+  }
   .etiqueta-impressa {
     flex-direction: row;
     justify-content: space-between;
