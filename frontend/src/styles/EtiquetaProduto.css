@@ -168,7 +168,7 @@ cursor: pointer;
       margin: 0;    
   }
 
-  .card {
+  .card, br {
     display: none;
   }
   .etiqueta-impressa {
