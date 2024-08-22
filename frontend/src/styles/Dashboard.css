@@ -1,7 +1,8 @@
 .dashboard-container {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #fc97a7;
+  background: rgb(2,0,36);
+    background: linear-gradient(144deg, rgba(2,0,36,1) 0%, rgba(124,124,124,1) 45%, rgba(246,246,246,1) 100%); 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -18,26 +19,28 @@
 .card {
 display: flex;
 flex-direction: column;
+box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 align-items: center;
 justify-content: center;
-background-color: white;
+background-color: #F5FFFA;
 border-radius: 30px;
 padding: 30px;
 }
 
 .dashboard-button {
-  background-color: #ca3b53;
-  color: white;
+  background: rgb(167, 167, 236);
+  color: black;
   padding: 20px;
   border: none;
   border-radius: 30px;
   cursor: pointer;
   font-size: 1.2rem;
-  transition: background-color 0.3s ease;
+  transition: transform 0.3s ease, background 0.3s ease; /* Suave transição */
 }
 
 .dashboard-button:hover {
-  background-color: #ee4a66;
+  transform: scale(1.1); /* Aumenta ligeiramente o tamanho */
+  background-color: rgb(137, 137, 243);
 }
 
 .logout-container {
@@ -45,16 +48,18 @@ padding: 30px;
 }
 
 .logout-button {
-  background-color: #0f8000;
+  background: rgb(255,0,0);
   color: white;
   padding: 20px;
   border: none;
   border-radius: 30px;
   cursor: pointer;
   font-size: 1.2rem;
-  transition: background-color 0.3s ease;
+  transition: transform 0.3s ease, background 0.3s ease; /* Suave transição */
 }
 
 .logout-button:hover {
-  background-color: #15b301;
+  transform: scale(1.1); /* Aumenta ligeiramente o tamanho */
+  background: rgb(255,0,0);
+  color: white;
 }
