@@ -1,10 +1,11 @@
 .App {
   text-align: center;
-  background-color: #fc97a7;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  background: rgb(2,0,36);
+  background: linear-gradient(144deg, rgba(2,0,36,1) 0%, rgba(124,124,124,1) 45%, rgba(246,246,246,1) 100%);
 }
 
 .header {
@@ -12,7 +13,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  background-color: #ee5e76;
+  background: rgb(167, 167, 236);
   width: 100%;
   height: 100px;
 }
@@ -75,8 +76,19 @@ label {
 }
 
 button {
-  background-color: #ee5e76;
-  color: white;
+  background: rgb(167, 167, 236);
+  color: black;
+  padding: 15px 12px;
+  border-width: 0;
+  border-radius: 20px;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease; /* Suave transição */
+}
+button:hover {
+  transform: scale(1.1); /* Aumenta ligeiramente o tamanho */
+  background-color: rgb(137, 137, 243);
+  color: black;
   padding: 15px 12px;
   border-width: 0;
   border-radius: 20px;
@@ -134,7 +146,7 @@ cursor: pointer;
 
 .etiqueta p {
   margin: 10px;
-  font-size: 15px;
+  font-size: 10px;
 }
 
 .qrCode {
@@ -158,7 +170,8 @@ cursor: pointer;
     height: auto;
   }
 
-  form, .App-header, .select-div, .etiqueta {
+  form, .header, .select-div, .etiqueta,  
+  .card,.spanLote, br, .inputDate, .fracionada-container, .select-div{
     display: none;
   }
 
@@ -168,9 +181,6 @@ cursor: pointer;
       margin: 0;    
   }
 
-  .card, br {
-    display: none;
-  }
   .etiqueta-impressa {
     flex-direction: row;
     justify-content: space-between;
@@ -180,11 +190,12 @@ cursor: pointer;
     margin-left: 15px;
   }
   .etiqueta-impressa p {
-  font-size: 15px;
+  font-size: 13px;
   }
 
   .qrCode {
     margin-right: 15px;
+    margin-left: -50px;
   }
 
   @page {

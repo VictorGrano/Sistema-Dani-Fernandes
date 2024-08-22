@@ -30,7 +30,7 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       <div className="card">
-      <h1>Bem-vindo ao Dashboard!</h1>
+      <h1>Bem-vindo ao menu!</h1>
       <p>Escolha o que deseja acessar:</p>
   
       <div className="button-container">
