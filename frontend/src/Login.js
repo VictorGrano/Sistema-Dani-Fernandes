@@ -38,7 +38,7 @@ function Login() {
             return Promise.reject(error);
           }
         );
-        navigate("/Dashboard");
+        navigate("/");
       } else {
         setError(response.data.error || "Erro ao autenticar");
       }
@@ -55,7 +55,7 @@ function Login() {
         <h1>Login</h1>
       </header>
       <main>
-        <form onSubmit={handleLogin} className="login-form">
+        <form onSubmit={handleLogin} className="login-form" autoComplete="off">
           <div className="form-group">
             <label htmlFor="username">Usuário:</label>
             <input
@@ -79,9 +79,11 @@ function Login() {
           </div>
 
           {error && <p className="error-message">{error}</p>}
+          <div>
           <button type="submit" className="login-button">
             Entrar
           </button>
+          </div>
         </form>
       </main>
     </div>

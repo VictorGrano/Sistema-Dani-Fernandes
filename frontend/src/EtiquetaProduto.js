@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { format, parse, parseISO, addHours } from "date-fns";
+import { useNavigate } from "react-router-dom"
 import "./styles/EtiquetaProduto.css";
+import { CgTrash, CgChevronLeft } from "react-icons/cg";
 import { QRCodeSVG } from "qrcode.react";
 
 function EtiquetaProduto() {
@@ -21,8 +23,13 @@ function EtiquetaProduto() {
   const [dataFabricacao, setDataFabricacao] = useState("");
   const [newLoteName, setNewLoteName] = useState("");
   const [etiquetas, setEtiquetas] = useState([]);
-
+  const [quantidadeFracionada, setQuantidadeFracionada] = useState("");
+  const [fracionadas, setFracionadas] = useState([]);
+  const [subtotalProdutos, setSubtotalProdutos] = useState(0);
+  const generatedEtiquetas = [];
+  const totalCaixas = parseInt(quantidadeCaixas) + fracionadas.length;
   const apiUrl = process.env.REACT_APP_API_URL;
+  const navigate = useNavigate(); // Defina o hook useNavigate
 
   useEffect(() => {
     axios
@@ -35,6 +42,15 @@ function EtiquetaProduto() {
         console.error("Error fetching products:", error);
       });
   }, []);
+
+  useEffect(() => {
+    const totalFracionadas = fracionadas.reduce((acc, val) => acc + val, 0);
+    const totalCaixas = parseInt(quantidadeCaixas || 0);
+    const totalProdutos =
+      totalCaixas * parseInt(quantidade || 0) + totalFracionadas;
+
+    setSubtotalProdutos(totalProdutos);
+  }, [quantidade, quantidadeCaixas, fracionadas]);
 
   const handleProduto = (selectedOption) => {
     const productId = selectedOption ? selectedOption.value : "";
@@ -61,134 +77,9 @@ function EtiquetaProduto() {
       });
   };
 
-  const handleQuantidade = (event) => {
-    const value = event.target.value;
-    if (value === "" || /^[0-9]+$/.test(value)) {
-      setQuantidade(value);
-    }
-  };
-
-  const handleQuantidadeCaixas = (event) => {
-    const value = event.target.value;
-    if (value === "" || /^[0-9]+$/.test(value)) {
-      setQuantidadeCaixas(value);
-    }
-  };
-
-  const handleMesValidade = (event) => {
-    const value = event.target.value;
-    if (value === "" || (value >= 1 && value <= 12 && /^[0-9]+$/.test(value))) {
-      setMesValidade(value.padStart(2, "0"));
-    }
-  };
-
-  const handleAnoValidade = (event) => {
-    const value = event.target.value;
-    const currentYear = new Date().getFullYear();
-    if (
-      value === "" ||
-      (value >= currentYear && value.length <= 4 && /^[0-9]+$/.test(value))
-    ) {
-      setAnoValidade(value);
-    }
-  };
-
-  const handleGenerateQRCode = () => {
-    if (
-      selectedProduct &&
-      quantidade &&
-      (selectedLote || newLoteName) &&
-      mesValidade &&
-      anoValidade &&
-      quantidadeCaixas
-    ) {
-      setShowQRCode(true);
-    } else {
-      alert("Todos os campos são obrigatórios!");
-    }
-  };
-
-  const handlePrint = () => {
-    if (!showQRCode) {
-      alert("Gere o QR Code antes de imprimir.");
-      return;
-    }
-
-    const generatedEtiquetas = [];
-    for (let i = 0; i < parseInt(quantidadeCaixas); i++) {
-      generatedEtiquetas.push(
-        <div className="etiqueta-impressa" key={i}>
-          <div>
-            <p>{productName}</p>
-            <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
-            <p>Quantidade: {quantidade}</p>
-            <p>
-              Número da caixa: {i + 1}/{quantidadeCaixas}
-            </p>
-            <p>Mês de Fabricação: {format(new Date(dataFabricacao), 'MM/yyyy')}</p>
-            <p>Validade: {`${mesValidade}/${anoValidade}`}</p>
-          </div>
-          <QRCodeSVG value={qrValue} className="qrCode" />
-        </div>
-      );
-    }
-    setEtiquetas(generatedEtiquetas);
-
-    const etiquetasContainer = document.querySelector(".etiquetas-container");
-    if (etiquetasContainer) {
-      etiquetasContainer.classList.add("imprimir"); // Aplica a classe .imprimir
-    }
-
-    setTimeout(() => {
-      window.print();
-      if (etiquetasContainer) {
-        etiquetasContainer.classList.remove("imprimir"); // Remove a classe após a impressão
-      }
-      setEtiquetas([]); // Limpa as etiquetas depois de imprimir
-    }, 0);
-  };
-
-  const handleClearInputs = () => {
-    setSelectedProduct(null);
-    setQuantidade("");
-    setQuantidadeCaixas("");
-    setProductName("");
-    setMesValidade("");
-    setAnoValidade("");
-    setShowQRCode(false);
-    setNewLoteName("");
-    setSelectedLote(null);
-    setDataFabricacao("");
-  };
-
-  const handleCreateLote = () => {
-    if (productId && dataFabricacao) {
-      axios
-        .get(`${apiUrl}/produtos/InfoProduto?id=${productId}`)
-        .then((response) => {
-          const { sigla, cod_aroma } = response.data;
-          const date = parseISO(dataFabricacao);
-          const adjustedDate = addHours(date, 12); // Adiciona 12 horas para ajustar o fuso horário
-          const formattedDate = format(adjustedDate, "MMddyy");
-          const nomeLote = `${sigla}${cod_aroma}${formattedDate}`;
-          setNewLoteName(nomeLote);
-          setCreatingLote(false);
-          setDataFabricacao(format(adjustedDate, "yyyy-MM-dd")); // Formata a data de fabricação
-        })
-        .catch((error) => {
-          console.error("Error fetching product details:", error);
-        });
-    } else {
-      alert("Data de fabricação é obrigatória!");
-    }
-  };
-
-  const toggleCreateLote = () => {
-    setCreatingLote(!creatingLote);
-    if (!creatingLote) {
-      setSelectedLote(null);
-    }
-  };
+  const handleBack = () => {
+    navigate("/");
+  }
 
   const extractFabricacaoDate = (loteName) => {
     const dateStr = loteName.slice(-6);
@@ -208,11 +99,178 @@ function EtiquetaProduto() {
     }
   };
 
+  const toggleCreateLote = () => {
+    setCreatingLote(!creatingLote);
+    if (!creatingLote) {
+      setSelectedLote(null);
+    }
+  };
+
+  const handleCreateLote = () => {
+    if (productId && dataFabricacao) {
+      axios
+        .get(`${apiUrl}/produtos/InfoProduto?id=${productId}`)
+        .then((response) => {
+          const { sigla, cod_aroma } = response.data;
+          const date = parseISO(dataFabricacao);
+          const adjustedDate = addHours(date, 12); // Ajusta o fuso horário
+          const formattedDate = format(adjustedDate, "MMddyy");
+          const nomeLote = `${sigla}${cod_aroma}${formattedDate}`;
+          setNewLoteName(nomeLote);
+          setCreatingLote(false);
+          setDataFabricacao(format(adjustedDate, "yyyy-MM-dd"));
+        })
+        .catch((error) => {
+          console.error("Error fetching product details:", error);
+        });
+    } else if (productId) {
+      alert("Data de fabricação é obrigatória!");
+    } 
+    else if (dataFabricacao) {
+      alert("Escolha um produto para criar o lote!")
+    }
+    else {
+      alert("Escolha o produto e uma data de fabricação para criar um lote!")
+    }
+  };
+
+  const handleQuantidadeCaixas = (event) => {
+    const value = event.target.value;
+    if (value === "" || /^[0-9]+$/.test(value)) {
+      setQuantidadeCaixas(value);
+    }
+  };
+
+  const handleQuantidade = (event) => {
+    const value = event.target.value;
+    if (value === "" || /^[0-9]+$/.test(value)) {
+      setQuantidade(value);
+    }
+  };
+
+  const handleAddFracionada = () => {
+    if (quantidadeFracionada) {
+      setFracionadas([...fracionadas, parseInt(quantidadeFracionada)]);
+      setQuantidadeFracionada("");
+    }
+  };
+
+  const handleRemoveFracionada = (index) => {
+    const newFracionadas = fracionadas.filter((_, i) => i !== index);
+    setFracionadas(newFracionadas);
+  };
+
+  const handleGenerateQRCode = () => {
+    const formattedMesValidade = mesValidade.padStart(2, "0");
+
+    if (
+      selectedProduct &&
+      quantidade &&
+      (selectedLote || newLoteName) &&
+      formattedMesValidade &&
+      anoValidade &&
+      quantidadeCaixas
+    ) {
+      setShowQRCode(true);
+    } else {
+      alert("Todos os campos são obrigatórios!");
+    }
+  };
+
+  const handlePrint = () => {
+    if (!showQRCode) {
+      alert("Gere o resumo antes de imprimir.");
+      return;
+    }
+    // Adiciona etiquetas para as caixas normais
+    for (let i = 0; i < parseInt(quantidadeCaixas); i++) {
+      const qrValueNormal = JSON.stringify({
+        id: productId,
+        quantidade: quantidade,
+        lote: selectedLote ? selectedLote.label : newLoteName,
+        validade: `${mesValidade.padStart(2, "0")}-${anoValidade}`,
+        fabricacao: dataFabricacao,
+      });
+
+      generatedEtiquetas.push(
+        <div className="etiqueta-impressa" key={i}>
+          <div>
+            <p>{productName}</p>
+            <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
+            <p>Quantidade: {quantidade}</p>
+            <p>
+              Número da caixa: {i + 1}/{totalCaixas}
+            </p>
+            <p>Mês de Fabricação: {format(new Date(dataFabricacao), "MM/yyyy")}</p>
+            <p>Validade: {`${mesValidade.padStart(2, "0")}/${anoValidade}`}</p>
+          </div>
+          <QRCodeSVG value={qrValueNormal} className="qrCode" />
+        </div>
+      );
+    }
+
+    // Adiciona etiquetas para as caixas fracionadas
+    fracionadas.forEach((quantidadeFracionada, index) => {
+      const qrValueFracionada = JSON.stringify({
+        id: productId,
+        quantidade: quantidadeFracionada,
+        lote: selectedLote ? selectedLote.label : newLoteName,
+        validade: `${mesValidade.padStart(2, "0")}-${anoValidade}`,
+        fabricacao: dataFabricacao,
+      });
+
+      generatedEtiquetas.push(
+        <div className="etiqueta-impressa" key={quantidadeCaixas + index}>
+          <div>
+            <p>{productName}</p>
+            <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
+            <p>Quantidade: {quantidadeFracionada}</p>
+            <p>
+              Número da caixa: {parseInt(quantidadeCaixas) + index + 1}/{totalCaixas}
+            </p>
+            <p>Mês de Fabricação: {format(new Date(dataFabricacao), "MM/yyyy")}</p>
+            <p>Validade: {`${mesValidade.padStart(2, "0")}/${anoValidade}`}</p>
+          </div>
+          <QRCodeSVG value={qrValueFracionada} className="qrCode" />
+        </div>
+      );
+    });
+
+    setEtiquetas(generatedEtiquetas);
+
+    const etiquetasContainer = document.querySelector(".etiquetas-container");
+    if (etiquetasContainer) {
+      etiquetasContainer.classList.add("imprimir");
+    }
+
+    setTimeout(() => {
+      window.print();
+      if (etiquetasContainer) {
+        etiquetasContainer.classList.remove("imprimir");
+      }
+      setEtiquetas([]);
+    }, 0);
+  };
+
+  const handleClearInputs = () => {
+    setSelectedProduct(null);
+    setQuantidade("");
+    setQuantidadeCaixas("");
+    setProductName("");
+    setMesValidade("");
+    setAnoValidade("");
+    setShowQRCode(false);
+    setNewLoteName("");
+    setSelectedLote(null);
+    setDataFabricacao("");
+    setFracionadas([]);
+  };
+
   const qrValue = JSON.stringify({
     id: productId,
     quantidade: quantidade,
     lote: selectedLote ? selectedLote.label : newLoteName,
-    validade: `${mesValidade}-${anoValidade}`,
+    validade: `${mesValidade.padStart(2, "0")}-${anoValidade}`,
     fabricacao: dataFabricacao,
   });
 
@@ -226,23 +284,18 @@ function EtiquetaProduto() {
     label: `${lote.nome_lote}`,
   }));
 
-  const preventNonNumericInput = (event) => {
-    if (
-      !/^[0-9]$/.test(event.key) &&
-      event.key !== "Backspace" &&
-      event.key !== "Delete"
-    ) {
-      event.preventDefault();
-    }
-  };
-
   return (
     <div className="App">
-      <header className="App-header">
-        <p className="Titulo">Criar etiquetas</p>
+      <header className="header">
+        <CgChevronLeft size="50px" color="white" className="iconHeader" onClick={handleBack}> 
+        </CgChevronLeft>
+        <div className="headerTextContainer">
+        <span className="headerSpan">Etiqueta de Produto</span>
+        </div>
       </header>
       <main>
         <form>
+          <div className="card">
           <label htmlFor="product-select">Escolha o produto:</label>
           <br />
           <div className="select-div">
@@ -260,7 +313,7 @@ function EtiquetaProduto() {
           <br />
           {!creatingLote && (
             <>
-              <label htmlFor="lote-select">Escolha o lote:</label>
+              <label htmlFor="lote-select">Escolha o lote (Apenas se já existir no estoque):</label>
               <br />
               <div className="select-div">
                 <Select
@@ -272,22 +325,28 @@ function EtiquetaProduto() {
                   isClearable
                   placeholder="Selecione um lote"
                 />
-              </div>
+                <br />
+            </div>
+                <span className="spanLote">Ou crie um novo lote no botão abaixo:</span>
+            <br />
             </>
           )}
-          <button type="button" onClick={toggleCreateLote}>
-            {creatingLote ? "Escolher Lote" : "Criar Lote"}
-          </button>
           {creatingLote && (
             <div>
+              <br/>
+              <span>Escolha um produto acima e uma data de fabricação abaixo para criar um lote.</span>
+              <br />
+              <br />
               <label>Data de Fabricação:</label>
               <br />
               <input
                 type="date"
+                className="inputDate"
                 value={dataFabricacao}
                 onChange={(e) => setDataFabricacao(e.target.value)}
                 required
               />
+              <br />
               <button type="button" onClick={handleCreateLote}>
                 Confirmar
               </button>
@@ -295,33 +354,58 @@ function EtiquetaProduto() {
           )}
           {newLoteName && (
             <div>
-              <p>Novo Lote Criado: {newLoteName}</p>
+            <p>Novo Lote Criado: {newLoteName}</p>
             </div>
           )}
+          
+          <button type="button" onClick={toggleCreateLote}>
+            {creatingLote ? "Escolher Lote existente" : "Criar Lote"}
+          </button>
+          </div>
           <br />
-          <label>Número de caixas:</label>
+          <div className="card">
+          <label>Número de caixa completas:</label>
           <br />
           <input
             type="number"
             min="1"
             value={quantidadeCaixas}
             onChange={handleQuantidadeCaixas}
-            onKeyDown={preventNonNumericInput}
             required
           />
           <br />
-          <label>Digite a quantidade na caixa:</label>
+
+          <label>Unidade por caixa:</label>
           <br />
           <input
             type="number"
             min="1"
             value={quantidade}
             onChange={handleQuantidade}
-            onKeyDown={preventNonNumericInput}
             required
           />
           <br />
+          <label>Caixas Fracionadas (Adicionar unidades da caixa):</label>
+          {fracionadas.map((item, index) => (
+            <div key={index} className="fracionada-container">
+              <span>Caixa {index + 1}: {item} produtos</span>
+              <CgTrash size="25px" className="removeButton" onClick={() => handleRemoveFracionada(index)}/>
+            </div>
+          ))}
           <br />
+          <input
+            type="number"
+            min="1"
+            value={quantidadeFracionada}
+            onChange={(e) => setQuantidadeFracionada(e.target.value)}
+          />
+          <br />
+          <button type="button" onClick={handleAddFracionada}>
+            Adicionar Caixa Fracionada
+          </button>
+          </div>
+          <br />
+          <div className="card">
           <label>Digite o mês de validade:</label>
           <br />
           <input
@@ -329,8 +413,7 @@ function EtiquetaProduto() {
             min="1"
             max="12"
             value={mesValidade}
-            onChange={handleMesValidade}
-            onKeyDown={preventNonNumericInput}
+            onChange={(e) => setMesValidade(e.target.value)}
             required
           />
           <br />
@@ -340,32 +423,37 @@ function EtiquetaProduto() {
             type="number"
             min={new Date().getFullYear()}
             value={anoValidade}
-            onChange={handleAnoValidade}
-            onKeyDown={preventNonNumericInput}
+            onChange={(e) => setAnoValidade(e.target.value)}
             required
           />
           <br />
+          </div>
+          <br />
+          <div className="card">
           <button type="button" onClick={handleGenerateQRCode}>
-            Gerar QR Code
+            Gerar resumo
           </button>
           <button type="button" onClick={handlePrint}>
-            Imprimir
+            Imprimir etiquetas
           </button>
           <button type="button" onClick={handleClearInputs}>
-            Limpar
+            Limpar dados
           </button>
+          </div>
+          <br />
         </form>
         {showQRCode && (
-          <div className="etiqueta">
+      <div className="card">
             <div>
               <p>{productName}</p>
-              <p>Quantidade: {quantidade}</p>
+              <p>Número de caixas: {totalCaixas}</p>
+              <p>Quantidade total: {subtotalProdutos}</p>
               <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
-              <p>Mês de Fabricação: {format(new Date(dataFabricacao), 'MM/yyyy')}</p>
-              <p>Validade: {`${mesValidade}/${anoValidade}`}</p>
-            <QRCodeSVG value={qrValue} className='qrCode'/>
+              <p>Mês de Fabricação: {format(new Date(dataFabricacao), "MM/yyyy")}</p>
+              <p>Validade: {`${mesValidade.padStart(2, "0")}/${anoValidade}`}</p>
+              <QRCodeSVG value={qrValue} className="qrCode" />
             </div>
-          </div>
+        </div>
         )}
         {etiquetas.length > 0 && (
           <div className="etiquetas-container">

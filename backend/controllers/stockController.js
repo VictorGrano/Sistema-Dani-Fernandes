@@ -104,6 +104,25 @@ exports.putPrateleira = (req, res) => {
   });
 };
 
+exports.putItemConcluido = (req, res) => {
+  const { id } = req.params;
+  const { concluido } = req.body;
+
+  const updateQuery = `
+    UPDATE lista_prateleira 
+    SET concluido = ? 
+    WHERE id = ?`;
+
+  connection.query(updateQuery, [concluido, id], (error, results) => {
+    if (error) {
+      console.error("Error updating prateleira item:", error);
+      res.status(500).json({ error: "Database update failed" });
+      return;
+    }
+    res.status(200).json({ success: true });
+  });
+};
+
 exports.deletePrateleira = (req, res) => {
   const { id } = req.params;
 
