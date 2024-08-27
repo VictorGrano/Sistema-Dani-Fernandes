@@ -24,10 +24,13 @@ const EntradaInsumoScreen = ({ route }) => {
   const [locais, setLocais] = useState([]);
   const [selectedInsumo, setSelectedInsumo] = useState(null);
   const [selectedLocal, setSelectedLocal] = useState(null);
+  const [noLotesMessage, setNoLotesMessage] = useState("");
+  const [lote, setLote] = useState(null);
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [lotes, setLotes] = useState([]);
+  const [isNewLote, setIsNewLote] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -68,9 +71,10 @@ const EntradaInsumoScreen = ({ route }) => {
 
   useEffect(() => {
     if (route.params) {
-      const { id, quantidade } = route.params;
+      const { id, quantidade, lote } = route.params;
       setID(id);
       setQuantidade(quantidade);
+      setLote(lote);
       setLoading(true);
 
       axios
@@ -87,10 +91,44 @@ const EntradaInsumoScreen = ({ route }) => {
     }
   }, [route.params, apiUrl]);
 
+  useEffect(() => {
+    if (selectedInsumo) {
+      setLoading(true);
+      axios
+        .get(`${apiUrl}/insumos/Lotes?insumo_id=${selectedInsumo}`)
+        .then((response) => {
+          if (response.data.length === 0) {
+            setNoLotesMessage("Não existem lotes para este produto.");
+            setLotes([]);
+          } else {
+            const lotesData = response.data.map((lote) => ({
+              label: lote.nome_lote,
+              value: lote.id,
+            }));
+            setLotes(lotesData);
+            setNoLotesMessage("");
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          if (error.response.status === "404") {
+            setLoading(false);
+            setNoLotesMessage("Não existem lotes para este produto.");
+            setLotes([]);
+          } else {
+            setLoading(false);
+            console.error("Error fetching lots:", error);
+          }
+        });
+    }
+    setLoading(false);
+  }, [selectedInsumo]);
+
   const handleEntrar = () => {
     const quantidadeTotal = quantidade * (quantidadeCaixas || 1);
     const entradaData = {
       id: selectedInsumo || id,
+      lote: lote,
       quantidade: quantidadeTotal,
       quantidade_caixas: quantidadeCaixas,
       localArmazenado: selectedLocal,
@@ -103,7 +141,6 @@ const EntradaInsumoScreen = ({ route }) => {
     axios
       .post(`${apiUrl}/estoque/EntradaInsumo`, entradaData)
       .then((response) => {
- 
         navigation.goBack();
       })
       .catch((error) => {
@@ -123,56 +160,64 @@ const EntradaInsumoScreen = ({ route }) => {
     <ScrollView style={styles.container}>
       {route.params ? (
         <>
-        <Text style={styles.header}>Dados do Insumo:</Text>
-        <View style={styles.card}>
           <Text style={styles.header}>Dados do Insumo:</Text>
-          <Text style={styles.subheader}>Nome do Insumo:</Text>
-          <TextInput
-            style={styles.nonEditableInput}
-            value={String(nome)}
-            editable={false}
-          />
+          <View style={styles.card}>
+            <Text style={styles.header}>Dados do Insumo:</Text>
+            <Text style={styles.subheader}>Nome do Insumo:</Text>
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              value={String(nome)}
+              editable={false}
+            />
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              editable={false}
+              placeholder="Digite o lote do insumo aqui"
+              value={lote}
+            />
           </View>
           <Text style={styles.header}>Caixas:</Text>
-        <View style={styles.card}>
-          <Text style={styles.subheader}>Quantidade de insumos na Caixa:</Text>
-          <TextInput
-            style={styles.nonEditableInput}
-            value={String(quantidade)}
-            editable={false}
-          />
-          <Text style={styles.subheader}>Quantidade de caixas:</Text>
-          <TextInput
-            style={styles.input}
-            editable={true}
-            keyboardType="numeric"
-            placeholder="Digite a quantidade de caixas aqui"
-            onChangeText={setQuantidadeCaixas}
-            value={quantidadeCaixas}
-          />
+          <View style={styles.card}>
+            <Text style={styles.subheader}>
+              Quantidade de insumos na Caixa:
+            </Text>
+            <TextInput
+              style={[styles.input, styles.nonEditableInput]}
+              value={String(quantidade)}
+              editable={false}
+            />
+            <Text style={styles.subheader}>Quantidade de caixas:</Text>
+            <TextInput
+              style={styles.input}
+              editable={true}
+              keyboardType="numeric"
+              placeholder="Digite a quantidade de caixas aqui"
+              onChangeText={setQuantidadeCaixas}
+              value={quantidadeCaixas}
+            />
           </View>
           <Text style={styles.header}>Local:</Text>
-        <View style={styles.card}>
-          <Text style={styles.subheader}>Local Armazenado:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={locais}
-            search={true}
-            labelField="label"
-            valueField="value"
-            placeholder="Selecione um local para armazenar"
-            value={selectedLocal}
-            onChange={(item) => {
-              setSelectedLocal(item.value);
-            }}
-          />
-          <Text style={styles.subheader}>Coluna armazenada:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: A1"
-            onChangeText={setColuna}
-            value={coluna}
-          />
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Local Armazenado:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={locais}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecione um local para armazenar"
+              value={selectedLocal}
+              onChange={(item) => {
+                setSelectedLocal(item.value);
+              }}
+            />
+            <Text style={styles.subheader}>Coluna armazenada:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: A1"
+              onChangeText={setColuna}
+              value={coluna}
+            />
           </View>
           <TouchableOpacity style={styles.button} onPress={handleEntrar}>
             <Text style={styles.buttonText}>Criar Entrada</Text>
@@ -180,65 +225,114 @@ const EntradaInsumoScreen = ({ route }) => {
         </>
       ) : (
         <>
-        <Text style={styles.header}>Dados do Insumo:</Text>
-        <View style={styles.card}>
-          <Text style={styles.subheader}>Nome do Insumo:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={insumos}
-            search={true}
-            labelField="label"
-            valueField="value"
-            placeholder="Selecione um insumo"
-            value={selectedInsumo}
-            onChange={(item) => {
-              setSelectedInsumo(item.value);
-              setID(item.value);
-            }}
-          />
+          <Text style={styles.header}>Dados do Insumo:</Text>
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Nome do Insumo:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={insumos}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecione um insumo"
+              value={selectedInsumo}
+              onChange={(item) => {
+                setSelectedInsumo(item.value);
+                setID(item.value);
+              }}
+            />
+            <Text style={styles.subheader}>Lote do insumo:</Text>
+            {noLotesMessage ? (
+              <View style={styles.messageContainer}>
+                <Text style={styles.message}>{noLotesMessage}</Text>
+              </View>
+            ) : null}
+            {isNewLote ? (
+              <View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nome do Lote"
+                  value={lote}
+                  onChangeText={setLote}
+                />
+                {lotes.length > 0 ? (
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setIsNewLote(false)}
+                  >
+                    <Text style={styles.buttonText}>
+                      Selecionar Lote Existente
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            ) : (
+              <View>
+                <Dropdown
+                  style={styles.dropdown}
+                  data={lotes}
+                  search={true}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Selecione um lote"
+                  value={lote}
+                  onChange={(item) => {
+                    setLote(item.label);
+                  }}
+                />
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setIsNewLote(true)}
+                >
+                  <Text style={styles.buttonText}>Criar Novo Lote</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
           <Text style={styles.header}>Caixas:</Text>
-        <View style={styles.card}>
-          <Text style={styles.subheader}>Quantidade de caixas:</Text>
-          <TextInput
-            style={styles.input}
-            editable={true}
-            keyboardType="numeric"
-            placeholder="Digite a quantidade de caixas aqui"
-            onChangeText={setQuantidadeCaixas}
-            value={quantidadeCaixas}
-          />
-          <Text style={styles.subheader}>Quantidade de insumos na Caixa:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Quantidade"
-            keyboardType="numeric"
-            onChangeText={setQuantidade}
-            value={quantidade}
-          />
+          <View style={styles.card}>
+            <Text style={styles.subheader}>Quantidade de caixas:</Text>
+            <TextInput
+              style={styles.input}
+              editable={true}
+              keyboardType="numeric"
+              placeholder="Digite a quantidade de caixas aqui"
+              onChangeText={setQuantidadeCaixas}
+              value={quantidadeCaixas}
+            />
+            <Text style={styles.subheader}>
+              Quantidade de insumos na Caixa:
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Quantidade"
+              keyboardType="numeric"
+              onChangeText={setQuantidade}
+              value={quantidade}
+            />
           </View>
           <Text style={styles.header}>Local:</Text>
           <View style={styles.card}>
-          <Text style={styles.subheader}>Local Armazenado:</Text>
-          <Dropdown
-            style={styles.dropdown}
-            data={locais}
-            search={true}
-            labelField="label"
-            valueField="value"
-            placeholder="Selecione um local para armazenar"
-            value={selectedLocal}
-            onChange={(item) => {
-              setSelectedLocal(item.value);
-            }}
-          />
-          <Text style={styles.subheader}>Coluna armazenada:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: A1"
-            onChangeText={setColuna}
-            value={coluna}
-          />
+            <Text style={styles.subheader}>Local Armazenado:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              data={locais}
+              search={true}
+              labelField="label"
+              valueField="value"
+              placeholder="Selecione um local para armazenar"
+              value={selectedLocal}
+              onChange={(item) => {
+                setSelectedLocal(item.value);
+              }}
+            />
+            <Text style={styles.subheader}>Coluna armazenada:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: A1"
+              onChangeText={setColuna}
+              value={coluna}
+            />
           </View>
           <TouchableOpacity style={styles.buttonEntrada} onPress={handleEntrar}>
             <Text style={styles.buttonText}>Criar Entrada</Text>

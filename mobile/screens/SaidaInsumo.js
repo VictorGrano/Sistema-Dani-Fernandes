@@ -22,9 +22,11 @@ const SaidaInsumoScreen = ({ route }) => {
   const [insumos, setInsumos] = useState([]);
   const [locais, setLocais] = useState([]);
   const [selectedInsumo, setSelectedInsumo] = useState(null);
+  const [lote, setLote] = useState(null);
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lotes, setLotes] = useState ([]);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -64,8 +66,9 @@ const SaidaInsumoScreen = ({ route }) => {
 
   useEffect(() => {
     if (route.params) {
-      const { id, quantidade } = route.params;
+      const { id, quantidade, lote } = route.params;
       setID(id);
+      setLote(lote);
       setQuantidade(quantidade);
       axios
         .get(`${apiUrl}/insumos/InfoInsumo?id=${id}`)
@@ -78,10 +81,44 @@ const SaidaInsumoScreen = ({ route }) => {
     }
   }, [route.params, apiUrl]);
 
+  useEffect(() => {
+    if (selectedInsumo) {
+      setLoading(true);
+      axios
+        .get(`${apiUrl}/insumos/Lotes?insumo_id=${selectedInsumo}`)
+        .then((response) => {
+          if (response.data.length === 0) {
+            setNoLotesMessage("Não existem lotes para este produto.");
+            setLotes([]);
+          } else {
+            const lotesData = response.data.map((lote) => ({
+              label: lote.nome_lote,
+              value: lote.id,
+            }));
+            setLotes(lotesData);
+            setNoLotesMessage("");
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          if (error.response.status === 404) {
+            setLoading(false);
+            setNoLotesMessage("Não existem lotes para este produto.");
+            setLotes([]);
+          } else {
+            setLoading(false);
+            console.error("Error fetching lots:", error);
+          }
+        });
+    }
+    setLoading(false);
+  }, [selectedInsumo]);
+
   const handleSaida = () => {
     const quantidadeTotal = quantidade * (quantidadeCaixas || 1);
     const saidaData = {
       id: selectedInsumo || id,
+      lote: lote,
       quantidade: quantidadeTotal,
       quantidade_caixas: quantidadeCaixas || 1,
       user: nomeUser,
@@ -92,10 +129,15 @@ const SaidaInsumoScreen = ({ route }) => {
       .post(`${apiUrl}/estoque/SaidaInsumo`, saidaData)
       .then((response) => {
         setLoading(false);
- 
         navigation.goBack();
       })
       .catch((error) => {
+      if (error.response.status == 400){
+      alert("Quantidade maior do que a existente no estoque!");
+      }
+      if (error.response.status == 404){
+      alert("Lote não existe! Tente novamente");
+      }
         setLoading(false);
         console.error("Erro ao registrar saída:", error);
       });
@@ -113,13 +155,19 @@ const SaidaInsumoScreen = ({ route }) => {
           <Text style={styles.header}>Dados do Insumo:</Text>
           <Text style={styles.subheader}>Nome do Insumo:</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.nonEditableInput]}
             value={String(nome)}
             editable={false}
           />
+          <TextInput
+            style={[styles.input, styles.nonEditableInput]}
+            editable={false}
+            placeholder="Digite o lote do insumo aqui"
+            value={lote}
+          />
           <Text style={styles.subheader}>Quantidade de insumos na Caixa:</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.nonEditableInput]}
             value={String(quantidade)}
             editable={false}
           />
@@ -150,6 +198,18 @@ const SaidaInsumoScreen = ({ route }) => {
             onChange={(item) => {
               setSelectedInsumo(item.value);
               setID(item.value);
+            }}
+          />
+          <Dropdown
+            style={styles.dropdown}
+            data={lotes}
+            search={true}
+            labelField="label"
+            valueField="value"
+            placeholder="Selecione um lote"
+            value={lote}
+            onChange={(item) => {
+              setLote(item.label);
             }}
           />
           <Text style={styles.subheader}>Quantidade de caixas:</Text>
@@ -192,6 +252,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     fontSize: 17,
     textAlign: "center",
+  },
+  nonEditableInput: {
+    backgroundColor: "#E0E0E0",
+    color: "#808080",
   },
   header: {
     fontSize: 24,

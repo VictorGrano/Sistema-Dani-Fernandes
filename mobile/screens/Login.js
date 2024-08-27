@@ -73,7 +73,7 @@ const LoginScreen = () => {
         alert("Usuário ou senha inválidos!");
       }
     } catch (error) {
-      if (error.response && error.response.status === 404) {
+      if (error.response && error.response.status === 401) {
         setLoading(false);
         alert("Usuário ou senha inválidos!");
       } else {

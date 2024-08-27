@@ -370,6 +370,7 @@ connection.query(checkQuery, [lote, lote, id], (error, results) => {
 exports.postEntradaInsumo = (req, res) => {
   const {
     id,
+    lote,
     quantidade,
     quantidade_caixas,
     localArmazenado,
@@ -383,48 +384,79 @@ exports.postEntradaInsumo = (req, res) => {
     return res.status(400).json({ error: "Todos os campos são necessários" });
   }
 
-  console.log("Dados recebidos:", req.body);
-
-  const updateQuery =
-    "UPDATE insumos SET estoque = estoque + ?, local_armazenado = ?, coluna = ? WHERE id = ?";
-
-  connection.query(
-    updateQuery,
-    [quantidade, localArmazenado, coluna, parseInt(id)],
-    (updateError) => {
-      if (updateError) {
-        console.error("Erro ao atualizar insumo:", updateError);
-        res.status(500).json({ error: "Erro ao atualizar insumo" });
-        return;
+  const atualizaEstoque = () => {
+    connection.query(
+      "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado + ?, quantidade_insumos = quantidade_insumos + ? WHERE id = ?",
+      [quantidade_caixas, quantidade, localArmazenado],
+      (updateStockError) => {
+        if (updateStockError) {
+          console.error("Erro ao atualizar estoque:", updateStockError);
+          res.status(500).json({ error: "Erro ao atualizar estoque" });
+          return;
+        }
+        // Registro da mudança
+        logChange(
+          iduser,
+          user,
+          "insumos",
+          "entrada",
+          id,
+          lote,
+          JSON.stringify({ quantidade, quantidade_caixas }),
+          0,
+          localArmazenado,
+          coluna
+        );
+        res.json({ message: "Insumo atualizado com sucesso" });
       }
+    );
+  };
+
+  console.log("Dados recebidos:", req.body);
+  const checkQuery =
+    "SELECT * FROM lote_insumos WHERE insumo_id = ? AND nome_lote = ?;";
+  connection.query(checkQuery, [id, lote], (error, results) => {
+    if (error) {
+      console.error("Erro ao verificar insumo:", error);
+      res.status(500).json({ error: "Erro ao verificar insumo" });
+      return;
+    }
+    if (results.length > 0) {
+      const updateQuery =
+        "UPDATE lote_insumos SET quantidade = quantidade + ?, quantidade_caixas = quantidade_caixas + ?, local_armazenado_id = ?, coluna = ? WHERE nome_lote = ?";
 
       connection.query(
-        "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado + ?, quantidade_insumos = quantidade_insumos + ? WHERE id = ?",
-        [quantidade_caixas, quantidade, localArmazenado],
-        (updateStockError) => {
-          if (updateStockError) {
-            console.error("Erro ao atualizar estoque:", updateStockError);
-            res.status(500).json({ error: "Erro ao atualizar estoque" });
+        updateQuery,
+        [quantidade, quantidade_caixas, localArmazenado, coluna, lote],
+        (updateError) => {
+          if (updateError) {
+            console.error("Erro ao atualizar insumo:", updateError);
+            res.status(500).json({ error: "Erro ao atualizar insumo" });
             return;
+          } else {
+            atualizaEstoque();
           }
-          // Registro da mudança
-          logChange(
-            iduser,
-            user,
-            "insumos",
-            "entrada",
-            id,
-            "NÃO POSSUI", // lote não se aplica a insumos
-            JSON.stringify({ quantidade, quantidade_caixas }),
-            0,
-            localArmazenado,
-            coluna
-          );
-          res.json({ message: "Insumo atualizado com sucesso" });
+        }
+      );
+    } else {
+      const insertQuery =
+        "INSERT INTO lote_insumos (insumo_id, nome_lote, quantidade, quantidade_caixas, local_armazenado_id, coluna) VALUES (?, ?, ?, ?, ?, ?)";
+
+      connection.query(
+        insertQuery,
+        [id, lote, quantidade, quantidade_caixas, localArmazenado, coluna],
+        (insertError) => {
+          if (insertError) {
+            console.error("Erro ao inserir insumo:", insertError);
+            res.status(500).json({ error: "Erro ao inserir insumo" });
+            return;
+          } else {
+            atualizaEstoque();
+          }
         }
       );
     }
-  );
+  });
 };
 
 exports.postSaida = (req, res) => {
@@ -506,79 +538,94 @@ exports.postSaida = (req, res) => {
 };
 
 exports.postSaidaInsumo = (req, res) => {
-  const { id, quantidade, quantidade_caixas, user, iduser } = req.body;
+  const { id, lote, quantidade, quantidade_caixas, user, iduser } = req.body;
 
-  if (!id || !quantidade || !quantidade_caixas) {
+  if (!id || !quantidade || !lote || !quantidade_caixas) {
     console.error("Todos os campos são necessários:", req.body);
     return res.status(400).json({ error: "Todos os campos são necessários" });
   }
 
   console.log("Dados recebidos:", req.body);
 
+  // Verifica o lote do insumo
   const checkQuery =
-    "SELECT id, estoque, local_armazenado, coluna FROM insumos WHERE id = ?";
+    "SELECT id, quantidade, quantidade_caixas, local_armazenado_id, coluna FROM lote_insumos WHERE insumo_id = ? AND nome_lote = ?";
 
-  connection.query(checkQuery, [id], (error, results) => {
+  connection.query(checkQuery, [id, lote], (error, results) => {
     if (error) {
       console.error("Erro no servidor:", error);
-      res.status(500).json({ error: "Erro no servidor" });
-      return;
+      return res.status(500).json({ error: "Erro no servidor" });
     }
 
     if (results.length > 0) {
-      const insumoResult = results[0];
-      if (insumoResult.quantidade < quantidade) {
+      const loteResult = results[0];
+
+      // Verifica se a quantidade no lote é suficiente
+      if (loteResult.quantidade < quantidade) {
         return res
           .status(400)
-          .json({ error: "Quantidade insuficiente no insumo" });
+          .json({ error: "Quantidade insuficiente no lote" });
       }
 
+      // Atualiza a quantidade e a quantidade de caixas no lote
       const updateQuery =
-        "UPDATE insumos SET estoque = estoque - ? WHERE id = ?";
-      connection.query(updateQuery, [quantidade, id], (updateError) => {
-        if (updateError) {
-          console.error("Erro ao atualizar insumo:", updateError);
-          res.status(500).json({ error: "Erro ao atualizar insumo" });
-          return;
-        }
+        "UPDATE lote_insumos SET quantidade = quantidade - ?, quantidade_caixas = quantidade_caixas - ? WHERE id = ?";
 
-        // Aqui continuamos com a atualização de locais_armazenamento
-        connection.query(
-          "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado - ?, quantidade_insumos = quantidade_insumos - ? WHERE id = ?",
-          [quantidade_caixas, quantidade, insumoResult.local_armazenado],
-          (updateStockError) => {
-            if (updateStockError) {
-              console.error("Erro ao atualizar estoque:", updateStockError);
-              res.status(500).json({ error: "Erro ao atualizar estoque" });
-              return;
-            }
-
-            // Registro da mudança no log
-            logChange(
-              iduser,
-              user,
-              "insumos",
-              "saída",
-              id,
-              "NÃO POSSUI", // lote não se aplica a insumos
-              JSON.stringify({ quantidade, quantidade_caixas }),
-              JSON.stringify({
-                quantidade: insumoResult.estoque, // Corrigido para estoque, em vez de quantidade
-                quantidade_caixas: insumoResult.quantidade_caixas,
-              }),
-              insumoResult.local_armazenado,
-              insumoResult.coluna
-            );
-
-            res.json({ message: "Insumo atualizado com sucesso" });
+      connection.query(
+        updateQuery,
+        [quantidade, quantidade_caixas, loteResult.id],
+        (updateError) => {
+          if (updateError) {
+            console.error("Erro ao atualizar lote:", updateError);
+            return res.status(500).json({ error: "Erro ao atualizar lote" });
           }
-        );
-      });
+
+          // Atualiza o estoque do local de armazenamento
+          connection.query(
+            "UPDATE locais_armazenamento SET estoque_utilizado = estoque_utilizado - ?, quantidade_insumos = quantidade_insumos - ? WHERE id = ?",
+            [quantidade_caixas, quantidade, loteResult.local_armazenado_id],
+            (updateStockError) => {
+              if (updateStockError) {
+                console.error(
+                  "Erro ao atualizar estoque do local de armazenamento:",
+                  updateStockError
+                );
+                return res
+                  .status(500)
+                  .json({ error: "Erro ao atualizar estoque" });
+              }
+
+              // Registro da mudança no log
+              logChange(
+                iduser,
+                user,
+                "insumos",
+                "saída",
+                id,
+                lote,
+                JSON.stringify({
+                  quantidade: quantidade,
+                  quantidade_caixas: quantidade_caixas,
+                }),
+                JSON.stringify({
+                  quantidade: loteResult.quantidade,
+                  quantidade_caixas: loteResult.quantidade_caixas,
+                }),
+                loteResult.local_armazenado_id,
+                loteResult.coluna
+              );
+
+              res.json({ message: "Saída de insumo realizada com sucesso" });
+            }
+          );
+        }
+      );
     } else {
-      res.status(404).json({ error: "Insumo não encontrado" });
+      res.status(404).json({ error: "Lote de insumo não encontrado" });
     }
   });
 };
+
 
 exports.getLocais = (req, res) => {
   connection.query("SELECT * FROM locais_armazenamento", (error, results) => {

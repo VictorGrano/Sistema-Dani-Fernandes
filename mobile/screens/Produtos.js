@@ -290,6 +290,7 @@ const ProdutosScreen = () => {
                 value={selectedAroma}
                 onChange={(item) => {
                   setSelectedAroma(item.value);
+                  console.log(item.value);
                 }}
               />
               </View>
@@ -402,6 +403,7 @@ const ProdutosScreen = () => {
                 value={selectedAroma}
                 onChange={(item) => {
                   setSelectedAroma(item.value);
+                  console.log(item.value);
                 }}
               />
               <Text style={styles.subheader}>Tipo do produto:</Text>
