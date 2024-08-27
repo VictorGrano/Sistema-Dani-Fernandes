@@ -37,22 +37,33 @@
           "recordAudioAndroid": true
         }
       ],
-      ["expo-build-properties", {
-        "android": {
-          "usesCleartextTraffic": true
-        },
-        "ios": {
-          "infoPlist": {
-            "NSAppTransportSecurity": { "NSAllowsArbitraryLoads": true }
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
           },
-          "supportsTablet": true
+          "ios": {
+            "infoPlist": {
+              "NSAppTransportSecurity": {
+                "NSAllowsArbitraryLoads": true
+              }
+            },
+            "supportsTablet": true
+          }
         }
-      }]
+      ]
     ],
     "extra": {
       "eas": {
         "projectId": "e6eb3a08-b280-4dee-a7df-8826c666869f"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e6eb3a08-b280-4dee-a7df-8826c666869f"
     }
   }
 }

@@ -58,11 +58,13 @@ const EscanearScreen = ({ route }) => {
     } else if (tipo === "entrada" && item === "insumo") {
       navigation.navigate("Entrada Insumo", {
         id: dados.id,
+        lote: dados.lote,
         quantidade: dados.quantidade,
       });
     } else if (tipo === "saida" && item === "insumo") {
       navigation.navigate("Saida Insumo", {
         id: dados.id,
+        lote: dados.lote,
         quantidade: dados.quantidade,
       });
     }

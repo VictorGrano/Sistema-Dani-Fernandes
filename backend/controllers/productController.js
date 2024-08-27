@@ -1,6 +1,5 @@
 const connection = require("../database");
 
-//Seleciona Todos os Produtos
 exports.getAllProducts = (req, res) => {
   const query = `
     SELECT 
@@ -73,7 +72,7 @@ exports.getInfoProduto = (req, res) => {
 };
 
 exports.createProduct = (req, res) => {
-  const { nome, descricao, estoque_total, preco, unidade, tipo, cod_aroma } = req.body;
+  const { nome, descricao, estoque_total, preco, unidade, tipo, aroma_id } = req.body;
 
   // Verifica se o nome do produto já existe
   const checkQuery = "SELECT * FROM produtos WHERE nome = ?";
@@ -89,7 +88,7 @@ exports.createProduct = (req, res) => {
     } else {
       // Insere o novo produto no banco de dados
       const insertQuery = "INSERT INTO produtos (nome, descricao, categoria_id, estoque_total, preco, unidade, cod_aroma) VALUES (?, ?, ?, ?, ?, ?, ?)";
-      const params = [nome, descricao, tipo, estoque_total, preco, unidade, cod_aroma];
+      const params = [nome, descricao, tipo, estoque_total, preco, unidade, aroma_id];
 
       connection.query(insertQuery, params, (error, results) => {
         if (error) {

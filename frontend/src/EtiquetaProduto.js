@@ -252,9 +252,13 @@ function EtiquetaProduto() {
     setSelectedLote(null);
     setDataFabricacao("");
     localStorage.removeItem("lastBoxNumber");
+    setInitialSubtotalProdutos(null);
+    setInitialTotalCaixas(null);
   };
 
   const handleClearLastBoxNumber = () => {
+    setInitialSubtotalProdutos(null);
+    setInitialTotalCaixas(null);
     localStorage.removeItem("lastBoxNumber");
     alert("Histórico de caixas foi limpo!");
   };

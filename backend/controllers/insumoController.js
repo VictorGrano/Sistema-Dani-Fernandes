@@ -58,6 +58,50 @@ exports.getInsumos = async (req, res) => {
   }
 };
 
+exports.getLotesInsumo = (req, res) => {
+  const { insumo_id } = req.query;
+  const q = "SELECT * FROM lote_insumos WHERE insumo_id = ? AND quantidade > 0";
+
+  connection.query(q, [insumo_id], (error, results) => {
+    if (error) throw error;
+
+    if (results.length > 0) {
+      const promises = results.map((lote) => {
+        return new Promise((resolve, reject) => {
+          const q2 = "SELECT nome_local FROM locais_armazenamento WHERE id = ?";
+          connection.query(
+            q2,
+            [lote.local_armazenado_id],
+            (error, localResult) => {
+              if (error) {
+                reject(error);
+              } else {
+                if (localResult.length > 0) {
+                  lote.nome_local = localResult[0].nome_local;
+                } else {
+                  lote.nome_local = null;
+                }
+                resolve(lote);
+              }
+            }
+          );
+        });
+      });
+
+      Promise.all(promises)
+        .then((lotesComNomeLocal) => {
+          res.json(lotesComNomeLocal);
+        })
+        .catch((error) => {
+          console.error("Error fetching local names:", error);
+          res.status(500).json({ error: "Internal server error" });
+        });
+    } else {
+      res.status(404).json({ error: "Lotes não encontrados" });
+    }
+  });
+};
+
 exports.updateInsumo = async (req, res) => {
   const { id, nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna } = req.body;
 
