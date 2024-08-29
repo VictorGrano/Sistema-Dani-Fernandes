@@ -343,10 +343,6 @@ const MenuScreen = ({ route }) => {
               <FontAwesome5 name="sign-out-alt" size={24} color="white" />
               <Text style={styles.buttonText}>Logout</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} >
-              <FontAwesome5 name="sign-out-alt" size={24} color="white" />
-              <Text style={styles.buttonText}>Verificar Atualizações</Text>
-            </TouchableOpacity>
           </ScrollView>
         </View>
       </ScrollView>
