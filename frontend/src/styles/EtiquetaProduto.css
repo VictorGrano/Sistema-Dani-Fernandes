@@ -1,11 +1,8 @@
 .App {
-  text-align: center;
   display: flex;
-  align-items: center;
   justify-content: center;
-  flex-direction: column;
-  background: rgb(2,0,36);
-  background: linear-gradient(144deg, rgba(2,0,36,1) 0%, rgba(124,124,124,1) 45%, rgba(246,246,246,1) 100%);
+  align-items: center;
+  padding: 20px;
 }
 
 .header {
@@ -39,11 +36,30 @@ form {
   margin-top: 20px;
 }
 
-.card {
-display: flex;
-justify-content: center;
-align-items: center;
-width: 400px;
+.card-modificado {
+  align-items: center;
+  justify-content: center;
+  width: 350px;
+  height: 350px;
+  margin: 10px;
+  padding: 15px;
+  border: 3px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 400px; 
+}
+
+.card-resumo {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: 350px;
+  padding: 15px;
+  border: 3px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-height: 400px; 
 }
 
 .select-div {
@@ -53,13 +69,11 @@ width: 400px;
 }
 
 .select {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 250px;
 }
 
 input {
-  width: 30%;
+  width: 250px;
   padding: 0.75rem;
   font-size: 1rem;
   border: 1px solid #000000;
@@ -75,25 +89,15 @@ label {
   padding-bottom: 20px;
 }
 
-button {
-  background: rgb(167, 167, 236);
-  color: black;
-  padding: 15px 12px;
-  border-width: 0;
-  border-radius: 20px;
-  margin-top: 20px;
-  cursor: pointer;
-  transition: transform 0.3s ease, background 0.3s ease; /* Suave transição */
-}
-button:hover {
-  transform: scale(1.1); /* Aumenta ligeiramente o tamanho */
-  background-color: rgb(137, 137, 243);
-  color: black;
-  padding: 15px 12px;
-  border-width: 0;
-  border-radius: 20px;
-  margin-top: 20px;
-  cursor: pointer;
+
+.row {
+  justify-content: center;
+  --bs-gutter-x: 0rem;
+  }
+
+.sizeButton {
+  width: 100%;
+  margin: 5px;
 }
 
 span {
@@ -126,80 +130,37 @@ cursor: pointer;
   width: 100%;
 }
 
-.etiqueta, .etiqueta-impressa {
+.etiqueta-impressa {
   display: flex;
-  flex-direction: column; /* Alinhamento em coluna */
-  align-items: center; /* Centraliza os itens horizontalmente */
-  justify-content: space-between; /* Mantém o espaço entre os elementos */
+  flex-direction: row; /* Alinha os elementos em uma linha */
+  align-items: center; /* Centraliza verticalmente */
+  justify-content: space-between; /* Garante que o conteúdo fique distribuído */
   width: 9cm; /* Largura da etiqueta */
   height: 5cm; /* Altura da etiqueta */
-  page-break-after: always; /* Garante que cada etiqueta esteja em uma página separada */
-  text-align: center;
+  page-break-inside: avoid;
+  text-align: left;
+  font-weight: bold;
 }
 
-.etiqueta div {
+.etiqueta-impressa div {
   flex: 1;
-  text-align: center; 
-  align-items: center;
-  justify-content: center;
+  text-align: left;
 }
 
-.etiqueta p {
-  margin: 10px;
-  font-size: 10px;
+.etiqueta-impressa p {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0; /* Remove margem para evitar deslocamento do texto */
 }
 
 .qrCode {
   width: 100px; /* Define um tamanho fixo para o QR code */
   height: 100px; /* Define um tamanho fixo para o QR code */
+  margin-left: 10px; /* Adiciona um espaço entre o QR code e o texto */
 }
 
 .etiquetas-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-}
-
-/* Configurações para impressão */
-@media print {
-  body * {
-    margin: 0;
-    padding: 0;
-    visibility: hidden;
-    height: auto;
-  }
-
-  form, .header, .select-div, .etiqueta,  
-  .card,.spanLote, br, .inputDate, .fracionada-container, .select-div{
-    display: none;
-  }
-
-  .etiquetas-container, .etiquetas-container * {
-      visibility: visible;
-      padding: 0;
-      margin: 0;    
-  }
-
-  .etiqueta-impressa {
-    flex-direction: row;
-    justify-content: space-between;
-    page-break-inside: avoid; /* Evita quebras dentro de uma etiqueta */
-    text-align: left;
-    font-weight: bold;
-    margin-left: 15px;
-  }
-  .etiqueta-impressa p {
-  font-size: 13px;
-  }
-
-  .qrCode {
-    margin-right: 15px;
-    margin-left: -50px;
-  }
-
-  @page {
-    size: 9cm 5cm; /* Define o tamanho da página para corresponder à etiqueta */
-    margin: 0;
-  }
 }

@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 import axios from "axios";
 import Select from "react-select";
-import "./styles/EtiquetaInsumo.css";
+import "./styles/Dashboard.css";
+import "./styles/EtiquetaInsumo.module.css";
 import { useNavigate } from "react-router-dom";
-import { CgChevronLeft } from "react-icons/cg";
 import { QRCodeSVG } from "qrcode.react";
+import { estiloEtiqueta } from "./components/printEtiqueta";
+import Navbar from "./components/Navbar";
 
 function EtiquetaInsumo() {
   const [insumos, setInsumos] = useState([]);
@@ -17,18 +20,17 @@ function EtiquetaInsumo() {
   const [etiquetas, setEtiquetas] = useState([]);
   const [subtotalProdutos, setSubtotalProdutos] = useState(0);
   const [loteInsumo, setLoteInsumo] = useState("");
-  const totalCaixas = parseInt(quantidadeCaixas);
+  const [showContainer, setShowContainer] = useState(false);
+  const etiquetasRef = useRef();
 
   const apiUrl = process.env.REACT_APP_API_URL;
-
-  const navigate = useNavigate(); // Defina o hook useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
       .get(`${apiUrl}/insumos/`)
       .then((response) => {
         setInsumos(response.data);
-        console.log(response.data);
       })
       .catch((error) => {
         console.error("Error fetching insumos:", error);
@@ -38,13 +40,8 @@ function EtiquetaInsumo() {
   useEffect(() => {
     const totalCaixas = parseInt(quantidadeCaixas || 0);
     const totalProdutos = totalCaixas * parseInt(quantidade || 0);
-
     setSubtotalProdutos(totalProdutos);
   }, [quantidade, quantidadeCaixas]);
-
-  const handleBack = () => {
-    navigate("/");
-  };
 
   const handleProduto = (selectedOption) => {
     const insumoId = selectedOption ? selectedOption.value : "";
@@ -64,10 +61,12 @@ function EtiquetaInsumo() {
       setQuantidade(value);
     }
   };
+
   const handleLoteInsumo = (event) => {
     const value = event.target.value;
-      setLoteInsumo(value);
+    setLoteInsumo(value);
   };
+
   const handleQuantidadeCaixas = (event) => {
     const value = event.target.value;
     if (value === "" || /^[0-9]+$/.test(value)) {
@@ -83,44 +82,67 @@ function EtiquetaInsumo() {
     }
   };
 
+  const imprimir = useReactToPrint({
+    content: () => etiquetasRef.current,
+    documentTitle: "Etiquetas Insumos",
+    onBeforePrint: () => setShowContainer(true),
+    onAfterPrint: () => setShowContainer(false),
+    pageStyle: estiloEtiqueta,
+  });
+
+  const qrValue = JSON.stringify({
+    id: insumoId,
+    lote: loteInsumo,
+    quantidade: quantidade,
+    quantidadeCaixas: quantidadeCaixas,
+  });
+
   const handlePrint = () => {
     if (!showQRCode) {
       alert("Gere o Resumo antes de imprimir.");
       return;
     }
-
+    setShowContainer(true);
     const generatedEtiquetas = [];
     for (let i = 0; i < parseInt(quantidadeCaixas); i++) {
+      const qrValue = JSON.stringify({
+        id: insumoId,
+        lote: loteInsumo,
+        quantidade: quantidade,
+        quantidadeCaixas: quantidadeCaixas,
+      });
+
       generatedEtiquetas.push(
         <div className="etiqueta-impressa" key={i}>
           <div>
-          <img src={require('./images/logo.png')} className="imagem"/>
+            <img
+              src={require("./images/logo.png")}
+              className="imagem"
+              alt="Logo"
+            />
             <p>{insumoName}</p>
             <p>Lote: {loteInsumo}</p>
-            <p>Número de caixas: {totalCaixas}</p>
-            <p>Quantidade: {quantidade}</p>
+          </div>
+          <div className="qrCode-info">
+            <QRCodeSVG value={qrValue} className="qrCode" />
+            <p>QTDE: {quantidade}</p>
             <p>
-              Número da caixa: {i + 1}/{quantidadeCaixas}
+              Caixa Nº: {i + 1}/{quantidadeCaixas}
             </p>
           </div>
-          <QRCodeSVG value={qrValue} className="qrCode" />
         </div>
       );
     }
     setEtiquetas(generatedEtiquetas);
 
-    const etiquetasContainer = document.querySelector(".etiquetas-container");
-    if (etiquetasContainer) {
-      etiquetasContainer.classList.add("imprimir"); // Aplica a classe .imprimir
-    }
-
     setTimeout(() => {
-      window.print();
-      if (etiquetasContainer) {
-        etiquetasContainer.classList.remove("imprimir"); // Remove a classe após a impressão
-      }
-      setEtiquetas([]); // Limpa as etiquetas depois de imprimir
+      imprimir(); // Função de impressão utilizando react-to-print
     }, 0);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/Login");
   };
 
   const handleClearInputs = () => {
@@ -131,13 +153,6 @@ function EtiquetaInsumo() {
     setShowQRCode(false);
     setEtiquetas([]);
   };
-
-  const qrValue = JSON.stringify({
-    id: insumoId,
-    lote: loteInsumo,
-    quantidade: quantidade,
-    quantidadeCaixas: quantidadeCaixas,
-  });
 
   const insumoOptions = insumos.map((insumo) => ({
     value: insumo.id,
@@ -155,97 +170,112 @@ function EtiquetaInsumo() {
   };
 
   return (
-    <div className="App">
-      <header className="header">
-        <CgChevronLeft
-          size="50px"
-          color="white"
-          className="iconHeader"
-          onClick={handleBack}
-        ></CgChevronLeft>
-        <div className="headerTextContainer">
-          <span className="headerSpan">Etiqueta de Insumo</span>
-        </div>
-      </header>
-      <main>
-        <form>
-          <div className="card">
-            <label htmlFor="product-select">Escolha o insumo:</label>
-            <br />
-            <div className="select-div">
-              <Select
-                className="select"
-                id="insumo-select"
-                value={selectedInsumo}
-                onChange={handleProduto}
-                options={insumoOptions}
-                isClearable
-                placeholder="Selecione um produto"
-                required
-              />
-            </div>
-            <br />
-            <label>Lote do insumo:</label>
-            <input type="text" value={loteInsumo} onChange={handleLoteInsumo} />
-            <br />
-          </div>
-          <br />
-          <div className="card">
-            <label>Número de caixas:</label>
-            <br />
-            <input
-              type="number"
-              min="1"
-              value={quantidadeCaixas}
-              onChange={handleQuantidadeCaixas}
-              onKeyDown={preventNonNumericInput}
-              required
-            />
-            <br />
-            <label>Unidades por caixa:</label>
-            <br />
-            <input
-              type="number"
-              min="1"
-              value={quantidade}
-              onChange={handleQuantidade}
-              onKeyDown={preventNonNumericInput}
-              required
-            />
-            <br />
-          </div>
-          <br />
-          <div className="card">
-            <button type="button" onClick={handleGenerateQRCode}>
-              Gerar resumo
-            </button>
-            <button type="button" onClick={handlePrint}>
-              Imprimir etiquetas
-            </button>
-            <button type="button" onClick={handleClearInputs}>
-              Limpar dados
-            </button>
-          </div>
-        </form>
-        <br />
-        {showQRCode && (
-          <div className="card">
-            <img src={require('./images/logo.png')} className="imagem"/>
-            <div className="etiqueta">
-              <div>
-                <p>{insumoName}</p>
-                <p>Lote: {loteInsumo}</p>
-                <p>Quantidade de caixas: {quantidadeCaixas}</p>
-                <p>Número total do insumo: {subtotalProdutos}</p>
+    <div>
+      <Navbar handleLogout={handleLogout} />
+      <div className="App">
+        <main>
+          <form>
+            <div className="row">
+              <div className="card card-modificado">
+                <label htmlFor="product-select">Escolha o insumo:</label>
+                <br />
+                <div className="select-div">
+                  <Select
+                    className="select"
+                    id="insumo-select"
+                    value={selectedInsumo}
+                    onChange={handleProduto}
+                    options={insumoOptions}
+                    isClearable
+                    placeholder="Selecione um produto"
+                    required
+                  />
+                </div>
+                <br />
+                <label>Lote do insumo:</label>
+                <input
+                  type="text"
+                  value={loteInsumo}
+                  onChange={handleLoteInsumo}
+                />
+                <br />
               </div>
-              <QRCodeSVG value={qrValue} className="qrCode" />
+              <br />
+              <div className="card card-modificado">
+                <label>Número de caixas:</label>
+                <br />
+                <input
+                  type="number"
+                  min="1"
+                  value={quantidadeCaixas}
+                  onChange={handleQuantidadeCaixas}
+                  onKeyDown={preventNonNumericInput}
+                  required
+                />
+                <br />
+                <label>Unidades por caixa:</label>
+                <br />
+                <input
+                  type="number"
+                  min="1"
+                  value={quantidade}
+                  onChange={handleQuantidade}
+                  onKeyDown={preventNonNumericInput}
+                  required
+                />
+                <br />
+              </div>
             </div>
-          </div>
-        )}
-        {etiquetas.length > 0 && (
-          <div className="etiquetas-container">{etiquetas}</div>
-        )}
-      </main>
+            <div className="row">
+              <div className="card card-modificado">
+                <button
+                  type="button"
+                  className="btn btn-primary sizeButton"
+                  onClick={handleGenerateQRCode}
+                >
+                  Gerar resumo
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary sizeButton"
+                  onClick={handlePrint}
+                >
+                  Imprimir etiquetas
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary sizeButton"
+                  onClick={handleClearInputs}
+                >
+                  Limpar dados
+                </button>
+              </div>
+              <br />
+              {showQRCode && (
+                <div className="card card-resumo">
+                  <div className="etiqueta">
+                    <div>
+                      <p>{insumoName}</p>
+                      <p>Lote: {loteInsumo}</p>
+                      <p>Número total do insumo: {subtotalProdutos}</p>
+                    </div>
+                    <QRCodeSVG value={qrValue} className="qrCode" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </form>
+          {etiquetas.length > 0 && (
+            <div
+              ref={etiquetasRef}
+              style={{ display: showContainer ? "block" : "none" }}
+              className="etiquetas-container"
+            >
+              {etiquetas}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

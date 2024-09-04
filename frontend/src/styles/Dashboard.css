@@ -1,65 +1,49 @@
 .dashboard-container {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: rgb(2,0,36);
-    background: linear-gradient(144deg, rgba(2,0,36,1) 0%, rgba(124,124,124,1) 45%, rgba(246,246,246,1) 100%); 
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  font-family: Arial, sans-serif;
-}
-
-.button-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
+  padding: 20px;
   flex-direction: column;
 }
+
 .card {
-display: flex;
-flex-direction: column;
-box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-align-items: center;
-justify-content: center;
-background-color: #F5FFFA;
-border-radius: 30px;
-padding: 30px;
+  width: 100%;
+  max-width: 600px;
+  margin: 10px;
+  padding: 15px;
+  border: 3px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 400px; /* Define a altura máxima e ativa a rolagem se necessário */
 }
 
-.dashboard-button {
-  background: rgb(167, 167, 236);
-  color: black;
-  padding: 20px;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: transform 0.3s ease, background 0.3s ease; /* Suave transição */
+.card-header {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
-.dashboard-button:hover {
-  transform: scale(1.1); /* Aumenta ligeiramente o tamanho */
-  background-color: rgb(137, 137, 243);
+.card-body {
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.logout-container {
-  margin-top: 30px;
+.card-text {
+  margin-bottom: 10px;
 }
 
-.logout-button {
-  background: rgb(255,0,0);
-  color: white;
-  padding: 20px;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: transform 0.3s ease, background 0.3s ease; /* Suave transição */
+.lotes-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.logout-button:hover {
-  transform: scale(1.1); /* Aumenta ligeiramente o tamanho */
-  background: rgb(255,0,0);
-  color: white;
+.lote-item {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
 }
