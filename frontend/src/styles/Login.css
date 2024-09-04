@@ -3,8 +3,8 @@
 .loginBody {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: rgb(2,0,36);
-    background: linear-gradient(144deg, rgba(2,0,36,1) 0%, rgba(124,124,124,1) 45%, rgba(246,246,246,1) 100%);
+    /* background: rgb(2,0,36);
+    background: linear-gradient(144deg, rgba(2,0,36,1) 0%, rgba(124,124,124,1) 45%, rgba(246,246,246,1) 100%); */
     display: flex;
     justify-content: center;
     align-items: center;

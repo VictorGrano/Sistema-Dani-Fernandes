@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 import axios from "axios";
 import Select from "react-select";
 import { format, parse, parseISO, addHours } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import "./styles/Dashboard.css";
 import "./styles/EtiquetaProduto.css";
-import { CgChevronLeft } from "react-icons/cg";
 import { QRCodeSVG } from "qrcode.react";
+import { estiloEtiqueta } from "./components/printEtiqueta";
+import Navbar from "./components/Navbar";
 
 function EtiquetaProduto() {
   const [products, setProducts] = useState([]);
@@ -28,10 +31,10 @@ function EtiquetaProduto() {
   const [isPrinting, setIsPrinting] = useState(false);
   const [initialSubtotalProdutos, setInitialSubtotalProdutos] = useState(null);
   const [initialTotalCaixas, setInitialTotalCaixas] = useState(null);
+  const etiquetasRef = useRef();
 
-  const generatedEtiquetas = [];
+  const navigate = useNavigate();
   const apiUrl = process.env.REACT_APP_API_URL;
-  const navigate = useNavigate(); // Defina o hook useNavigate
 
   useEffect(() => {
     axios
@@ -49,16 +52,16 @@ function EtiquetaProduto() {
   useEffect(() => {
     const caixasAtuais = parseInt(quantidadeCaixas || 0);
     const quantidadePorCaixa = parseInt(quantidade || 0);
-  
+
     // Atualiza o subtotal de produtos considerando apenas as caixas atuais
     const totalProdutosCaixas = caixasAtuais * quantidadePorCaixa;
-  
+
     // Apenas atualiza o subtotal com as caixas atuais
     setSubtotalProdutos(totalProdutosCaixas);
-  
+
     // Apenas atualiza o total de caixas com as caixas atuais
     setTotalCaixas(caixasAtuais);
-  
+
     if (isPrinting) {
       setIsPrinting(false); // Reseta o estado de impressão após a atualização
     }
@@ -78,6 +81,11 @@ function EtiquetaProduto() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove o token do localStorage
+    navigate("/Login"); // Redireciona para a página de login
+  };
+
   const fetchLotes = (productId) => {
     axios
       .get(`${apiUrl}/produtos/Lotes?produto_id=${productId}`)
@@ -87,10 +95,6 @@ function EtiquetaProduto() {
       .catch((error) => {
         console.error("Error fetching lotes:", error);
       });
-  };
-
-  const handleBack = () => {
-    navigate("/");
   };
 
   const extractFabricacaoDate = (loteName) => {
@@ -175,20 +179,28 @@ function EtiquetaProduto() {
     }
   };
 
+  const imprimir = useReactToPrint({
+    content: () => etiquetasRef.current,
+    documentTitle: "Etiquetas",
+    onBeforePrint: () => setIsPrinting(true),
+    onAfterPrint: () => setIsPrinting(false),
+    pageStyle: estiloEtiqueta,
+  });
+
   const handlePrint = () => {
     if (!showQRCode) {
       alert("Gere o resumo antes de imprimir.");
       return;
     }
-  
+
     setIsPrinting(true);
-  
     let lastBoxNumber = parseInt(localStorage.getItem("lastBoxNumber") || "0");
-  
+
     const caixasImpressas = parseInt(quantidadeCaixas);
     const quantidadePorCaixa = parseInt(quantidade);
-  
+
     // Adiciona etiquetas para as caixas normais
+    const newEtiquetas = [];
     for (let i = 0; i < caixasImpressas; i++) {
       const qrValueNormal = JSON.stringify({
         id: productId,
@@ -197,48 +209,43 @@ function EtiquetaProduto() {
         validade: `${mesValidade.padStart(2, "0")}-${anoValidade}`,
         fabricacao: dataFabricacao,
       });
-  
-      generatedEtiquetas.push(
+
+      newEtiquetas.push(
         <div className="etiqueta-impressa" key={i}>
           <div>
             <p>{productName}</p>
             <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
-            <p>Quantidade: {quantidadePorCaixa}</p>
-            <p>Número da caixa: {lastBoxNumber + i + 1}</p>
-            <p>Validade: {`${mesValidade.padStart(2, "0")}/${anoValidade}`}</p>
-            <p>Contagem: _______________________ </p>
-            <p>Conferência: ______________________ </p>
-            <p>Data: ___/___/_____ </p>
+            {/* <p>Quantidade: {quantidadePorCaixa}</p>
+            <p>Número da caixa: {lastBoxNumber + i + 1}</p> */}
+            <p>Contagem: _____________________________ </p>
+            <p>Conferência: _____________________________ </p>
+            <p>Data: ______/______/________ </p>
           </div>
-          <QRCodeSVG value={qrValueNormal} className="qrCode" />
+          <div className="qrCode-info">
+            <QRCodeSVG value={qrValueNormal} className="qrCode" />
+            <p>QTDE: {quantidadePorCaixa}</p>
+            <p>Caixa Nº: {lastBoxNumber + i + 1}</p>
+            <p>Validade: {`${mesValidade.padStart(2, "0")}/${anoValidade}`}</p>
+          </div>
         </div>
       );
     }
-  
+
     lastBoxNumber += caixasImpressas;
     localStorage.setItem("lastBoxNumber", lastBoxNumber.toString());
-  
-    setEtiquetas(generatedEtiquetas);
-  
-    const etiquetasContainer = document.querySelector(".etiquetas-container");
-    if (etiquetasContainer) {
-      etiquetasContainer.classList.add("imprimir");
-    }
-  
-    // Atualiza o subtotal e o total de caixas da impressão atual
-    setInitialSubtotalProdutos((prevSubtotal) => prevSubtotal + caixasImpressas * quantidadePorCaixa);
+
+    setEtiquetas(newEtiquetas);
+
+    setInitialSubtotalProdutos(
+      (prevSubtotal) => prevSubtotal + caixasImpressas * quantidadePorCaixa
+    );
     setInitialTotalCaixas((prevTotal) => prevTotal + caixasImpressas);
-  
+
+    // Após gerar as etiquetas, chamar a função de impressão
     setTimeout(() => {
-      window.print();
-      if (etiquetasContainer) {
-        etiquetasContainer.classList.remove("imprimir");
-      }
-      setEtiquetas([]);
-  
-      setShowQRCode(true); // Mostra novamente o resumo atualizado
+      imprimir(); // Função de impressão utilizando react-to-print
     }, 0);
-  };  
+  };
 
   const handleClearInputs = () => {
     setSelectedProduct(null);
@@ -281,183 +288,202 @@ function EtiquetaProduto() {
     label: `${lote.nome_lote}`,
   }));
 
-  const displayedSubtotalProdutos = initialSubtotalProdutos !== null ? initialSubtotalProdutos : subtotalProdutos;
-  const displayedTotalCaixas = initialTotalCaixas !== null ? initialTotalCaixas : totalCaixas;
+  const displayedSubtotalProdutos =
+    initialSubtotalProdutos !== null
+      ? initialSubtotalProdutos
+      : subtotalProdutos;
+  const displayedTotalCaixas =
+    initialTotalCaixas !== null ? initialTotalCaixas : totalCaixas;
 
   return (
-    <div className="App">
-      <header className="header">
-        <CgChevronLeft
-          size="50px"
-          color="white"
-          className="iconHeader"
-          onClick={handleBack}
-        ></CgChevronLeft>
-        <div className="headerTextContainer">
-          <span className="headerSpan">Etiqueta de Produto</span>
-        </div>
-      </header>
-      <main>
-        <form>
-          <div className="card">
-            <label htmlFor="product-select">Escolha o produto:</label>
-            <br />
-            <div className="select-div">
-              <Select
-                className="select"
-                id="product-select"
-                value={selectedProduct}
-                onChange={handleProduto}
-                options={productOptions}
-                isClearable
-                placeholder="Selecione um produto"
-                required
-              />
-            </div>
-            <br />
-            {!creatingLote && (
-              <>
-                <label htmlFor="lote-select">
-                  Escolha o lote (Apenas se já existir no estoque):
-                </label>
-                <br />
+    <div>
+      <Navbar handleLogout={handleLogout} />
+      <div className="App">
+        <main>
+          <form>
+            <div class="row align-items-center">
+              <div className="card card-modificado">
+                <label htmlFor="product-select">Escolha o produto:</label>
+
                 <div className="select-div">
                   <Select
                     className="select"
-                    id="lote-select"
-                    value={selectedLote}
-                    onChange={handleLoteChange}
-                    options={loteOptions}
+                    id="product-select"
+                    value={selectedProduct}
+                    onChange={handleProduto}
+                    options={productOptions}
                     isClearable
-                    placeholder="Selecione um lote"
+                    placeholder="Selecione um produto"
+                    required
                   />
-                  <br />
                 </div>
-                <span className="spanLote">
-                  Ou crie um novo lote no botão abaixo:
-                </span>
-                <br />
-              </>
-            )}
-            {creatingLote && (
-              <div>
-                <br />
-                <span>
-                  Escolha um produto acima e uma data de fabricação abaixo para
-                  criar um lote.
-                </span>
-                <br />
-                <br />
-                <label>Data de Fabricação:</label>
-                <br />
-                <input
-                  type="date"
-                  className="inputDate"
-                  value={dataFabricacao}
-                  onChange={(e) => setDataFabricacao(e.target.value)}
-                  required
-                />
-                <br />
-                <button type="button" onClick={handleCreateLote}>
-                  Confirmar
+
+                {!creatingLote && (
+                  <>
+                    <label htmlFor="lote-select">
+                      Escolha o lote (Apenas se já existir no estoque):
+                    </label>
+
+                    <div className="select-div">
+                      <Select
+                        className="select"
+                        id="lote-select"
+                        value={selectedLote}
+                        onChange={handleLoteChange}
+                        options={loteOptions}
+                        isClearable
+                        placeholder="Selecione um lote"
+                      />
+                    </div>
+                    <span className="spanLote">
+                      Ou crie um novo lote no botão abaixo:
+                    </span>
+                  </>
+                )}
+                {creatingLote && (
+                  <div>
+                    <span>
+                      Escolha um produto acima e uma data de fabricação abaixo
+                      para criar um lote.
+                    </span>
+
+                    <label>Data de Fabricação:</label>
+
+                    <input
+                      type="date"
+                      className="inputDate"
+                      value={dataFabricacao}
+                      onChange={(e) => setDataFabricacao(e.target.value)}
+                      required
+                    />
+
+                    <button
+                      type="button"
+                      onClick={handleCreateLote}
+                      class="btn btn-primary sizeButton"
+                    >
+                      Confirmar
+                    </button>
+                  </div>
+                )}
+                {newLoteName && (
+                  <div>
+                    <p>Novo Lote Criado: {newLoteName}</p>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={toggleCreateLote}
+                  className="btn btn-primary"
+                >
+                  {creatingLote ? "Escolher Lote existente" : "Criar Lote"}
                 </button>
               </div>
-            )}
-            {newLoteName && (
-              <div>
-                <p>Novo Lote Criado: {newLoteName}</p>
-              </div>
-            )}
+              <div className="card card-modificado">
+                <label>Número de caixas completas:</label>
 
-            <button type="button" onClick={toggleCreateLote}>
-              {creatingLote ? "Escolher Lote existente" : "Criar Lote"}
-            </button>
-          </div>
-          <br />
-          <div className="card">
-            <label>Número de caixas completas:</label>
-            <br />
-            <input
-              type="number"
-              min="1"
-              value={quantidadeCaixas}
-              onChange={handleQuantidadeCaixas}
-              required
-            />
-            <br />
-            <label>Unidade por caixa:</label>
-            <br />
-            <input
-              type="number"
-              min="1"
-              value={quantidade}
-              onChange={handleQuantidade}
-              required
-            />
-            <br />
+                <input
+                  type="number"
+                  min="1"
+                  value={quantidadeCaixas}
+                  onChange={handleQuantidadeCaixas}
+                  required
+                />
+
+                <label>Unidade por caixa:</label>
+
+                <input
+                  type="number"
+                  min="1"
+                  value={quantidade}
+                  onChange={handleQuantidade}
+                  required
+                />
+              </div>
             </div>
-          <br />
-          <div className="card">
-            <label>Digite o mês de validade:</label>
-            <br />
-            <input
-              type="number"
-              min="1"
-              max="12"
-              value={mesValidade}
-              onChange={(e) => setMesValidade(e.target.value)}
-              required
-            />
-            <br />
-            <label>Digite o ano de validade:</label>
-            <br />
-            <input
-              type="number"
-              min={new Date().getFullYear()}
-              value={anoValidade}
-              onChange={(e) => setAnoValidade(e.target.value)}
-              required
-            />
-            <br />
-          </div>
-          <br />
-          <div className="card">
-            <button type="button" onClick={handleGenerateQRCode}>
-              Gerar resumo
-            </button>
-            <button type="button" onClick={handlePrint}>
-              Imprimir etiquetas
-            </button>
-            <button type="button" onClick={handleClearInputs}>
-              Limpar dados
-            </button>
-            <button type="button" onClick={handleClearLastBoxNumber}>
-              Limpar Histórico de Caixas
-            </button>
-          </div>
-          <br />
-        </form>
+            <div class="row align-items-center">
+              <div className="card card-modificado">
+                <label>Digite o mês de validade:</label>
+
+                <input
+                  type="number"
+                  min="1"
+                  max="12"
+                  value={mesValidade}
+                  onChange={(e) => setMesValidade(e.target.value)}
+                  required
+                />
+
+                <label>Digite o ano de validade:</label>
+
+                <input
+                  type="number"
+                  min={new Date().getFullYear()}
+                  value={anoValidade}
+                  onChange={(e) => setAnoValidade(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="card card-modificado">
+                <button
+                  type="button"
+                  class="btn btn-primary sizeButton"
+                  onClick={handleGenerateQRCode}
+                >
+                  Gerar resumo
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary sizeButton"
+                  onClick={handlePrint}
+                >
+                  Imprimir etiquetas
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary sizeButton"
+                  onClick={handleClearInputs}
+                >
+                  Limpar dados
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary sizeButton"
+                  onClick={handleClearLastBoxNumber}
+                >
+                  Limpar Histórico de Caixas
+                </button>
+              </div>
+            </div>
+          </form>
+        </main>
         {showQRCode && (
-          <div className="card">
+          <div className="card card-resumo">
             <div>
-          <p>{productName}</p>
-          <p>Número de caixas: {displayedTotalCaixas}</p>
-          <p>Quantidade total: {displayedSubtotalProdutos}</p>
-          <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
-          <p>
-            Mês de Fabricação: {format(new Date(dataFabricacao), "MM/yyyy")}
-          </p>
-          <p>
-            Validade: {`${mesValidade.padStart(2, "0")}/${anoValidade}`}
-          </p>
-          <QRCodeSVG value={qrValue} className="qrCode" />
-        </div>
+              <p>{productName}</p>
+              <p>Número de caixas: {displayedTotalCaixas}</p>
+              <p>Quantidade total: {displayedSubtotalProdutos}</p>
+              <p>Lote: {selectedLote ? selectedLote.label : newLoteName}</p>
+              <p>
+                Mês de Fabricação: {format(new Date(dataFabricacao), "MM/yyyy")}
+              </p>
+              <p>
+                Validade: {`${mesValidade.padStart(2, "0")}/${anoValidade}`}
+              </p>
+              <QRCodeSVG value={qrValue} className="qrCode" />
+            </div>
           </div>
         )}
         {etiquetas.length > 0 && (
-          <div className="etiquetas-container">{etiquetas}</div>
+          <div
+            ref={etiquetasRef}
+            style={{ display: isPrinting ? "block" : "none" }}
+            className="etiquetas-container"
+          >
+            {etiquetas}
+          </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

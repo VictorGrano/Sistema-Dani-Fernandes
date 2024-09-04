@@ -24,6 +24,7 @@ function Login() {
       if (response.data.token) {
         // Login bem-sucedido, armazenar o token
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("tipoUsuario", response.data.usuario.tipo);
 
         // Configurando o interceptor para incluir o token em todas as requisições
         axios.interceptors.request.use(
