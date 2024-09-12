@@ -67,10 +67,8 @@ const MenuScreen = ({ route }) => {
         setDados(dadosr);
         setLoading(false);
       })
-      .catch((error) => {
- 
-      });
-      setLoading(false);
+      .catch((error) => {});
+    setLoading(false);
   }, [id]);
 
   useFocusEffect(
@@ -90,31 +88,31 @@ const MenuScreen = ({ route }) => {
   }, []);
 
   async function onFetchUpdateAsync() {
-      const update = await Updates.checkForUpdateAsync();
-  
-      if (update.isAvailable) {
-        Alert.alert('Atualização', 'Uma nova atualização está disponível!', [
-          {
-            text: 'Lembre-me da próxima vez',
-            style: 'cancel',
+    const update = await Updates.checkForUpdateAsync();
+
+    if (update.isAvailable) {
+      Alert.alert("Atualização", "Uma nova atualização está disponível!", [
+        {
+          text: "Lembre-me da próxima vez",
+          style: "cancel",
+        },
+        {
+          text: "Atualizar Agora",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await Updates.fetchUpdateAsync();
+              await Updates.reloadAsync();
+              setLoading(false);
+            } catch (error) {
+              setLoading(false);
+              alert("Erro ao atualizar!", error.message);
+            }
           },
-          {
-            text: 'Atualizar Agora',
-            onPress: async () => {
-              try {
-                setLoading(true);
-                await Updates.fetchUpdateAsync();
-                await Updates.reloadAsync();
-                setLoading(false);
-              } catch (error) {
-                setLoading(false);
-                alert("Erro ao atualizar!", error.message);
-              }
-            },
-          },
-        ]);
-      }
-  }  
+        },
+      ]);
+    }
+  }
 
   useEffect(() => {
     onFetchUpdateAsync();
@@ -151,7 +149,19 @@ const MenuScreen = ({ route }) => {
   };
 
   const handleEntradaSaida = (tipoMovimento, tipoItem) => {
-    navigation.navigate("Escanear", { tipo: tipoMovimento, item: tipoItem });
+    if (tipo == "consulta") {
+      Alert.alert("Erro!", "Você não ter permissão para acessar essa página!");
+    } else {
+      navigation.navigate("Escanear", { tipo: tipoMovimento, item: tipoItem });
+    }
+  };
+
+  const handleNavigation = (screen, allowedTypes) => {
+    if (allowedTypes.includes(tipo)) {
+      navigation.navigate(screen);
+    } else {
+      alert("Você não tem permissão para acessar esta página.");
+    }
   };
 
   if (loading) {
@@ -221,42 +231,42 @@ const MenuScreen = ({ route }) => {
           </View>
         </View>
         <View style={styles.buttonContainer}>
-          {tipo == "admin" && (
-            <>
-              <Text style={styles.cardTittle}>Administração</Text>
-              <ScrollView
-                horizontal
-                style={styles.horizontalScrollContainer}
-                contentContainerStyle={
-                  styles.horizontalScrollContainer.contentContainer
+          <>
+            <Text style={styles.cardTittle}>Administração</Text>
+            <ScrollView
+              horizontal
+              style={styles.horizontalScrollContainer}
+              contentContainerStyle={
+                styles.horizontalScrollContainer.contentContainer
+              }
+            >
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() =>
+                  handleNavigation("Menu Relatorio", ["admin", "consulta"])
                 }
               >
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => navigation.navigate("Menu Relatorio")}
-                >
-                  <FontAwesome5 name="chart-bar" size={24} color="white" />
-                  <Text style={styles.buttonText}>Relatórios</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => navigation.navigate("Historico")}
-                >
-                  <FontAwesome5 name="clock" size={24} color="white" />
-                  <Text style={styles.buttonText}>
-                    Histórico de Movimentação
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => navigation.navigate("Gerenciar")}
-                >
-                  <FontAwesome5 name="edit" size={24} color="white" />
-                  <Text style={styles.buttonText}>Gerenciar</Text>
-                </TouchableOpacity>
-              </ScrollView>
-            </>
-          )}
+                <FontAwesome5 name="chart-bar" size={24} color="white" />
+                <Text style={styles.buttonText}>Relatórios</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() =>
+                  handleNavigation("Historico", ["admin", "consulta"])
+                }
+              >
+                <FontAwesome5 name="clock" size={24} color="white" />
+                <Text style={styles.buttonText}>Histórico de Movimentação</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => handleNavigation("Gerenciar", ["admin"])}
+              >
+                <FontAwesome5 name="edit" size={24} color="white" />
+                <Text style={styles.buttonText}>Gerenciar</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </>
           <Text style={styles.cardTittle}>Produtos</Text>
           <ScrollView
             horizontal
@@ -334,7 +344,7 @@ const MenuScreen = ({ route }) => {
           >
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("Lista Prateleira")}
+              onPress={() => handleNavigation("Lista Prateleira", ["almoxarifado", "admin"])}
             >
               <FontAwesome5 name="list" size={24} color="white" />
               <Text style={styles.buttonText}>Lista Prateleira</Text>
