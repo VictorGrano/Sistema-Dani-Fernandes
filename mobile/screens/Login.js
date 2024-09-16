@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import * as Updates from "expo-updates";
 import Loading from "../components/Loading";
 
 const LoginScreen = () => {
@@ -84,6 +85,37 @@ const LoginScreen = () => {
     }
     setLoading(false);
   };
+
+  async function onFetchUpdateAsync() {
+    const update = await Updates.checkForUpdateAsync();
+
+    if (update.isAvailable) {
+      Alert.alert("Atualização", "Uma nova atualização está disponível!", [
+        {
+          text: "Lembre-me da próxima vez",
+          style: "cancel",
+        },
+        {
+          text: "Atualizar Agora",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await Updates.fetchUpdateAsync();
+              await Updates.reloadAsync();
+              setLoading(false);
+            } catch (error) {
+              setLoading(false);
+              alert("Erro ao atualizar!", error.message);
+            }
+          },
+        },
+      ]);
+    }
+  }
+
+  useEffect(() => {
+    onFetchUpdateAsync();
+  }, []);
   
   const handlePassword = () => {
     setVisualizarSenha(!visualizarSenha);

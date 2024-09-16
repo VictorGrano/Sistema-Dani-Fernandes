@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Modal,
   Alert,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -13,7 +12,6 @@ import { PieChart } from "react-native-gifted-charts";
 import axios from "axios";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Updates from "expo-updates";
 import Loading from "../components/Loading";
 
 const MenuScreen = ({ route }) => {
@@ -85,37 +83,6 @@ const MenuScreen = ({ route }) => {
       setTipo(storedTipo || "usuario");
     };
     fetchNome();
-  }, []);
-
-  async function onFetchUpdateAsync() {
-    const update = await Updates.checkForUpdateAsync();
-
-    if (update.isAvailable) {
-      Alert.alert("Atualização", "Uma nova atualização está disponível!", [
-        {
-          text: "Lembre-me da próxima vez",
-          style: "cancel",
-        },
-        {
-          text: "Atualizar Agora",
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await Updates.fetchUpdateAsync();
-              await Updates.reloadAsync();
-              setLoading(false);
-            } catch (error) {
-              setLoading(false);
-              alert("Erro ao atualizar!", error.message);
-            }
-          },
-        },
-      ]);
-    }
-  }
-
-  useEffect(() => {
-    onFetchUpdateAsync();
   }, []);
 
   const calculaPorcentagem = (num, total) => {
