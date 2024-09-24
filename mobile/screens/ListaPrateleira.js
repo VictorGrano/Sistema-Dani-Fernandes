@@ -100,6 +100,7 @@ const ListaPrateleiraScreen = () => {
           produto_id: selectedProduct,
           lote_id: lote.id,
           quantidade: lote.quantidade,
+
         });
         quantidadeRestante -= lote.quantidade;
       } else {
@@ -249,12 +250,6 @@ const ListaPrateleiraScreen = () => {
             <Text style={styles.buttonText}>Adicionar item a lista</Text>
           </TouchableOpacity>
           <View style={styles.tableContainer}>
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderText}>Produto</Text>
-              <Text style={styles.tableHeaderText}>Lote</Text>
-              <Text style={styles.tableHeaderText}>Quantidade</Text>
-              <Text style={styles.tableHeaderText}>Ações</Text>
-            </View>
             <FlatList
               data={listaPrateleira.sort((a, b) => a.concluido - b.concluido)}
               keyExtractor={(item) => item.id.toString()}
@@ -271,7 +266,7 @@ const ListaPrateleiraScreen = () => {
                       item.concluido && styles.tableCellCompleted,
                     ]}
                   >
-                    {item.nome_produto}
+                   PRODUTO: {item.nome_produto}
                   </Text>
                   <Text
                     style={[
@@ -279,7 +274,7 @@ const ListaPrateleiraScreen = () => {
                       item.concluido && styles.tableCellCompleted,
                     ]}
                   >
-                    {item.nome_lote}
+                   LOTE: {item.nome_lote}
                   </Text>
                   <Text
                     style={[
@@ -287,7 +282,23 @@ const ListaPrateleiraScreen = () => {
                       item.concluido && styles.tableCellCompleted,
                     ]}
                   >
-                    {item.quantidade}
+                   QUANTIDADE: {item.quantidade}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      item.concluido && styles.tableCellCompleted,
+                    ]}
+                  >
+                   Local: {item.nome_local}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      item.concluido && styles.tableCellCompleted,
+                    ]}
+                  >
+                   COLUNA: {item.coluna}
                   </Text>
                   <View style={styles.actionsContainer}>
                     {!item.concluido && (
@@ -385,7 +396,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   tableRow: {
-    flexDirection: "row",
     justifyContent: "space-between",
     padding: 10,
     borderBottomWidth: 1,
