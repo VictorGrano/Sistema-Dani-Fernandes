@@ -68,8 +68,6 @@ const EntradaScreen = ({ route }) => {
         setLocais(locaisData);
       } catch (error) {
         console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -78,7 +76,6 @@ const EntradaScreen = ({ route }) => {
 
   useEffect(() => {
     if (selectedProduct) {
-      setLoading(true);
       axios
         .get(`${apiUrl}/produtos/Lotes?produto_id=${selectedProduct}`)
         .then((response) => {
@@ -109,9 +106,6 @@ const EntradaScreen = ({ route }) => {
             console.error("Error fetching lots:", error);
           }
         })
-        .finally(() => {
-          setLoading(false);
-        });
     }
   }, [selectedProduct, apiUrl]);
 
