@@ -66,7 +66,7 @@ const HistoricoScreen = () => {
       const data = historicoResponse.data.map((historico) => {
         const mov_data = JSON.parse(historico.valor_movimentacao);
         const mov_antigo = JSON.parse(historico.valor_antigo);
-        const parsedDate = historico.data_mudanca;
+        const parsedDate = historico.data_mudanca.slice(0, -1); // Removido o Z do final para evitar erros de hora;
         return {
           usuario: historico.usuario,
           tabela: historico.tabela_alterada,
@@ -80,7 +80,7 @@ const HistoricoScreen = () => {
           local_armazenado: historico.nome_local,
           coluna: historico.coluna,
           data_mudanca: format(parsedDate, "dd/MM/yyyy"),
-          hora_mudanca: format(parsedDate, "HH:mm:ss"),
+          hora_mudanca: format(parsedDate, "HH:mm",),
         };
       });
       setHistoricoData(data);

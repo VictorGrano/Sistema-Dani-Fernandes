@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { useNavigation } from "@react-navigation/native";
 import Loading from "../components/Loading";
 
 const ListaPrateleiraScreen = () => {
@@ -23,6 +24,8 @@ const ListaPrateleiraScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [productNotFound, setProductNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const navigation = useNavigation();
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -243,12 +246,20 @@ const ListaPrateleiraScreen = () => {
         </>
       ) : (
         <>
+        <View style={styles.viewButtons}>
           <TouchableOpacity
             style={styles.buttonAdd}
             onPress={() => setLista(false)}
           >
             <Text style={styles.buttonText}>Adicionar item a lista</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.buttonAdd}
+            onPress={() => {navigation.navigate("Escanear", { tipo: "saida", item: "produto"})}}
+          >
+            <Text style={styles.buttonText}>Saída</Text>
+          </TouchableOpacity>
+          </View>
           <View style={styles.tableContainer}>
             <FlatList
               data={listaPrateleira.sort((a, b) => a.concluido - b.concluido)}
@@ -342,6 +353,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  viewButtons: {
+    flexDirection: "row",
   },
   dropdown: {
     marginBottom: 20,
