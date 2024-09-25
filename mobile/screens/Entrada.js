@@ -127,7 +127,6 @@ const EntradaScreen = ({ route }) => {
       setValidade(formattedValidade);
       setFabricacao(formattedFabricacao);
 
-      setLoading(true);
       axios
         .get(`${apiUrl}/produtos/InfoProduto?id=${id}`)
         .then((response) => {
@@ -140,7 +139,6 @@ const EntradaScreen = ({ route }) => {
       axios
         .get(`${apiUrl}/produtos/Lotes?produto_id=${id}`)
         .then((response) => {
-          setLoading(false);
           if (response.data.length === 0) {
             setNoLotesMessage("Não existem lotes para este produto.");
             setLotes([]);
@@ -164,6 +162,9 @@ const EntradaScreen = ({ route }) => {
         .catch((error) => {
           setLoading(false);
         });
+    }
+    else {
+      setLoading(false);
     }
   }, [route.params]);
 
