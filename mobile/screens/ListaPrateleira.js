@@ -244,7 +244,7 @@ const ListaPrateleiraScreen = () => {
       ) : (
         <>
           <TouchableOpacity
-            style={styles.button}
+            style={styles.buttonAdd}
             onPress={() => setLista(false)}
           >
             <Text style={styles.buttonText}>Adicionar item a lista</Text>
@@ -360,6 +360,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
+
+  buttonAdd: {
+    marginTop: 30,
+    backgroundColor: "#4D7EA8",
+    padding: 15,
+    marginVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
   buttonText: {
     color: "white",
     fontSize: 18,
@@ -380,6 +389,7 @@ const styles = StyleSheet.create({
   },
   tableContainer: {
     width: "100%",
+    marginBottom: 80,
   },
   tableHeader: {
     flexDirection: "row",
