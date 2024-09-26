@@ -1,5 +1,3 @@
-//Conexão com o banco de dados:
-
 const mysql = require("mysql");
 const config = require("./config");
 
@@ -11,6 +9,15 @@ connection.connect((err) => {
     return;
   }
   console.log("Conectado ao banco de dados como id " + connection.threadId);
+
+  // Mantendo a conexão ativa
+  setInterval(function () {
+    connection.query('SELECT 1', (error) => {
+      if (error) {
+        console.error('Erro ao executar keep-alive query:', error);
+      }
+    });
+  }, 5000); // Executa a cada 5 segundos
 });
 
 module.exports = connection;

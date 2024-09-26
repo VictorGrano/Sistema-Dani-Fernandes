@@ -17,6 +17,8 @@ exports.getAllProducts = (req, res) => {
       lotes l ON p.id = l.produto_id
     GROUP BY 
       p.id, a.nome_aroma, t.nome_categoria, t.sigla
+    ORDER BY 
+      p.nome ASC;
   `;
 
   connection.query(query, (error, results) => {

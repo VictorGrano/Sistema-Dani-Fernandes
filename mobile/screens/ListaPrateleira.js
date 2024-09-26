@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { useNavigation } from "@react-navigation/native";
 import Loading from "../components/Loading";
 
 const ListaPrateleiraScreen = () => {
@@ -23,6 +24,8 @@ const ListaPrateleiraScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [productNotFound, setProductNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const navigation = useNavigation();
 
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -100,6 +103,7 @@ const ListaPrateleiraScreen = () => {
           produto_id: selectedProduct,
           lote_id: lote.id,
           quantidade: lote.quantidade,
+
         });
         quantidadeRestante -= lote.quantidade;
       } else {
@@ -242,19 +246,21 @@ const ListaPrateleiraScreen = () => {
         </>
       ) : (
         <>
+        <View style={styles.viewButtons}>
           <TouchableOpacity
-            style={styles.button}
+            style={styles.buttonAdd}
             onPress={() => setLista(false)}
           >
             <Text style={styles.buttonText}>Adicionar item a lista</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.buttonAdd}
+            onPress={() => {navigation.navigate("Escanear", { tipo: "saida", item: "produto"})}}
+          >
+            <Text style={styles.buttonText}>Saída</Text>
+          </TouchableOpacity>
+          </View>
           <View style={styles.tableContainer}>
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderText}>Produto</Text>
-              <Text style={styles.tableHeaderText}>Lote</Text>
-              <Text style={styles.tableHeaderText}>Quantidade</Text>
-              <Text style={styles.tableHeaderText}>Ações</Text>
-            </View>
             <FlatList
               data={listaPrateleira.sort((a, b) => a.concluido - b.concluido)}
               keyExtractor={(item) => item.id.toString()}
@@ -271,7 +277,7 @@ const ListaPrateleiraScreen = () => {
                       item.concluido && styles.tableCellCompleted,
                     ]}
                   >
-                    {item.nome_produto}
+                   PRODUTO: {item.nome_produto}
                   </Text>
                   <Text
                     style={[
@@ -279,7 +285,7 @@ const ListaPrateleiraScreen = () => {
                       item.concluido && styles.tableCellCompleted,
                     ]}
                   >
-                    {item.nome_lote}
+                   LOTE: {item.nome_lote}
                   </Text>
                   <Text
                     style={[
@@ -287,7 +293,23 @@ const ListaPrateleiraScreen = () => {
                       item.concluido && styles.tableCellCompleted,
                     ]}
                   >
-                    {item.quantidade}
+                   QUANTIDADE: {item.quantidade}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      item.concluido && styles.tableCellCompleted,
+                    ]}
+                  >
+                   Local: {item.nome_local}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      item.concluido && styles.tableCellCompleted,
+                    ]}
+                  >
+                   COLUNA: {item.coluna}
                   </Text>
                   <View style={styles.actionsContainer}>
                     {!item.concluido && (
@@ -332,6 +354,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
+  viewButtons: {
+    flexDirection: "row",
+  },
   dropdown: {
     marginBottom: 20,
     width: "100%",
@@ -343,6 +368,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   button: {
+    backgroundColor: "#4D7EA8",
+    padding: 15,
+    marginVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+
+  buttonAdd: {
+    marginTop: 30,
     backgroundColor: "#4D7EA8",
     padding: 15,
     marginVertical: 10,
@@ -369,6 +403,7 @@ const styles = StyleSheet.create({
   },
   tableContainer: {
     width: "100%",
+    marginBottom: 80,
   },
   tableHeader: {
     flexDirection: "row",
@@ -385,7 +420,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   tableRow: {
-    flexDirection: "row",
     justifyContent: "space-between",
     padding: 10,
     borderBottomWidth: 1,
