@@ -57,6 +57,37 @@ exports.getInsumos = async (req, res) => {
     res.status(500).json({ error: "Erro no servidor" });
   }
 };
+exports.getAdesivos = async (req, res) => {
+  const q = `
+    SELECT 
+      insumos.id,
+      insumos.nome,
+      insumos.descricao,
+      insumos.estoque,
+      insumos.preco,
+      insumos.coluna,
+      tipo_insumo.nome AS tipo,
+      locais_armazenamento.nome_local AS local
+    FROM insumos
+    LEFT JOIN tipo_insumo ON insumos.tipo_id = tipo_insumo.id
+    LEFT JOIN locais_armazenamento ON insumos.local_armazenado = locais_armazenamento.id
+    ORDER BY insumos.nome
+    WHERE insumos.id in (10, 13, 14)
+  `;
+
+  try {
+    const results = await queryAsync(q);
+
+    if (results.length > 0) {
+      res.json(results);
+    } else {
+      res.status(404).json({ message: "Erro na pesquisa" });
+    }
+  } catch (error) {
+    console.error("Erro no servidor:", error);
+    res.status(500).json({ error: "Erro no servidor" });
+  }
+};
 
 exports.getLotesInsumo = (req, res) => {
   const { insumo_id } = req.query;
