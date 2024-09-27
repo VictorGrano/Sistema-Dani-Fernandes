@@ -71,8 +71,8 @@ exports.getAdesivos = async (req, res) => {
     FROM insumos
     LEFT JOIN tipo_insumo ON insumos.tipo_id = tipo_insumo.id
     LEFT JOIN locais_armazenamento ON insumos.local_armazenado = locais_armazenamento.id
+    WHERE insumos.tipo_id in (10, 13, 14)
     ORDER BY insumos.nome
-    WHERE insumos.id in (10, 13, 14)
   `;
 
   try {
