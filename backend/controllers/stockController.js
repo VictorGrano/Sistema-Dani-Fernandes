@@ -380,7 +380,7 @@ exports.postEntradaInsumo = (req, res) => {
     iduser,
   } = req.body;
 
-  if (!id || !quantidade || !localArmazenado || !quantidade_caixas || !coluna) {
+  if (!id || !quantidade || !localArmazenado || !coluna) {
     console.error("Todos os campos são necessários:", req.body);
     return res.status(400).json({ error: "Todos os campos são necessários" });
   }
@@ -541,7 +541,7 @@ exports.postSaida = (req, res) => {
 exports.postSaidaInsumo = (req, res) => {
   const { id, lote, quantidade, quantidade_caixas, user, iduser } = req.body;
 
-  if (!id || !quantidade || !lote || !quantidade_caixas) {
+  if (!id || !quantidade || !lote) {
     console.error("Todos os campos são necessários:", req.body);
     return res.status(400).json({ error: "Todos os campos são necessários" });
   }

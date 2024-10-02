@@ -43,7 +43,6 @@ const EntradaScreen = ({ route }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
         const storedNome = await AsyncStorage.getItem("nome");
         const storedID = await AsyncStorage.getItem("id");

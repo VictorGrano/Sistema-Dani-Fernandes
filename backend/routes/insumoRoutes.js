@@ -4,6 +4,7 @@ const insumoController = require("../controllers/insumoController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
 router.get("/", authMiddleware.verifyToken, insumoController.getInsumos);
+router.get("/Adesivos", authMiddleware.verifyToken, insumoController.getAdesivos);
 router.get("/Lotes", authMiddleware.verifyToken, insumoController.getLotesInsumo);
 router.get("/TiposInsumos", authMiddleware.verifyToken, insumoController.getTiposInsumos);
 router.put("/Atualizar", authMiddleware.verifyToken, insumoController.updateInsumo);
