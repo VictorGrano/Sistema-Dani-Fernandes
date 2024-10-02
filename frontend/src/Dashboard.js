@@ -3,6 +3,7 @@ import axios from "axios";
 import "./styles/Dashboard.css";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import { jwtDecode } from "jwt-decode";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -11,6 +12,30 @@ function Dashboard() {
   const [dataL, setDataL] = useState([]); // Para armazenar os locais de armazenamento
   const [lotesVencimentoProximo, setLotesVencimentoProximo] = useState([]); // Para armazenar os lotes próximos do vencimento
   const [info, setInfo] = useState(false);
+
+  const isTokenExpired = (token) => {
+    if (!token) return true;
+    try {
+      const decodedToken = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      return decodedToken.exp < currentTime;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return true;
+    }
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      const token = localStorage.getItem('token');
+      if (isTokenExpired(token)) {
+        localStorage.removeItem('token');
+        navigate('/Login');
+      }
+    } else {
+      navigate('/Login');
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
