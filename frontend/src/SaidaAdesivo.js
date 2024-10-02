@@ -10,7 +10,6 @@ function SaidaAdesivo() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedLote, setSelectedLote] = useState(null);
   const [lotes, setLotes] = useState([]);
-  const [quantidadeCaixas, setQuantidadeCaixas] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [idUser, setIdUser] = useState(null);
   const [nomeUser, setNomeUser] = useState(null);
@@ -60,9 +59,9 @@ function SaidaAdesivo() {
 
     const saidaData = {
       id: selectedProduct ? selectedProduct.value : "",
-      quantidade: (quantidade * quantidadeCaixas),
+      quantidade: quantidade,
       lote: selectedLote?.label,  
-      quantidade_caixas: parseInt(quantidadeCaixas) || 1,
+      quantidade_caixas: 0,
       user: nomeUser,
       iduser: idUser,
     };
@@ -125,14 +124,7 @@ function SaidaAdesivo() {
               </div>
 
               <div className="card card-entrada">
-                <label>Número de caixas:</label>
-                <input
-                  type="number"
-                  value={quantidadeCaixas}
-                  onChange={(e) => setQuantidadeCaixas(e.target.value)}
-                />
-
-                <label>Quantidade por caixa:</label>
+                <label>Quantidade:</label>
                 <input
                   type="number"
                   value={quantidade}
