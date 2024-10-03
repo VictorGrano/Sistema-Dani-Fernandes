@@ -138,26 +138,37 @@ exports.historico = (req, res) => {
     if (results.length > 0) {
       const promises = results.map((result, index) => {
         return new Promise((resolve, reject) => {
-          const q2 = `SELECT nome FROM produtos WHERE id = ?`;
-          connection.query(q2, [result.produto_id], (error, nomeResults) => {
-            if (error) {
-              console.error("Erro no servidor:", error);
-              reject(error);
-            } else {
-              results[index].nome_produto = nomeResults[0].nome;
-              resolve();
-            }
+          // Consultas paralelas usando Promise.all
+          const produtoQuery = new Promise((resolveProduto, rejectProduto) => {
+            const q2 = `SELECT nome FROM produtos WHERE id = ?`;
+            connection.query(q2, [result.produto_id], (error, nomeResults) => {
+              if (error) {
+                console.error("Erro no servidor:", error);
+                rejectProduto(error);
+              } else {
+                results[index].nome_produto = nomeResults[0]?.nome || "Desconhecido";
+                resolveProduto();
+              }
+            });
           });
-          const q3 = `SELECT nome_local FROM locais_armazenamento WHERE id = ?`;
-          connection.query(q3, [result.local_armazenado], (error, localResults) => {
-            if (error) {
-              console.error("Erro no servidor:", error);
-              reject(error);
-            } else {
-              results[index].nome_local = localResults[0].nome_local;
-              resolve();
-            }
+
+          const localQuery = new Promise((resolveLocal, rejectLocal) => {
+            const q3 = `SELECT nome_local FROM locais_armazenamento WHERE id = ?`;
+            connection.query(q3, [result.local_armazenado], (error, localResults) => {
+              if (error) {
+                console.error("Erro no servidor:", error);
+                rejectLocal(error);
+              } else {
+                results[index].nome_local = localResults[0]?.nome_local || "Desconhecido";
+                resolveLocal();
+              }
+            });
           });
+
+          // Executando ambas as consultas paralelamente
+          Promise.all([produtoQuery, localQuery])
+            .then(() => resolve())
+            .catch((error) => reject(error));
         });
       });
 
@@ -174,6 +185,7 @@ exports.historico = (req, res) => {
     }
   });
 };
+
 
 exports.usuarios = (req, res) => {
   const q = `SELECT * FROM usuarios ORDER BY nome`;

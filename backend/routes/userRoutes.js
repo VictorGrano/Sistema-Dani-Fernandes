@@ -3,7 +3,6 @@ const router = express.Router();
 const userController = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
-
 router.get("/", authMiddleware.verifyToken, userController.usuarios);
 router.post("/Login", userController.login);
 router.post("/Historico", authMiddleware.verifyToken, userController.historico);
