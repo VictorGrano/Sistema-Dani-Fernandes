@@ -91,43 +91,49 @@ exports.historico = (req, res) => {
     ordenar,
   } = req.body;
 
-  let q = "SELECT * FROM historico_mudancas WHERE 1=1";
+  let q = `
+    SELECT h.*, p.nome AS nome_produto, l.nome_local AS nome_local
+    FROM historico_mudancas h
+    LEFT JOIN produtos p ON h.produto_id = p.id
+    LEFT JOIN locais_armazenamento l ON h.local_armazenado = l.id
+    WHERE 1=1
+  `;
   let params = [];
 
   if (idusuario) {
-    q += " AND id_usuario = ?";
+    q += " AND h.id_usuario = ?";
     params.push(idusuario);
   }
   if (dataInicio && dataFim) {
-    q += " AND data_mudanca BETWEEN ? AND ?";
+    q += " AND h.data_mudanca BETWEEN ? AND ?";
     params.push(
       formatDateToBeginingOfDay(dataInicio),
       formatDateToEndOfDay(dataFim)
     );
   } else if (dataInicio) {
-    q += " AND data_mudanca > ?";
+    q += " AND h.data_mudanca > ?";
     params.push(formatDateToBeginingOfDay(dataInicio));
   } else if (dataFim) {
-    q += " AND data_mudanca < ?";
+    q += " AND h.data_mudanca < ?";
     params.push(formatDateToEndOfDay(dataFim));
   }
   if (produtoid) {
-    q += " AND produto_id = ?";
+    q += " AND h.produto_id = ?";
     params.push(produtoid);
   }
   if (lote) {
-    q += " AND lote LIKE ?";
+    q += " AND h.lote LIKE ?";
     params.push(`%${lote}%`);
   }
   if (local_armazenado) {
-    q += " AND local_armazenado = ?";
+    q += " AND h.local_armazenado = ?";
     params.push(local_armazenado);
   }
   if (tipo_mudanca) {
-    q += " AND tipo_mudanca = ?";
+    q += " AND h.tipo_mudanca = ?";
     params.push(tipo_mudanca);
   }
-  q += ` ORDER BY ${ordenar || "data_mudanca"} DESC`;
+  q += ` ORDER BY ${ordenar || "h.data_mudanca"} DESC`;
 
   connection.query(q, params, (error, results) => {
     if (error) {
@@ -136,50 +142,7 @@ exports.historico = (req, res) => {
       return;
     }
     if (results.length > 0) {
-      const promises = results.map((result, index) => {
-        return new Promise((resolve, reject) => {
-          // Consultas paralelas usando Promise.all
-          const produtoQuery = new Promise((resolveProduto, rejectProduto) => {
-            const q2 = `SELECT nome FROM produtos WHERE id = ?`;
-            connection.query(q2, [result.produto_id], (error, nomeResults) => {
-              if (error) {
-                console.error("Erro no servidor:", error);
-                rejectProduto(error);
-              } else {
-                results[index].nome_produto = nomeResults[0]?.nome || "Desconhecido";
-                resolveProduto();
-              }
-            });
-          });
-
-          const localQuery = new Promise((resolveLocal, rejectLocal) => {
-            const q3 = `SELECT nome_local FROM locais_armazenamento WHERE id = ?`;
-            connection.query(q3, [result.local_armazenado], (error, localResults) => {
-              if (error) {
-                console.error("Erro no servidor:", error);
-                rejectLocal(error);
-              } else {
-                results[index].nome_local = localResults[0]?.nome_local || "Desconhecido";
-                resolveLocal();
-              }
-            });
-          });
-
-          // Executando ambas as consultas paralelamente
-          Promise.all([produtoQuery, localQuery])
-            .then(() => resolve())
-            .catch((error) => reject(error));
-        });
-      });
-
-      Promise.all(promises)
-        .then(() => {
-          res.json(results);
-        })
-        .catch((error) => {
-          console.error("Erro no servidor:", error);
-          res.status(500).json({ error: "Erro no servidor" });
-        });
+      res.json(results);
     } else {
       res.status(404).json({ message: "Nenhum registro encontrado" });
     }
