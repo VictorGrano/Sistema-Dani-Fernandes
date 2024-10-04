@@ -35,8 +35,8 @@ function AdminRoute({ element: Element }) {
 function MainRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<PrivateRoute element={Dashboard} />} />
       <Route path="/Login" element={<Login />} />
+      <Route path="/" element={<PrivateRoute element={Dashboard} />} />
       <Route path="/etiquetaProduto" element={<PrivateRoute element={EtiquetaProduto} />} />
       <Route path="/etiquetaInsumo" element={<PrivateRoute element={EtiquetaInsumo} />} />
       <Route path="/Entrada" element={<PrivateRoute element={Entrada} />} />
@@ -45,10 +45,10 @@ function MainRoutes() {
       <Route path="/EntradaAdesivo" element={<PrivateRoute element={EntradaAdesivo} />} />
       <Route path="/SaidaInsumo" element={<PrivateRoute element={SaidaInsumo} />} />
       <Route path="/SaidaAdesivo" element={<PrivateRoute element={SaidaAdesivo} />} />
-      <Route path="/ListaProdutos" element={<AdminRoute element={ListaProdutos} />} />
-      <Route path="/ListaLotes" element={<AdminRoute element={ListaLotes} />} />
-      <Route path="/ListaInsumos" element={<AdminRoute element={ListaInsumos} />} />
-      <Route path="/ListaAdesivos" element={<AdminRoute element={ListaAdesivos} />} />
+      <Route path="/ListaAdesivos" element={<PrivateRoute element={ListaAdesivos} />} />
+      <Route path="/ListaProdutos" element={<PrivateRoute element={ListaProdutos} />} />
+      <Route path="/ListaLotes" element={<PrivateRoute element={ListaLotes} />} />
+      <Route path="/ListaInsumos" element={<PrivateRoute element={ListaInsumos} />} />
       <Route path="/Historico" element={<AdminRoute element={Historico} />} />
       
     </Routes>
