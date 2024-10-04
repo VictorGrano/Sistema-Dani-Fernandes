@@ -41,7 +41,7 @@ Bem-vindo ao repositório do **Sistema Dani Fernandes**! Este projeto é uma apl
 ### **Passos**
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/nome-do-projeto.git
+   git clone [https://github.com/VictorGrano/Sistema-Dani-Fernandes.git]
    cd nome-do-projeto
    ```
 2. Instale as dependências para o backend, frontend e mobile:

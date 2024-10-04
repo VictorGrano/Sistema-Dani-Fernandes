@@ -36,61 +36,102 @@ function Navbar({ handleLogout }) {
                 Home
               </Link>
             </li>
-            <li className="nav-item">
-              <Link
-                className={`nav-link ${
-                  isActive("/etiquetaProduto") ? "active" : ""
-                }`}
-                to="/etiquetaProduto"
-              >
-                Gerar Etiquetas Produtos
-              </Link>
-            </li>
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Controle de Adesivos
-              </a>
-              <ul className="dropdown-menu">
-                <li>
+
+            {/* Exibir listas separadas apenas para o usuário "consulta" */}
+            {tipoUsuario === "consulta" && (
+              <>
+                <li className="nav-item">
                   <Link
-                    className={`dropdown-item ${
-                      isActive("/ListaAdesivos") ? "active" : ""
-                    }`}
+                    className={`nav-link ${isActive("/ListaAdesivos") ? "active" : ""}`}
                     to="/ListaAdesivos"
                   >
                     Lista de Adesivos
                   </Link>
                 </li>
-                <li>
+                <li className="nav-item">
                   <Link
-                    className={`dropdown-item ${
-                      isActive("/EntradaAdesivo") ? "active" : ""
-                    }`}
-                    to="/EntradaAdesivo"
+                    className={`nav-link ${isActive("/ListaProdutos") ? "active" : ""}`}
+                    to="/ListaProdutos"
                   >
-                    Entrada de Adesivos
+                    Lista de Produtos
                   </Link>
                 </li>
-                <li>
+                <li className="nav-item">
                   <Link
-                    className={`dropdown-item ${
-                      isActive("/SaidaAdesivo") ? "active" : ""
-                    }`}
-                    to="/SaidaAdesivo"
+                    className={`nav-link ${isActive("/ListaLotes") ? "active" : ""}`}
+                    to="/ListaLotes"
                   >
-                    Saída de Adesivos
+                    Lista de Lotes
                   </Link>
                 </li>
-              </ul>
-            </li>
-            {/* Verifica se o usuário é admin antes de exibir opções adicionais */}
-            {tipoUsuario === "admin" && (
+                <li className="nav-item">
+                  <Link
+                    className={`nav-link ${isActive("/ListaInsumos") ? "active" : ""}`}
+                    to="/ListaInsumos"
+                  >
+                    Lista de Insumos
+                  </Link>
+                </li>
+              </>
+            )}
+
+            {/* Exibir o gerador de etiquetas de produtos para "produção", "admin" e "almoxarifado" */}
+            {(tipoUsuario === "admin" || tipoUsuario === "producao" || tipoUsuario === "almoxarifado") && (
+              <li className="nav-item">
+                <Link
+                  className={`nav-link ${isActive("/etiquetaProduto") ? "active" : ""}`}
+                  to="/etiquetaProduto"
+                >
+                  Gerar Etiquetas Produtos
+                </Link>
+              </li>
+            )}
+
+            {/* Exibir controle completo e listas dentro de dropdowns para "admin", "almoxarifado", e "produção" */}
+            {(tipoUsuario === "admin" || tipoUsuario === "almoxarifado" || tipoUsuario === "producao") && (
+              <>
+                <li className="nav-item dropdown">
+                  <a
+                    className="nav-link dropdown-toggle"
+                    href="#"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    Controle de Adesivos
+                  </a>
+                  <ul className="dropdown-menu">
+                    <li>
+                      <Link
+                        className={`dropdown-item ${isActive("/ListaAdesivos") ? "active" : ""}`}
+                        to="/ListaAdesivos"
+                      >
+                        Lista de Adesivos
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        className={`dropdown-item ${isActive("/EntradaAdesivo") ? "active" : ""}`}
+                        to="/EntradaAdesivo"
+                      >
+                        Entrada de Adesivos
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        className={`dropdown-item ${isActive("/SaidaAdesivo") ? "active" : ""}`}
+                        to="/SaidaAdesivo"
+                      >
+                        Saída de Adesivos
+                      </Link>
+                    </li>
+                  </ul>
+                </li>
+              </>
+            )}
+
+            {/* Exibir controle completo para "admin" e "almoxarifado" */}
+            {(tipoUsuario === "admin" || tipoUsuario === "almoxarifado") && (
               <>
                 <li className="nav-item dropdown">
                   <a
@@ -105,9 +146,7 @@ function Navbar({ handleLogout }) {
                   <ul className="dropdown-menu">
                     <li>
                       <Link
-                        className={`dropdown-item ${
-                          isActive("/Entrada") ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${isActive("/Entrada") ? "active" : ""}`}
                         to="/Entrada"
                       >
                         Entrada de Produtos
@@ -115,9 +154,7 @@ function Navbar({ handleLogout }) {
                     </li>
                     <li>
                       <Link
-                        className={`dropdown-item ${
-                          isActive("/Saida") ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${isActive("/Saida") ? "active" : ""}`}
                         to="/Saida"
                       >
                         Saída de Produtos
@@ -125,9 +162,7 @@ function Navbar({ handleLogout }) {
                     </li>
                     <li>
                       <Link
-                        className={`dropdown-item ${
-                          isActive("/EntradaInsumos") ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${isActive("/EntradaInsumos") ? "active" : ""}`}
                         to="/EntradaInsumos"
                       >
                         Entrada de Insumos
@@ -135,9 +170,7 @@ function Navbar({ handleLogout }) {
                     </li>
                     <li>
                       <Link
-                        className={`dropdown-item ${
-                          isActive("/SaidaInsumo") ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${isActive("/SaidaInsumo") ? "active" : ""}`}
                         to="/SaidaInsumo"
                       >
                         Saída de Insumos
@@ -159,9 +192,7 @@ function Navbar({ handleLogout }) {
                   <ul className="dropdown-menu">
                     <li>
                       <Link
-                        className={`dropdown-item ${
-                          isActive("/etiquetaInsumo") ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${isActive("/etiquetaInsumo") ? "active" : ""}`}
                         to="/etiquetaInsumo"
                       >
                         Gerar Etiquetas Insumos
@@ -169,9 +200,7 @@ function Navbar({ handleLogout }) {
                     </li>
                     <li>
                       <Link
-                        className={`dropdown-item ${
-                          isActive("/ListaProdutos") ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${isActive("/ListaProdutos") ? "active" : ""}`}
                         to="/ListaProdutos"
                       >
                         Lista de Produtos
@@ -179,9 +208,7 @@ function Navbar({ handleLogout }) {
                     </li>
                     <li>
                       <Link
-                        className={`dropdown-item ${
-                          isActive("/ListaLotes") ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${isActive("/ListaLotes") ? "active" : ""}`}
                         to="/ListaLotes"
                       >
                         Lista de Lotes
@@ -189,9 +216,7 @@ function Navbar({ handleLogout }) {
                     </li>
                     <li>
                       <Link
-                        className={`dropdown-item ${
-                          isActive("/ListaInsumos") ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${isActive("/ListaInsumos") ? "active" : ""}`}
                         to="/ListaInsumos"
                       >
                         Lista de Insumos
@@ -199,9 +224,7 @@ function Navbar({ handleLogout }) {
                     </li>
                     <li>
                       <Link
-                        className={`dropdown-item ${
-                          isActive("/Historico") ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${isActive("/Historico") ? "active" : ""}`}
                         to="/Historico"
                       >
                         Histórico
