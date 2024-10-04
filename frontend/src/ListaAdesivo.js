@@ -66,8 +66,8 @@ function ListaAdesivos() {
 
   const TableComponent = React.forwardRef((props, ref) => (
     <div ref={ref}>
-      <table className="table">
-        <thead>
+      <table className="table table-striped table-hover table-bordered">
+        <thead className="table-dark">
           <tr>
             <th>Nome</th>
             <th>Estoque Total</th>
@@ -78,9 +78,9 @@ function ListaAdesivos() {
           {filteredData.length > 0 ? (
             filteredData.map((item) => (
               <tr key={item.id}>
-                <td>{item.nome}</td>
-                <td>{item.estoque}</td>
-                <td>{item.tipo}</td>
+                <td className="text-nowrap">{item.nome}</td>
+                <td className="text-nowrap">{item.estoque}</td>
+                <td className="text-nowrap">{item.tipo}</td>
               </tr>
             ))
           ) : (
@@ -96,8 +96,8 @@ function ListaAdesivos() {
   return (
     <div>
       <Navbar handleLogout={handleLogout} />
-      <div className="search-table-container">
-      <div className="d-flex align-items-center mb-3">
+      <div className="container mt-4">
+        <div className="d-flex align-items-center mb-3">
           <input
             type="text"
             placeholder="Buscar por adesivo..."
@@ -115,12 +115,16 @@ function ListaAdesivos() {
             placeholder="Filtrar por tipo..."
           />
         </div>
-        <ReactToPrint
-          trigger={() => (
-            <button className="btn btn-primary btnImprimir">Imprimir</button>
-          )}
-          content={() => componentRef.current}
-        />
+        <div className="d-flex justify-content-end mb-3">
+          <ReactToPrint
+            trigger={() => (
+              <button className="btn btn-primary btnImprimir">
+                Imprimir
+              </button>
+            )}
+            content={() => componentRef.current}
+          />
+        </div>
         <TableComponent ref={componentRef} />
       </div>
     </div>
