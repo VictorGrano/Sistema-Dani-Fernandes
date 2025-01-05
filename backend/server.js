@@ -6,7 +6,7 @@ const productRoutes = require('./routes/productRoutes');
 const stockRoutes = require('./routes/stockRoutes');
 const userRoutes = require('./routes/userRoutes');
 const insumoRoutes = require('./routes/insumoRoutes');
-const insumoRoutes = require('./routes/materiaPrimaRoutes');
+const materiaPrimaRoutes = require('./routes/materiaPrimaRoutes');
 
 const app = express();
 app.use(bodyParser.json());
