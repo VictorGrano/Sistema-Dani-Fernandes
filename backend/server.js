@@ -6,6 +6,7 @@ const productRoutes = require('./routes/productRoutes');
 const stockRoutes = require('./routes/stockRoutes');
 const userRoutes = require('./routes/userRoutes');
 const insumoRoutes = require('./routes/insumoRoutes');
+const insumoRoutes = require('./routes/materiaPrimaRoutes');
 
 const app = express();
 app.use(bodyParser.json());
@@ -19,6 +20,7 @@ app.use('/produtos', authMiddleware.verifyToken, productRoutes);
 app.use('/estoque', authMiddleware.verifyToken, stockRoutes);
 app.use('/usuarios', userRoutes);  // Deixe esta rota aberta para login
 app.use('/insumos', authMiddleware.verifyToken, insumoRoutes);
+app.use("/materia-prima", authMiddleware.verifyToken, materiaPrimaRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {

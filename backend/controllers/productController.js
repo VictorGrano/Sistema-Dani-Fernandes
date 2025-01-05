@@ -216,6 +216,7 @@ exports.getAllLotes = (req, res) => {
     FROM lotes
     LEFT JOIN produtos ON lotes.produto_id = produtos.id
     LEFT JOIN locais_armazenamento ON lotes.local_armazenado_id = locais_armazenamento.id
+    WHERE lotes.quantidade > 0
   `;
 
   connection.query(q, [produto_id], (error, results) => {
