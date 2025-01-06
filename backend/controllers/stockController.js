@@ -386,7 +386,7 @@ exports.postEntradaMateriaPrima = (req, res) => {
     if (results.length > 0) {
       const updateQuery = `
         UPDATE materias_primas
-        SET quantidade = quantidade + ?
+        SET estoque = estoque + ?
         WHERE id = ?`;
 
       connection.query(updateQuery, [quantidade, id], (updateError) => {
@@ -439,7 +439,7 @@ exports.postSaidaMateriaPrima = (req, res) => {
 
       const updateQuery = `
         UPDATE materias_primas
-        SET quantidade = quantidade - ?
+        SET estoque = estoque - ?
         WHERE id = ?`;
 
       connection.query(updateQuery, [quantidade, id], (updateError) => {
