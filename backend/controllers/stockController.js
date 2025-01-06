@@ -376,7 +376,7 @@ exports.postEntradaMateriaPrima = (req, res) => {
     return res.status(400).json({ error: "Todos os campos são necessários" });
   }
 
-  const checkQuery = "SELECT id, quantidade FROM materias_primas WHERE id = ?";
+  const checkQuery = "SELECT id, estoque FROM materias_primas WHERE id = ?";
   connection.query(checkQuery, [id], (error, results) => {
     if (error) {
       console.error("Erro ao verificar matéria-prima:", error);
@@ -425,7 +425,7 @@ exports.postSaidaMateriaPrima = (req, res) => {
     return res.status(400).json({ error: "Todos os campos são necessários" });
   }
 
-  const checkQuery = "SELECT id, quantidade FROM materias_primas WHERE id = ?";
+  const checkQuery = "SELECT id, estoque FROM materias_primas WHERE id = ?";
   connection.query(checkQuery, [id], (error, results) => {
     if (error) {
       console.error("Erro ao verificar matéria-prima:", error);
