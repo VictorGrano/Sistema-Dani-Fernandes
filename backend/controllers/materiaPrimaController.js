@@ -36,6 +36,7 @@ exports.getMateriasPrimas = async (req, res) => {
       materias_primas.estoque,
       materias_primas.preco,
       materias_primas.coluna,
+      materias_primas.unidade,
       tipo_materia_prima.nome AS tipo,
       locais_armazenamento.nome_local AS local
     FROM materias_primas
@@ -58,54 +59,9 @@ exports.getMateriasPrimas = async (req, res) => {
   }
 };
 
-// Obter lotes de uma matéria-prima específica
-exports.getLotesMateriaPrima = (req, res) => {
-  const { materia_prima_id } = req.query;
-  const q = "SELECT * FROM lote_materias_primas WHERE materia_prima_id = ? AND quantidade > 0";
-
-  connection.query(q, [materia_prima_id], (error, results) => {
-    if (error) throw error;
-
-    if (results.length > 0) {
-      const promises = results.map((lote) => {
-        return new Promise((resolve, reject) => {
-          const q2 = "SELECT nome_local FROM locais_armazenamento WHERE id = ?";
-          connection.query(
-            q2,
-            [lote.local_armazenado_id],
-            (error, localResult) => {
-              if (error) {
-                reject(error);
-              } else {
-                if (localResult.length > 0) {
-                  lote.nome_local = localResult[0].nome_local;
-                } else {
-                  lote.nome_local = null;
-                }
-                resolve(lote);
-              }
-            }
-          );
-        });
-      });
-
-      Promise.all(promises)
-        .then((lotesComNomeLocal) => {
-          res.json(lotesComNomeLocal);
-        })
-        .catch((error) => {
-          console.error("Erro ao buscar nomes dos locais:", error);
-          res.status(500).json({ error: "Erro no servidor" });
-        });
-    } else {
-      res.status(404).json({ error: "Lotes não encontrados" });
-    }
-  });
-};
-
 // Atualizar uma matéria-prima
 exports.updateMateriaPrima = async (req, res) => {
-  const { id, nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna } = req.body;
+  const { id, nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade } = req.body;
 
   const q1 = "SELECT * FROM materias_primas WHERE nome = ? AND id != ?";
   connection.query(q1, [nome, id], async (error, results) => {
@@ -120,8 +76,8 @@ exports.updateMateriaPrima = async (req, res) => {
       });
     } else {
       try {
-        const q2 = "UPDATE materias_primas SET nome = ?, descricao = ?, estoque = ?, preco = ?, tipo_id = ?, local_armazenado = ?, coluna = ? WHERE id = ?";
-        const params = [nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna, id];
+        const q2 = "UPDATE materias_primas SET nome = ?, descricao = ?, estoque = ?, preco = ?, tipo_id = ?, local_armazenado = ?, coluna = ?, unidade = ? WHERE id = ?";
+        const params = [nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade, id];
 
         connection.query(q2, params, (error, results) => {
           if (error) {
@@ -160,11 +116,11 @@ exports.deleteMateriaPrima = (req, res) => {
 
 // Cadastrar uma nova matéria-prima
 exports.postCadastroMateriaPrima = async (req, res) => {
-  const { nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna } = req.body;
-  const q = "INSERT INTO materias_primas (nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  const { nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade } = req.body;
+  const q = "INSERT INTO materias_primas (nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
   
   try {
-    const result = await queryAsync(q, [nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna]);
+    const result = await queryAsync(q, [nome, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade]);
     res.status(201).json({ success: true });
   } catch (error) {
     console.error("Erro ao cadastrar a matéria-prima:", error);
