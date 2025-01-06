@@ -26,6 +26,32 @@ exports.getTiposMateriasPrimas = (req, res) => {
   });
 };
 
+exports.getInfoMateriaPrima = async (req, res) => {
+  const { id } = req.query;
+  const q = `
+    SELECT 
+      materias_primas.*,
+      tipo_materia_prima.nome AS tipo,
+      locais_armazenamento.nome_local AS local
+    FROM materias_primas
+    LEFT JOIN tipo_materia_prima ON materias_primas.tipo_id = tipo_materia_prima.id
+    LEFT JOIN locais_armazenamento ON materias_primas.local_armazenado = locais_armazenamento.id
+    WHERE materias_primas.id = ?
+  `;
+
+  try {
+    const results = await queryAsync(q, [id]);
+    if (results.length > 0) {
+      res.json(results[0]);
+    } else {
+      res.status(404).json({ message: "Matéria-prima não encontrada" });
+    }
+  } catch (error) {
+    console.error("Erro no servidor:", error);
+    res.status(500).json({ error: "Erro no servidor" });
+  }
+};
+
 // Obter todas as matérias-primas
 exports.getMateriasPrimas = async (req, res) => {
   const q = `

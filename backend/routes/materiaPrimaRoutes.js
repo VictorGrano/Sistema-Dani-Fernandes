@@ -11,9 +11,4 @@ router.post("/Cadastro", authMiddleware.verifyToken, materiaPrimaController.post
 router.put("/Atualizar", authMiddleware.verifyToken, materiaPrimaController.updateMateriaPrima);
 router.delete("/:id", authMiddleware.verifyToken, materiaPrimaController.deleteMateriaPrima);
 
-// Rotas para tipos de matérias-primas
-router.post("/CadastroTipo", authMiddleware.verifyToken, materiaPrimaController.postCadastroTipoMateriaPrima);
-router.put("/AtualizarTipo", authMiddleware.verifyToken, materiaPrimaController.updateTipoMateriaPrima);
-router.delete("/Tipo/:id", authMiddleware.verifyToken, materiaPrimaController.deleteTipoMateriaPrima);
-
 module.exports = router;
