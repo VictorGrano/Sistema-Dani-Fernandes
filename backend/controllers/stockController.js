@@ -368,6 +368,108 @@ exports.postEntrada = (req, res) => {
   });
 };
 
+exports.postEntradaMateriaPrima = (req, res) => {
+  const { id, quantidade, localArmazenado, coluna, user, iduser } = req.body;
+
+  if (!id || !quantidade || !localArmazenado || !coluna) {
+    console.error("Todos os campos são necessários:", req.body);
+    return res.status(400).json({ error: "Todos os campos são necessários" });
+  }
+
+  const checkQuery = "SELECT id, quantidade FROM materias_primas WHERE id = ?";
+  connection.query(checkQuery, [id], (error, results) => {
+    if (error) {
+      console.error("Erro ao verificar matéria-prima:", error);
+      return res.status(500).json({ error: "Erro no servidor" });
+    }
+
+    if (results.length > 0) {
+      const updateQuery = `
+        UPDATE materias_primas
+        SET quantidade = quantidade + ?
+        WHERE id = ?`;
+
+      connection.query(updateQuery, [quantidade, id], (updateError) => {
+        if (updateError) {
+          console.error("Erro ao atualizar estoque:", updateError);
+          return res.status(500).json({ error: "Erro ao atualizar estoque" });
+        }
+
+        // Registro da mudança
+        logChange(
+          iduser,
+          user,
+          "materias_primas",
+          "entrada",
+          id,
+          null,
+          quantidade,
+          results[0].quantidade,
+          localArmazenado,
+          coluna
+        );
+
+        res.json({ message: "Estoque atualizado com sucesso" });
+      });
+    } else {
+      res.status(404).json({ error: "Matéria-prima não encontrada" });
+    }
+  });
+};
+
+exports.postSaidaMateriaPrima = (req, res) => {
+  const { id, quantidade, user, iduser } = req.body;
+
+  if (!id || !quantidade) {
+    console.error("Todos os campos são necessários:", req.body);
+    return res.status(400).json({ error: "Todos os campos são necessários" });
+  }
+
+  const checkQuery = "SELECT id, quantidade FROM materias_primas WHERE id = ?";
+  connection.query(checkQuery, [id], (error, results) => {
+    if (error) {
+      console.error("Erro ao verificar matéria-prima:", error);
+      return res.status(500).json({ error: "Erro no servidor" });
+    }
+
+    if (results.length > 0) {
+      if (results[0].quantidade < quantidade) {
+        return res.status(400).json({ error: "Estoque insuficiente" });
+      }
+
+      const updateQuery = `
+        UPDATE materias_primas
+        SET quantidade = quantidade - ?
+        WHERE id = ?`;
+
+      connection.query(updateQuery, [quantidade, id], (updateError) => {
+        if (updateError) {
+          console.error("Erro ao atualizar estoque:", updateError);
+          return res.status(500).json({ error: "Erro ao atualizar estoque" });
+        }
+
+        // Registro da mudança
+        logChange(
+          iduser,
+          user,
+          "materias_primas",
+          "saída",
+          id,
+          null,
+          quantidade,
+          results[0].quantidade,
+          null,
+          null
+        );
+
+        res.json({ message: "Estoque atualizado com sucesso" });
+      });
+    } else {
+      res.status(404).json({ error: "Matéria-prima não encontrada" });
+    }
+  });
+};
+
 exports.postEntradaInsumo = (req, res) => {
   const {
     id,

@@ -14,4 +14,8 @@ router.post("/EntradaInsumo", authMiddleware.verifyToken, stockController.postEn
 router.post("/Saida", authMiddleware.verifyToken, stockController.postSaida);
 router.post("/SaidaInsumo", authMiddleware.verifyToken, stockController.postSaidaInsumo);
 
+// Novas rotas para matéria-prima
+router.post("/EntradaMateriaPrima", authMiddleware.verifyToken, stockController.postEntradaMateriaPrima);
+router.post("/SaidaMateriaPrima", authMiddleware.verifyToken, stockController.postSaidaMateriaPrima);
+
 module.exports = router;
