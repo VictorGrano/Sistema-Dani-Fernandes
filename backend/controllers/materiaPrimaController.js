@@ -18,7 +18,6 @@ exports.getInfoMateriaPrima = async (req, res) => {
       materias_primas.*,
       locais_armazenamento.nome_local AS local
     FROM materias_primas
-    LEFT JOIN tipo_materia_prima ON materias_primas.tipo_id = tipo_materia_prima.id
     LEFT JOIN locais_armazenamento ON materias_primas.local_armazenado = locais_armazenamento.id
     WHERE materias_primas.id = ?
   `;
@@ -49,7 +48,6 @@ exports.getMateriasPrimas = async (req, res) => {
       materias_primas.unidade,
       locais_armazenamento.nome_local AS local
     FROM materias_primas
-    LEFT JOIN tipo_materia_prima ON materias_primas.tipo_id = tipo_materia_prima.id
     LEFT JOIN locais_armazenamento ON materias_primas.local_armazenado = locais_armazenamento.id
     ORDER BY materias_primas.mateira_prima
   `;
