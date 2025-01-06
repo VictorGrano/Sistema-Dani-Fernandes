@@ -47,7 +47,6 @@ exports.getMateriasPrimas = async (req, res) => {
       materias_primas.preco,
       materias_primas.coluna,
       materias_primas.unidade,
-      tipo_materia_prima.mateira_prima AS tipo,
       locais_armazenamento.nome_local AS local
     FROM materias_primas
     LEFT JOIN tipo_materia_prima ON materias_primas.tipo_id = tipo_materia_prima.id
