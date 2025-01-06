@@ -40,7 +40,7 @@ exports.getMateriasPrimas = async (req, res) => {
   const q = `
     SELECT 
       materias_primas.id,
-      materias_primas.mateira_prima,
+      materias_primas.materia_prima,
       materias_primas.descricao,
       materias_primas.estoque,
       materias_primas.preco,
@@ -49,7 +49,7 @@ exports.getMateriasPrimas = async (req, res) => {
       locais_armazenamento.nome_local AS local
     FROM materias_primas
     LEFT JOIN locais_armazenamento ON materias_primas.local_armazenado = locais_armazenamento.id
-    ORDER BY materias_primas.mateira_prima
+    ORDER BY materias_primas.materia_prima
   `;
 
   try {
@@ -68,10 +68,10 @@ exports.getMateriasPrimas = async (req, res) => {
 
 // Atualizar uma matéria-prima
 exports.updateMateriaPrima = async (req, res) => {
-  const { id, mateira_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade } = req.body;
+  const { id, materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade } = req.body;
 
-  const q1 = "SELECT * FROM materias_primas WHERE mateira_prima = ? AND id != ?";
-  connection.query(q1, [mateira_prima, id], async (error, results) => {
+  const q1 = "SELECT * FROM materias_primas WHERE materia_prima = ? AND id != ?";
+  connection.query(q1, [materia_prima, id], async (error, results) => {
     if (error) {
       console.error("Erro no servidor:", error);
       res.status(500).json({ error: "Erro no servidor" });
@@ -79,12 +79,12 @@ exports.updateMateriaPrima = async (req, res) => {
     }
     if (results.length > 0) {
       res.status(409).json({
-        message: "Erro ao atualizar! Já existe uma matéria-prima com este mateira_prima no sistema!",
+        message: "Erro ao atualizar! Já existe uma matéria-prima com este materia_prima no sistema!",
       });
     } else {
       try {
-        const q2 = "UPDATE materias_primas SET mateira_prima = ?, descricao = ?, estoque = ?, preco = ?, tipo_id = ?, local_armazenado = ?, coluna = ?, unidade = ? WHERE id = ?";
-        const params = [mateira_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade, id];
+        const q2 = "UPDATE materias_primas SET materia_prima = ?, descricao = ?, estoque = ?, preco = ?, tipo_id = ?, local_armazenado = ?, coluna = ?, unidade = ? WHERE id = ?";
+        const params = [materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade, id];
 
         connection.query(q2, params, (error, results) => {
           if (error) {
@@ -123,11 +123,11 @@ exports.deleteMateriaPrima = (req, res) => {
 
 // Cadastrar uma nova matéria-prima
 exports.postCadastroMateriaPrima = async (req, res) => {
-  const { mateira_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade } = req.body;
-  const q = "INSERT INTO materias_primas (mateira_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+  const { materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade } = req.body;
+  const q = "INSERT INTO materias_primas (materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
   
   try {
-    const result = await queryAsync(q, [mateira_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade]);
+    const result = await queryAsync(q, [materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, unidade]);
     res.status(201).json({ success: true });
   } catch (error) {
     console.error("Erro ao cadastrar a matéria-prima:", error);
