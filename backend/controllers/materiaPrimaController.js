@@ -68,7 +68,7 @@ exports.getMateriasPrimas = async (req, res) => {
 
 // Atualizar uma matéria-prima
 exports.updateMateriaPrima = async (req, res) => {
-  const { id, materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, medida } = req.body;
+  const { id, materia_prima, descricao, estoque, preco, local_armazenado, coluna, medida } = req.body;
 
   const q1 = "SELECT * FROM materias_primas WHERE materia_prima = ? AND id != ?";
   connection.query(q1, [materia_prima, id], async (error, results) => {
@@ -83,8 +83,8 @@ exports.updateMateriaPrima = async (req, res) => {
       });
     } else {
       try {
-        const q2 = "UPDATE materias_primas SET materia_prima = ?, descricao = ?, estoque = ?, preco = ?, tipo_id = ?, local_armazenado = ?, coluna = ?, medida = ? WHERE id = ?";
-        const params = [materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, medida, id];
+        const q2 = "UPDATE materias_primas SET materia_prima = ?, descricao = ?, estoque = ?, preco = ?, local_armazenado = ?, coluna = ?, medida = ? WHERE id = ?";
+        const params = [materia_prima, descricao, estoque, preco, local_armazenado, coluna, medida, id];
 
         connection.query(q2, params, (error, results) => {
           if (error) {
@@ -123,11 +123,11 @@ exports.deleteMateriaPrima = (req, res) => {
 
 // Cadastrar uma nova matéria-prima
 exports.postCadastroMateriaPrima = async (req, res) => {
-  const { materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, medida } = req.body;
-  const q = "INSERT INTO materias_primas (materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, medida) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+  const { materia_prima, descricao, estoque, preco, local_armazenado, coluna, medida } = req.body;
+  const q = "INSERT INTO materias_primas (materia_prima, descricao, estoque, preco, local_armazenado, coluna, medida) VALUES (?, ?, ?, ?, ?, ?, ?)";
   
   try {
-    const result = await queryAsync(q, [materia_prima, descricao, estoque, preco, tipo_id, local_armazenado, coluna, medida]);
+    const result = await queryAsync(q, [materia_prima, descricao, estoque, preco, local_armazenado, coluna, medida]);
     res.status(201).json({ success: true });
   } catch (error) {
     console.error("Erro ao cadastrar a matéria-prima:", error);
