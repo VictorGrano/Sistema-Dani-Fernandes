@@ -17,6 +17,7 @@ function ListaLotes() {
   const [editedData, setEditedData] = useState({});
   const componentRef = useRef();
 
+  // Fetch initial data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,6 +32,7 @@ function ListaLotes() {
     fetchData();
   }, [apiUrl]);
 
+  // Filter data based on search term
   useEffect(() => {
     const results = data.filter((item) =>
       item.nome_lote.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -48,15 +50,29 @@ function ListaLotes() {
 
   const handleEditClick = (id, item) => {
     setEditingId(id);
-    setEditedData({ ...item });
+    setEditedData({
+      ...item,
+      local_armazenado_id: item.local_armazenado_id || "",
+      coluna: item.coluna || "",
+    });
   };
 
   const handleSaveClick = async (id) => {
     try {
-      await axios.post(`${apiUrl}/produtos/AtualizarLote`, editedData);
+      const payload = {
+        lote_id: id,
+        local_armazenado_id: editedData.local_armazenado_id || "",
+        coluna: editedData.coluna || "",
+      };
+
+      await axios.post(`${apiUrl}/produtos/AtualizarLote`, payload);
+
       const updatedData = data.map((item) =>
-        item.id === id ? { ...item, ...editedData } : item
+        item.id === id
+          ? { ...item, ...editedData }
+          : item
       );
+
       setData(updatedData);
       setFilteredData(updatedData);
       setEditingId(null);
@@ -82,7 +98,8 @@ function ListaLotes() {
             <th>Produto</th>
             <th>Lote</th>
             <th>Estoque</th>
-            <th>Quantidade de Caixas</th>
+            <th>Local Armazenado</th>
+            <th>Coluna</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -120,14 +137,27 @@ function ListaLotes() {
                 <td>
                   {editingId === item.id ? (
                     <input
-                      type="number"
-                      value={editedData.quantidade_caixas || ""}
+                      type="text"
+                      value={editedData.local_armazenado_id || ""}
                       onChange={(e) =>
-                        handleInputChange("quantidade_caixas", e.target.value)
+                        handleInputChange("local_armazenado_id", e.target.value)
                       }
                     />
                   ) : (
-                    item.quantidade_caixas
+                    item.local_armazenado_id
+                  )}
+                </td>
+                <td>
+                  {editingId === item.id ? (
+                    <input
+                      type="text"
+                      value={editedData.coluna || ""}
+                      onChange={(e) =>
+                        handleInputChange("coluna", e.target.value)
+                      }
+                    />
+                  ) : (
+                    item.coluna
                   )}
                 </td>
                 <td>
@@ -159,7 +189,7 @@ function ListaLotes() {
             ))
           ) : (
             <tr>
-              <td colSpan="5">Nenhum produto encontrado</td>
+              <td colSpan="6">Nenhum produto encontrado</td>
             </tr>
           )}
         </tbody>
