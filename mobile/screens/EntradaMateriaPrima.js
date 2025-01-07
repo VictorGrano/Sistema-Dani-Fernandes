@@ -13,17 +13,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loading from "../components/Loading";
 import { Dropdown } from "react-native-element-dropdown";
 
-const SaidaInsumoScreen = ({ route }) => {
+const EntradaMateriaPrimaScreen = () => {
   const navigation = useNavigation();
   const [nome, setNome] = useState("");
   const [id, setID] = useState("");
   const [quantidade, setQuantidade] = useState("");
-  const [quantidadeCaixas, setQuantidadeCaixas] = useState("1");
-  const [insumos, setInsumos] = useState([]);
-  const [estoqueAtual, setEstoqueAtual] = useState(null);
+  const [coluna, setColuna] = useState("");
+  const [materiasPrimas, setMateriasPrimas] = useState([]);
+  const [locais, setLocais] = useState([]);
+  const [selectedMateriaPrima, setSelectedMateriaPrima] = useState(null);
+  const [selectedLocal, setSelectedLocal] = useState(null);
   const [nomeUser, setNomeUser] = useState("");
+  const [medida, setMedida] = useState("");
   const [idUser, setIdUser] = useState("");
   const [loading, setLoading] = useState(false);
+  const [estoqueAtual, setEstoqueAtual] = useState(null);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -35,15 +39,26 @@ const SaidaInsumoScreen = ({ route }) => {
         setNomeUser(storedNome || "Usuário");
         setIdUser(storedID || null);
 
-        const insumosResponse = await axios.get(`${apiUrl}/insumos/`);
+        const [materiasPrimasResponse, locaisResponse] = await Promise.all([
+          axios.get(`${apiUrl}/materia-prima/`),
+          axios.get(`${apiUrl}/estoque/Locais`),
+        ]);
 
-        const insumosData = insumosResponse.data.map((insumo) => ({
-          label: insumo.nome,
-          value: insumo.id,
+        const materiasPrimasData = materiasPrimasResponse.data.map(
+          (materia) => ({
+            label: materia.materia_prima,
+            value: materia.id,
+          })
+        );
+        setMateriasPrimas(materiasPrimasData);
+
+        const locaisData = locaisResponse.data.map((local) => ({
+          label: local.nome_local,
+          value: local.id,
         }));
-        setInsumos(insumosData);
+        setLocais(locaisData);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Erro ao buscar dados:", error);
       } finally {
         setLoading(false);
       }
@@ -53,40 +68,38 @@ const SaidaInsumoScreen = ({ route }) => {
   }, [apiUrl]);
 
   useEffect(() => {
-    if (id) {
+    if (selectedMateriaPrima) {
       axios
-        .get(`${apiUrl}/insumos/InfoInsumo?id=${id}`)
+        .get(`${apiUrl}/materia-prima/Info?id=${selectedMateriaPrima}`)
         .then((response) => {
-          setNome(response.data.nome);
+          setNome(response.data.materia_prima);
           setEstoqueAtual(response.data.estoque);
+          setMedida(response.data.medida);
         })
         .catch((error) => {
-          console.error("Error fetching insumo data:", error);
+          console.error("Erro ao buscar dados da matéria-prima:", error);
         });
     }
-  }, [id, apiUrl]);
+  }, [selectedMateriaPrima, apiUrl]);
 
-  const handleSaida = () => {
-    const quantidadeTotal = quantidade * (quantidadeCaixas || 1);
-    const saidaData = {
-      id: id || null,
-      quantidade: quantidadeTotal,
-      quantidade_caixas: quantidadeCaixas || 1,
+  const handleEntrar = () => {
+    const entradaData = {
+      id: selectedMateriaPrima || id,
+      quantidade: quantidade,
+      localArmazenado: selectedLocal,
+      coluna: coluna,
       user: nomeUser,
       iduser: idUser,
     };
 
     setLoading(true);
     axios
-      .post(`${apiUrl}/estoque/SaidaInsumo`, saidaData)
+      .post(`${apiUrl}/estoque/EntradaMateriaPrima`, entradaData)
       .then(() => {
         navigation.goBack();
       })
       .catch((error) => {
-        if (error.response.status === 400) {
-          alert("Quantidade maior do que a existente no estoque!");
-        }
-        console.error("Erro ao registrar saída:", error);
+        console.error("Erro ao criar entrada:", error);
       })
       .finally(() => {
         setLoading(false);
@@ -99,47 +112,65 @@ const SaidaInsumoScreen = ({ route }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Dados do Insumo:</Text>
+      <Text style={styles.header}>Dados da Matéria-Prima:</Text>
       <View style={styles.card}>
-        <Text style={styles.subheader}>Nome do Insumo:</Text>
+        <Text style={styles.subheader}>Nome da Matéria-Prima:</Text>
         <Dropdown
           style={styles.dropdown}
-          data={insumos}
+          data={materiasPrimas}
           search={true}
           labelField="label"
           valueField="value"
-          placeholder="Selecione um insumo"
-          value={id}
+          placeholder="Selecione uma matéria-prima"
+          value={selectedMateriaPrima}
           onChange={(item) => {
+            setSelectedMateriaPrima(item.value);
             setID(item.value);
           }}
         />
         {estoqueAtual !== null && (
-          <Text style={styles.subheader}>Estoque Atual: {estoqueAtual}</Text>
+          <Text style={styles.subheader}>
+            Estoque Atual: {estoqueAtual}
+            {medida}
+          </Text>
         )}
       </View>
-      <Text style={styles.header}>Caixas:</Text>
+      <Text style={styles.header}>Quantidade:</Text>
       <View style={styles.card}>
-        <Text style={styles.subheader}>Quantidade de caixas:</Text>
+        <Text style={styles.subheader}>Quantidade a adicionar:</Text>
         <TextInput
           style={styles.input}
-          editable={true}
-          keyboardType="numeric"
-          placeholder="Digite a quantidade de caixas aqui"
-          onChangeText={setQuantidadeCaixas}
-          value={quantidadeCaixas}
-        />
-        <Text style={styles.subheader}>Quantidade de insumos na Caixa:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Quantidade"
+          placeholder="Digite a quantidade"
           keyboardType="numeric"
           onChangeText={setQuantidade}
           value={quantidade}
         />
       </View>
-      <TouchableOpacity style={styles.buttonEntrada} onPress={handleSaida}>
-        <Text style={styles.buttonText}>Registrar Saída</Text>
+      <Text style={styles.header}>Local:</Text>
+      <View style={styles.card}>
+        <Text style={styles.subheader}>Local Armazenado:</Text>
+        <Dropdown
+          style={styles.dropdown}
+          data={locais}
+          search={true}
+          labelField="label"
+          valueField="value"
+          placeholder="Selecione um local para armazenar"
+          value={selectedLocal}
+          onChange={(item) => {
+            setSelectedLocal(item.value);
+          }}
+        />
+        <Text style={styles.subheader}>Coluna armazenada:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: A1"
+          onChangeText={setColuna}
+          value={coluna}
+        />
+      </View>
+      <TouchableOpacity style={styles.buttonEntrada} onPress={handleEntrar}>
+        <Text style={styles.buttonText}>Criar Entrada</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -204,4 +235,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SaidaInsumoScreen;
+export default EntradaMateriaPrimaScreen;

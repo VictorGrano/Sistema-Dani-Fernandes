@@ -28,6 +28,13 @@ const GerenciarScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
+          onPress={() => navigation.navigate("Materias Primas")}
+        >
+          <FontAwesome5 name="pump-soap" size={24} color="white" />
+          <Text style={styles.buttonText}>Matérias Primas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => setModalInsumo(true)} // Corrigido para callback
         >
           <FontAwesome5 name="pump-soap" size={24} color="white" />

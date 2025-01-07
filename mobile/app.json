@@ -2,7 +2,7 @@
   "expo": {
     "name": "DaniFernandes",
     "slug": "DaniFernandes",
-    "version": "2.0.5",
+    "version": "2.1.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -26,7 +26,8 @@
       "package": "com.victorgrano.AppDaniFernandes"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "static"
     },
     "plugins": [
       [

@@ -36,6 +36,8 @@ function Navbar({ handleLogout }) {
                 Home
               </Link>
             </li>
+
+            {/* Etiquetas */}
             <li className="nav-item">
               <Link
                 className={`nav-link ${
@@ -46,6 +48,17 @@ function Navbar({ handleLogout }) {
                 Gerar Etiquetas Produtos
               </Link>
             </li>
+            <li className="nav-item">
+              <Link
+                className={`nav-link ${
+                  isActive("/etiquetaInsumo") ? "active" : ""
+                }`}
+                to="/etiquetaInsumo"
+              >
+                Gerar Etiquetas Insumos
+              </Link>
+            </li>
+            {/* Controle de Adesivos */}
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle"
@@ -89,9 +102,11 @@ function Navbar({ handleLogout }) {
                 </li>
               </ul>
             </li>
-            {/* Verifica se o usuário é admin antes de exibir opções adicionais */}
+
+            {/* Apenas para administradores */}
             {tipoUsuario === "admin" && (
               <>
+                {/* Controle de Entrada e Saída */}
                 <li className="nav-item dropdown">
                   <a
                     className="nav-link dropdown-toggle"
@@ -143,9 +158,30 @@ function Navbar({ handleLogout }) {
                         Saída de Insumos
                       </Link>
                     </li>
+                    <li>
+                      <Link
+                        className={`dropdown-item ${
+                          isActive("/EntradaMateriaPrima") ? "active" : ""
+                        }`}
+                        to="/EntradaMateriaPrima"
+                      >
+                        Entrada de Matéria-Prima
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        className={`dropdown-item ${
+                          isActive("/SaidaMateriaPrima") ? "active" : ""
+                        }`}
+                        to="/SaidaMateriaPrima"
+                      >
+                        Saída de Matéria-Prima
+                      </Link>
+                    </li>
                   </ul>
                 </li>
 
+                {/* Almoxarifado */}
                 <li className="nav-item dropdown">
                   <a
                     className="nav-link dropdown-toggle"
@@ -160,16 +196,6 @@ function Navbar({ handleLogout }) {
                     <li>
                       <Link
                         className={`dropdown-item ${
-                          isActive("/etiquetaInsumo") ? "active" : ""
-                        }`}
-                        to="/etiquetaInsumo"
-                      >
-                        Gerar Etiquetas Insumos
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        className={`dropdown-item ${
                           isActive("/ListaProdutos") ? "active" : ""
                         }`}
                         to="/ListaProdutos"
@@ -180,21 +206,31 @@ function Navbar({ handleLogout }) {
                     <li>
                       <Link
                         className={`dropdown-item ${
-                          isActive("/ListaLotes") ? "active" : ""
-                        }`}
-                        to="/ListaLotes"
-                      >
-                        Lista de Lotes
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        className={`dropdown-item ${
                           isActive("/ListaInsumos") ? "active" : ""
                         }`}
                         to="/ListaInsumos"
                       >
                         Lista de Insumos
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        className={`dropdown-item ${
+                          isActive("/ListaMateriasPrimas") ? "active" : ""
+                        }`}
+                        to="/ListaMateriasPrimas"
+                      >
+                        Lista de Matérias-Primas
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        className={`dropdown-item ${
+                          isActive("/ListaLotes") ? "active" : ""
+                        }`}
+                        to="/ListaLotes"
+                      >
+                        Lista de Lotes
                       </Link>
                     </li>
                     <li>

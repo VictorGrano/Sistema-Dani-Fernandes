@@ -105,34 +105,10 @@ function SaidaInsumo() {
                     required
                   />
                 </div>
-                    <label htmlFor="lote-select">
-                      Escolha o lote:
-                    </label>
-                    <div className="select-div">
-                      <Select
-                        className="select"
-                        id="lote-select"
-                        value={selectedLote}
-                        onChange={handleLoteChange}
-                        options={lotes.map((lote) => ({
-                          label: lote.nome_lote,
-                          value: lote.id,
-                        }))}
-                        isClearable
-                        placeholder="Selecione um lote"
-                      />
-                    </div>
               </div>
 
               <div className="card card-entrada">
-                <label>Número de caixas:</label>
-                <input
-                  type="number"
-                  value={quantidadeCaixas}
-                  onChange={(e) => setQuantidadeCaixas(e.target.value)}
-                />
-
-                <label>Quantidade por caixa:</label>
+                <label>Quantidade:</label>
                 <input
                   type="number"
                   value={quantidade}

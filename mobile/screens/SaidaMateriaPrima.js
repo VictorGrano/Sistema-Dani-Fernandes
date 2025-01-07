@@ -13,16 +13,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loading from "../components/Loading";
 import { Dropdown } from "react-native-element-dropdown";
 
-const SaidaInsumoScreen = ({ route }) => {
+const SaidaMateriaPrimaScreen = () => {
   const navigation = useNavigation();
   const [nome, setNome] = useState("");
   const [id, setID] = useState("");
   const [quantidade, setQuantidade] = useState("");
-  const [quantidadeCaixas, setQuantidadeCaixas] = useState("1");
-  const [insumos, setInsumos] = useState([]);
+  const [materiasPrimas, setMateriasPrimas] = useState([]);
   const [estoqueAtual, setEstoqueAtual] = useState(null);
   const [nomeUser, setNomeUser] = useState("");
   const [idUser, setIdUser] = useState("");
+  const [medida, setMedida] = useState("");
   const [loading, setLoading] = useState(false);
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -35,15 +35,15 @@ const SaidaInsumoScreen = ({ route }) => {
         setNomeUser(storedNome || "Usuário");
         setIdUser(storedID || null);
 
-        const insumosResponse = await axios.get(`${apiUrl}/insumos/`);
+        const materiasPrimasResponse = await axios.get(`${apiUrl}/materia-prima/`);
 
-        const insumosData = insumosResponse.data.map((insumo) => ({
-          label: insumo.nome,
-          value: insumo.id,
+        const materiasPrimasData = materiasPrimasResponse.data.map((materiaPrima) => ({
+          label: materiaPrima.materia_prima,
+          value: materiaPrima.id,
         }));
-        setInsumos(insumosData);
+        setMateriasPrimas(materiasPrimasData);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Erro ao buscar dados:", error);
       } finally {
         setLoading(false);
       }
@@ -55,30 +55,29 @@ const SaidaInsumoScreen = ({ route }) => {
   useEffect(() => {
     if (id) {
       axios
-        .get(`${apiUrl}/insumos/InfoInsumo?id=${id}`)
+        .get(`${apiUrl}/materia-prima/Info?id=${id}`)
         .then((response) => {
-          setNome(response.data.nome);
+          setNome(response.data.materia_prima);
           setEstoqueAtual(response.data.estoque);
+          setMedida(response.data.medida);
         })
         .catch((error) => {
-          console.error("Error fetching insumo data:", error);
+          console.error("Erro ao buscar dados da matéria-prima:", error);
         });
     }
   }, [id, apiUrl]);
 
   const handleSaida = () => {
-    const quantidadeTotal = quantidade * (quantidadeCaixas || 1);
     const saidaData = {
       id: id || null,
-      quantidade: quantidadeTotal,
-      quantidade_caixas: quantidadeCaixas || 1,
+      quantidade: quantidade,
       user: nomeUser,
       iduser: idUser,
     };
 
     setLoading(true);
     axios
-      .post(`${apiUrl}/estoque/SaidaInsumo`, saidaData)
+      .post(`${apiUrl}/estoque/SaidaMateriaPrima`, saidaData)
       .then(() => {
         navigation.goBack();
       })
@@ -99,46 +98,37 @@ const SaidaInsumoScreen = ({ route }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Dados do Insumo:</Text>
+      <Text style={styles.header}>Dados da Matéria-Prima:</Text>
       <View style={styles.card}>
-        <Text style={styles.subheader}>Nome do Insumo:</Text>
+        <Text style={styles.subheader}>Nome da Matéria-Prima:</Text>
         <Dropdown
           style={styles.dropdown}
-          data={insumos}
+          data={materiasPrimas}
           search={true}
           labelField="label"
           valueField="value"
-          placeholder="Selecione um insumo"
+          placeholder="Selecione uma matéria-prima"
           value={id}
           onChange={(item) => {
             setID(item.value);
           }}
         />
         {estoqueAtual !== null && (
-          <Text style={styles.subheader}>Estoque Atual: {estoqueAtual}</Text>
+          <Text style={styles.subheader}>Estoque Atual: {estoqueAtual} {medida}</Text>
         )}
       </View>
-      <Text style={styles.header}>Caixas:</Text>
+      <Text style={styles.header}>Quantidade:</Text>
       <View style={styles.card}>
-        <Text style={styles.subheader}>Quantidade de caixas:</Text>
+        <Text style={styles.subheader}>Quantidade a retirar:</Text>
         <TextInput
           style={styles.input}
-          editable={true}
-          keyboardType="numeric"
-          placeholder="Digite a quantidade de caixas aqui"
-          onChangeText={setQuantidadeCaixas}
-          value={quantidadeCaixas}
-        />
-        <Text style={styles.subheader}>Quantidade de insumos na Caixa:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Quantidade"
+          placeholder="Digite a quantidade"
           keyboardType="numeric"
           onChangeText={setQuantidade}
           value={quantidade}
         />
       </View>
-      <TouchableOpacity style={styles.buttonEntrada} onPress={handleSaida}>
+      <TouchableOpacity style={styles.buttonSaida} onPress={handleSaida}>
         <Text style={styles.buttonText}>Registrar Saída</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -190,8 +180,8 @@ const styles = StyleSheet.create({
     borderColor: "#444",
     paddingHorizontal: 8,
   },
-  buttonEntrada: {
-    backgroundColor: "#4D7EA8",
+  buttonSaida: {
+    backgroundColor: "#D9534F",
     padding: 15,
     marginVertical: 10,
     borderRadius: 8,
@@ -204,4 +194,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SaidaInsumoScreen;
+export default SaidaMateriaPrimaScreen;

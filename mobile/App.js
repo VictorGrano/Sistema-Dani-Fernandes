@@ -24,6 +24,10 @@ import EntradaInsumoScreen from './screens/EntradaInsumo';
 import SaidaInsumoScreen from './screens/SaidaInsumo';
 import VencimentoScreen from './screens/Vencimentos';
 import TipoInsumosScreen from './screens/TipoInsumos';
+import MateriasPrimasScreen from './screens/MateriasPrimas';
+import BuscaMateriasPrimasScreen from './screens/BuscaMateriaPrima';
+import EntradaMateriaPrimaScreen from './screens/EntradaMateriaPrima';
+import SaidaMateriaPrimaScreen from './screens/SaidaMateriaPrima';
 
 const Stack = createStackNavigator();
 
@@ -83,6 +87,11 @@ const App = () => {
           options={{ title: 'Registrar Entrada' }}
         />
         <Stack.Screen
+          name="Entrada Materia Prima"
+          component={EntradaMateriaPrimaScreen}
+          options={{ title: 'Registrar Entrada' }}
+        />
+        <Stack.Screen
           name="Saida"
           component={SaidaScreen}
           options={{ title: 'Registrar Saída' }}
@@ -90,6 +99,11 @@ const App = () => {
         <Stack.Screen
           name="Saida Insumo"
           component={SaidaInsumoScreen}
+          options={{ title: 'Registrar Saída' }}
+        />
+        <Stack.Screen
+          name="Saida Materia Prima"
+          component={SaidaMateriaPrimaScreen}
           options={{ title: 'Registrar Saída' }}
         />
         <Stack.Screen
@@ -120,6 +134,16 @@ const App = () => {
         <Stack.Screen
           name="Insumos"
           component={InsumosScreen}
+          options={{ title: 'Insumos' }}
+        />
+        <Stack.Screen
+          name="Materias Primas"
+          component={MateriasPrimasScreen}
+          options={{ title: 'Matérias Primas' }}
+        />
+        <Stack.Screen
+          name="Buscar Materias Primas"
+          component={BuscaMateriasPrimasScreen}
           options={{ title: 'Insumos' }}
         />
         <Stack.Screen

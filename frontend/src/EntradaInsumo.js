@@ -120,65 +120,10 @@ function EntradaInsumo() {
                     required
                   />
                 </div>
-
-                {/* Exibição Condicional de Lote Manual ou Seleção de Lote */}
-                {isLoteManual ? (
-                  <>
-                    <label htmlFor="lote-input">Lote:</label>
-                    <input
-                      type="text"
-                      id="lote-input"
-                      placeholder="Digite o lote"
-                      value={newLote}
-                      onChange={(e) => setNewLote(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-primary botaoAdd"
-                      onClick={() => setIsLoteManual(false)}
-                    >
-                      Selecionar lote existente
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <label htmlFor="lote-select">
-                      Escolha o lote (Apenas se já existir no estoque):
-                    </label>
-                    <div className="select-div">
-                      <Select
-                        className="select"
-                        id="lote-select"
-                        value={selectedLote}
-                        onChange={handleLoteChange}
-                        options={lotes.map((lote) => ({
-                          label: lote.nome_lote,
-                          value: lote.id,
-                        }))}
-                        isClearable
-                        placeholder="Selecione um lote"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-primary botaoAdd"
-                      onClick={() => setIsLoteManual(true)}
-                    >
-                      Digitar lote manualmente
-                    </button>
-                  </>
-                )}
               </div>
 
               <div className="card card-entrada">
-                <label>Número de caixas:</label>
-                <input
-                  type="number"
-                  value={quantidadeCaixas}
-                  onChange={(e) => setQuantidadeCaixas(e.target.value)}
-                />
-
-                <label>Quantidade por caixa:</label>
+                <label>Quantidade:</label>
                 <input
                   type="number"
                   value={quantidade}

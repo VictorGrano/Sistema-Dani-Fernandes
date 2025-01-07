@@ -301,6 +301,36 @@ const MenuScreen = ({ route }) => {
               <Text style={styles.buttonText}>Saída</Text>
             </TouchableOpacity>
           </ScrollView>
+          <Text style={styles.cardTittle}>Matérias-Primas</Text>
+          <ScrollView
+            horizontal
+            style={styles.horizontalScrollContainer}
+            contentContainerStyle={
+              styles.horizontalScrollContainer.contentContainer
+            }
+          >
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Buscar Materias Primas")}
+            >
+              <FontAwesome5 name="search" size={24} color="white" />
+              <Text style={styles.buttonText}>Buscar Matérias-Primas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleEntradaSaida("entrada", "materia-prima")}
+            >
+              <FontAwesome5 name="upload" size={24} color="white" />
+              <Text style={styles.buttonText}>Entrada</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleEntradaSaida("saida", "materia-prima")}
+            >
+              <FontAwesome5 name="download" size={24} color="white" />
+              <Text style={styles.buttonText}>Saída</Text>
+            </TouchableOpacity>
+          </ScrollView>
           <Text style={styles.cardTittle}>Outros</Text>
           <ScrollView
             horizontal
@@ -311,7 +341,9 @@ const MenuScreen = ({ route }) => {
           >
             <TouchableOpacity
               style={styles.button}
-              onPress={() => handleNavigation("Lista Prateleira", ["almoxarifado", "admin"])}
+              onPress={() =>
+                handleNavigation("Lista Prateleira", ["almoxarifado", "admin"])
+              }
             >
               <FontAwesome5 name="list" size={24} color="white" />
               <Text style={styles.buttonText}>Lista Prateleira</Text>
