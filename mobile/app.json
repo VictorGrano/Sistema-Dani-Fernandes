@@ -53,7 +53,8 @@
             "supportsTablet": true
           }
         }
-      ]
+      ],
+      "expo-router"
     ],
     "extra": {
       "eas": {

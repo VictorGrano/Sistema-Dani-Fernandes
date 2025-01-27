@@ -91,7 +91,7 @@ exports.historico = (req, res) => {
     ordenar,
   } = req.body;
 
-  let q = "SELECT * FROM historico_mudancas WHERE 1=1";
+  let q = "SELECT h.*, p.nome AS nome_produto, l.nome_local AS nome_local FROM historico_mudancas h LEFT JOIN produtos p ON h.produto_id = p.id LEFT JOIN locais_armazenamento l ON h.local_armazenado = l.id WHERE 1=1";
   let params = [];
 
   if (idusuario) {
