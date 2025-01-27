@@ -91,7 +91,10 @@ exports.historico = (req, res) => {
     ordenar,
   } = req.body;
 
-  let q = "SELECT h.*, p.nome AS nome_produto, l.nome_local AS nome_local FROM historico_mudancas h LEFT JOIN produtos p ON h.produto_id = p.id LEFT JOIN locais_armazenamento l ON h.local_armazenado = l.id WHERE 1=1";
+  let q =
+    "SELECT h.*, p.nome AS nome_produto, l.nome_local AS nome_local FROM historico_mudancas h " +
+    "LEFT JOIN produtos p ON h.produto_id = p.id " +
+    "LEFT JOIN locais_armazenamento l ON h.local_armazenado = l.id WHERE 1=1";
   let params = [];
 
   if (idusuario) {
@@ -105,10 +108,10 @@ exports.historico = (req, res) => {
       formatDateToEndOfDay(dataFim)
     );
   } else if (dataInicio) {
-    q += " AND data_mudanca > ?";
+    q += " AND data_mudanca >= ?";
     params.push(formatDateToBeginingOfDay(dataInicio));
   } else if (dataFim) {
-    q += " AND data_mudanca < ?";
+    q += " AND data_mudanca <= ?";
     params.push(formatDateToEndOfDay(dataFim));
   }
   if (produtoid) {
@@ -127,7 +130,11 @@ exports.historico = (req, res) => {
     q += " AND tipo_mudanca = ?";
     params.push(tipo_mudanca);
   }
-  q += ` ORDER BY ${ordenar || "data_mudanca"} DESC`;
+
+  // Ordenação segura
+  const validColumns = ["data_mudanca", "id_usuario", "produto_id", "lote"]; // Colunas válidas para ordenar
+  const orderByColumn = validColumns.includes(ordenar) ? ordenar : "data_mudanca";
+  q += ` ORDER BY ${orderByColumn} DESC`;
 
   connection.query(q, params, (error, results) => {
     if (error) {
@@ -136,44 +143,13 @@ exports.historico = (req, res) => {
       return;
     }
     if (results.length > 0) {
-      const promises = results.map((result, index) => {
-        return new Promise((resolve, reject) => {
-          const q2 = `SELECT nome FROM produtos WHERE id = ?`;
-          connection.query(q2, [result.produto_id], (error, nomeResults) => {
-            if (error) {
-              console.error("Erro no servidor:", error);
-              reject(error);
-            } else {
-              results[index].nome_produto = nomeResults[0].nome;
-              resolve();
-            }
-          });
-          const q3 = `SELECT nome_local FROM locais_armazenamento WHERE id = ?`;
-          connection.query(q3, [result.local_armazenado], (error, localResults) => {
-            if (error) {
-              console.error("Erro no servidor:", error);
-              reject(error);
-            } else {
-              results[index].nome_local = localResults[0].nome_local;
-              resolve();
-            }
-          });
-        });
-      });
-
-      Promise.all(promises)
-        .then(() => {
-          res.json(results);
-        })
-        .catch((error) => {
-          console.error("Erro no servidor:", error);
-          res.status(500).json({ error: "Erro no servidor" });
-        });
+      res.json(results);
     } else {
       res.status(404).json({ message: "Nenhum registro encontrado" });
     }
   });
 };
+
 
 exports.usuarios = (req, res) => {
   const q = `SELECT * FROM usuarios ORDER BY nome`;
